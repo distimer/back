@@ -59,7 +59,7 @@ func Code(v string) predicate.InviteCode {
 }
 
 // Used applies equality check predicate on the "used" field. It's identical to UsedEQ.
-func Used(v bool) predicate.InviteCode {
+func Used(v int) predicate.InviteCode {
 	return predicate.InviteCode(sql.FieldEQ(FieldUsed, v))
 }
 
@@ -129,13 +129,43 @@ func CodeContainsFold(v string) predicate.InviteCode {
 }
 
 // UsedEQ applies the EQ predicate on the "used" field.
-func UsedEQ(v bool) predicate.InviteCode {
+func UsedEQ(v int) predicate.InviteCode {
 	return predicate.InviteCode(sql.FieldEQ(FieldUsed, v))
 }
 
 // UsedNEQ applies the NEQ predicate on the "used" field.
-func UsedNEQ(v bool) predicate.InviteCode {
+func UsedNEQ(v int) predicate.InviteCode {
 	return predicate.InviteCode(sql.FieldNEQ(FieldUsed, v))
+}
+
+// UsedIn applies the In predicate on the "used" field.
+func UsedIn(vs ...int) predicate.InviteCode {
+	return predicate.InviteCode(sql.FieldIn(FieldUsed, vs...))
+}
+
+// UsedNotIn applies the NotIn predicate on the "used" field.
+func UsedNotIn(vs ...int) predicate.InviteCode {
+	return predicate.InviteCode(sql.FieldNotIn(FieldUsed, vs...))
+}
+
+// UsedGT applies the GT predicate on the "used" field.
+func UsedGT(v int) predicate.InviteCode {
+	return predicate.InviteCode(sql.FieldGT(FieldUsed, v))
+}
+
+// UsedGTE applies the GTE predicate on the "used" field.
+func UsedGTE(v int) predicate.InviteCode {
+	return predicate.InviteCode(sql.FieldGTE(FieldUsed, v))
+}
+
+// UsedLT applies the LT predicate on the "used" field.
+func UsedLT(v int) predicate.InviteCode {
+	return predicate.InviteCode(sql.FieldLT(FieldUsed, v))
+}
+
+// UsedLTE applies the LTE predicate on the "used" field.
+func UsedLTE(v int) predicate.InviteCode {
+	return predicate.InviteCode(sql.FieldLTE(FieldUsed, v))
 }
 
 // HasGroup applies the HasEdge predicate on the "group" edge.

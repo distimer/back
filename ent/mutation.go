@@ -1554,7 +1554,8 @@ type InviteCodeMutation struct {
 	typ           string
 	id            *int
 	code          *string
-	used          *bool
+	used          *int
+	addused       *int
 	clearedFields map[string]struct{}
 	group         *uuid.UUID
 	clearedgroup  bool
@@ -1698,12 +1699,13 @@ func (m *InviteCodeMutation) ResetCode() {
 }
 
 // SetUsed sets the "used" field.
-func (m *InviteCodeMutation) SetUsed(b bool) {
-	m.used = &b
+func (m *InviteCodeMutation) SetUsed(i int) {
+	m.used = &i
+	m.addused = nil
 }
 
 // Used returns the value of the "used" field in the mutation.
-func (m *InviteCodeMutation) Used() (r bool, exists bool) {
+func (m *InviteCodeMutation) Used() (r int, exists bool) {
 	v := m.used
 	if v == nil {
 		return
@@ -1714,7 +1716,7 @@ func (m *InviteCodeMutation) Used() (r bool, exists bool) {
 // OldUsed returns the old "used" field's value of the InviteCode entity.
 // If the InviteCode object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteCodeMutation) OldUsed(ctx context.Context) (v bool, err error) {
+func (m *InviteCodeMutation) OldUsed(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUsed is only allowed on UpdateOne operations")
 	}
@@ -1728,9 +1730,28 @@ func (m *InviteCodeMutation) OldUsed(ctx context.Context) (v bool, err error) {
 	return oldValue.Used, nil
 }
 
+// AddUsed adds i to the "used" field.
+func (m *InviteCodeMutation) AddUsed(i int) {
+	if m.addused != nil {
+		*m.addused += i
+	} else {
+		m.addused = &i
+	}
+}
+
+// AddedUsed returns the value that was added to the "used" field in this mutation.
+func (m *InviteCodeMutation) AddedUsed() (r int, exists bool) {
+	v := m.addused
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetUsed resets all changes to the "used" field.
 func (m *InviteCodeMutation) ResetUsed() {
 	m.used = nil
+	m.addused = nil
 }
 
 // SetGroupID sets the "group" edge to the Group entity by id.
@@ -1855,7 +1876,7 @@ func (m *InviteCodeMutation) SetField(name string, value ent.Value) error {
 		m.SetCode(v)
 		return nil
 	case invitecode.FieldUsed:
-		v, ok := value.(bool)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1868,13 +1889,21 @@ func (m *InviteCodeMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *InviteCodeMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addused != nil {
+		fields = append(fields, invitecode.FieldUsed)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *InviteCodeMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case invitecode.FieldUsed:
+		return m.AddedUsed()
+	}
 	return nil, false
 }
 
@@ -1883,6 +1912,13 @@ func (m *InviteCodeMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *InviteCodeMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case invitecode.FieldUsed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUsed(v)
+		return nil
 	}
 	return fmt.Errorf("unknown InviteCode numeric field %s", name)
 }

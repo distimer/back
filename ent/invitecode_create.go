@@ -28,15 +28,15 @@ func (icc *InviteCodeCreate) SetCode(s string) *InviteCodeCreate {
 }
 
 // SetUsed sets the "used" field.
-func (icc *InviteCodeCreate) SetUsed(b bool) *InviteCodeCreate {
-	icc.mutation.SetUsed(b)
+func (icc *InviteCodeCreate) SetUsed(i int) *InviteCodeCreate {
+	icc.mutation.SetUsed(i)
 	return icc
 }
 
 // SetNillableUsed sets the "used" field if the given value is not nil.
-func (icc *InviteCodeCreate) SetNillableUsed(b *bool) *InviteCodeCreate {
-	if b != nil {
-		icc.SetUsed(*b)
+func (icc *InviteCodeCreate) SetNillableUsed(i *int) *InviteCodeCreate {
+	if i != nil {
+		icc.SetUsed(*i)
 	}
 	return icc
 }
@@ -135,7 +135,7 @@ func (icc *InviteCodeCreate) createSpec() (*InviteCode, *sqlgraph.CreateSpec) {
 		_node.Code = value
 	}
 	if value, ok := icc.mutation.Used(); ok {
-		_spec.SetField(invitecode.FieldUsed, field.TypeBool, value)
+		_spec.SetField(invitecode.FieldUsed, field.TypeInt, value)
 		_node.Used = value
 	}
 	if nodes := icc.mutation.GroupIDs(); len(nodes) > 0 {

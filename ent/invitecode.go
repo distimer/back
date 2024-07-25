@@ -21,7 +21,7 @@ type InviteCode struct {
 	// Code holds the value of the "code" field.
 	Code string `json:"code,omitempty"`
 	// Used holds the value of the "used" field.
-	Used bool `json:"used,omitempty"`
+	Used int `json:"used,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InviteCodeQuery when eager-loading is set.
 	Edges              InviteCodeEdges `json:"edges"`
@@ -54,9 +54,7 @@ func (*InviteCode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case invitecode.FieldUsed:
-			values[i] = new(sql.NullBool)
-		case invitecode.FieldID:
+		case invitecode.FieldID, invitecode.FieldUsed:
 			values[i] = new(sql.NullInt64)
 		case invitecode.FieldCode:
 			values[i] = new(sql.NullString)
@@ -90,10 +88,10 @@ func (ic *InviteCode) assignValues(columns []string, values []any) error {
 				ic.Code = value.String
 			}
 		case invitecode.FieldUsed:
-			if value, ok := values[i].(*sql.NullBool); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field used", values[i])
 			} else if value.Valid {
-				ic.Used = value.Bool
+				ic.Used = int(value.Int64)
 			}
 		case invitecode.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {

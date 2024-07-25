@@ -65,7 +65,7 @@ var (
 	InviteCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "code", Type: field.TypeString, Unique: true},
-		{Name: "used", Type: field.TypeBool, Default: false},
+		{Name: "used", Type: field.TypeInt, Default: 0},
 		{Name: "group_invite_codes", Type: field.TypeUUID},
 	}
 	// InviteCodesTable holds the schema information for the "invite_codes" table.

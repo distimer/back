@@ -48,7 +48,7 @@ func init() {
 	// invitecodeDescUsed is the schema descriptor for used field.
 	invitecodeDescUsed := invitecodeFields[1].Descriptor()
 	// invitecode.DefaultUsed holds the default value on creation for the used field.
-	invitecode.DefaultUsed = invitecodeDescUsed.Default.(bool)
+	invitecode.DefaultUsed = invitecodeDescUsed.Default.(int)
 	refreshtokenFields := schema.RefreshToken{}.Fields()
 	_ = refreshtokenFields
 	// refreshtokenDescCreatedAt is the schema descriptor for created_at field.
