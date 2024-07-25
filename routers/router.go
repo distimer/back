@@ -9,4 +9,5 @@ func EnrollRouter(app *fiber.App) {
 	apiRouter := app.Group("/")
 	initAuthRouter(apiRouter)
 	initGroupRouter(apiRouter)
+	initUserRouter(apiRouter)
 }
