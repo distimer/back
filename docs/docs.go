@@ -240,6 +240,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/group/join": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Join Group with Invite Code",
+                "parameters": [
+                    {
+                        "description": "joinReq",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.joinReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.joinRes"
+                        }
+                    }
+                }
+            }
+        },
         "/group/member/{id}": {
             "get": {
                 "security": [
@@ -630,7 +668,7 @@ const docTemplate = `{
                 },
                 "used": {
                     "description": "Used holds the value of the \"used\" field.",
-                    "type": "boolean"
+                    "type": "integer"
                 }
             }
         },
@@ -867,6 +905,25 @@ const docTemplate = `{
             "properties": {
                 "code": {
                     "type": "string"
+                }
+            }
+        },
+        "groupctrl.joinReq": {
+            "type": "object",
+            "required": [
+                "invite_code"
+            ],
+            "properties": {
+                "invite_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "groupctrl.joinRes": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "$ref": "#/definitions/ent.Group"
                 }
             }
         },

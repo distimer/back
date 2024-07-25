@@ -2,6 +2,7 @@ package userctrl
 
 import (
 	"context"
+	"unicode/utf8"
 
 	"github.com/gofiber/fiber/v2"
 	"pentag.kr/distimer/db"
@@ -30,6 +31,11 @@ func ModifyUserInfo(c *fiber.Ctx) error {
 	data := new(modifyUserInfoReq)
 	if err := dto.Bind(c, data); err != nil {
 		return err
+	}
+	if utf8.RuneCountInString(data.Name) < 1 || utf8.RuneCountInString(data.Name) > 20 {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Name length should be between 1 and 20",
+		})
 	}
 
 	userID := middlewares.GetUserIDFromMiddleware(c)
