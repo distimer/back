@@ -240,6 +240,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/group/member/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Get All Group Members",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "group id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.getAllGroupMembersRes"
+                        }
+                    }
+                }
+            }
+        },
         "/group/policy/{id}": {
             "put": {
                 "security": [
@@ -738,6 +774,17 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 2,
                     "minimum": 0
+                }
+            }
+        },
+        "groupctrl.getAllGroupMembersRes": {
+            "type": "object",
+            "properties": {
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Affiliation"
+                    }
                 }
             }
         },
