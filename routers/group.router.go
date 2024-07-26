@@ -29,4 +29,5 @@ func initGroupRouter(router fiber.Router) {
 	// group invite
 	groupRouter.Get("/invite/:id", groupctrl.GetInviteCodeList)
 	groupRouter.Post("/invite/:id", groupctrl.InviteToGroup)
+	groupRouter.Delete("/invite/:id/:code", groupctrl.DeleteInviteCode)
 }
