@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -43,5 +44,13 @@ func (Affiliation) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Field("group_id"),
+	}
+}
+
+// Indexes of the Affiliation.
+func (Affiliation) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("user_id"),
+		index.Fields("group_id"),
 	}
 }

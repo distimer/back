@@ -48,14 +48,6 @@ func (rtc *RefreshTokenCreate) SetUserID(id uuid.UUID) *RefreshTokenCreate {
 	return rtc
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (rtc *RefreshTokenCreate) SetNillableUserID(id *uuid.UUID) *RefreshTokenCreate {
-	if id != nil {
-		rtc = rtc.SetUserID(*id)
-	}
-	return rtc
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (rtc *RefreshTokenCreate) SetUser(u *User) *RefreshTokenCreate {
 	return rtc.SetUserID(u.ID)
@@ -106,6 +98,9 @@ func (rtc *RefreshTokenCreate) defaults() {
 func (rtc *RefreshTokenCreate) check() error {
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RefreshToken.created_at"`)}
+	}
+	if _, ok := rtc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RefreshToken.user"`)}
 	}
 	return nil
 }

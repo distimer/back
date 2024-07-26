@@ -30,6 +30,8 @@ const (
 	EdgeStudyLogs = "study_logs"
 	// EdgeRefreshTokens holds the string denoting the refresh_tokens edge name in mutations.
 	EdgeRefreshTokens = "refresh_tokens"
+	// EdgeOwnedCategories holds the string denoting the owned_categories edge name in mutations.
+	EdgeOwnedCategories = "owned_categories"
 	// EdgeAffiliations holds the string denoting the affiliations edge name in mutations.
 	EdgeAffiliations = "affiliations"
 	// Table holds the table name of the user in the database.
@@ -60,6 +62,13 @@ const (
 	RefreshTokensInverseTable = "refresh_tokens"
 	// RefreshTokensColumn is the table column denoting the refresh_tokens relation/edge.
 	RefreshTokensColumn = "user_refresh_tokens"
+	// OwnedCategoriesTable is the table that holds the owned_categories relation/edge.
+	OwnedCategoriesTable = "categories"
+	// OwnedCategoriesInverseTable is the table name for the Category entity.
+	// It exists in this package in order to avoid circular dependency with the "category" package.
+	OwnedCategoriesInverseTable = "categories"
+	// OwnedCategoriesColumn is the table column denoting the owned_categories relation/edge.
+	OwnedCategoriesColumn = "user_owned_categories"
 	// AffiliationsTable is the table that holds the affiliations relation/edge.
 	AffiliationsTable = "affiliations"
 	// AffiliationsInverseTable is the table name for the Affiliation entity.
@@ -185,6 +194,20 @@ func ByRefreshTokens(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByOwnedCategoriesCount orders the results by owned_categories count.
+func ByOwnedCategoriesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newOwnedCategoriesStep(), opts...)
+	}
+}
+
+// ByOwnedCategories orders the results by owned_categories terms.
+func ByOwnedCategories(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOwnedCategoriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByAffiliationsCount orders the results by affiliations count.
 func ByAffiliationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -224,6 +247,13 @@ func newRefreshTokensStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(RefreshTokensInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, RefreshTokensTable, RefreshTokensColumn),
+	)
+}
+func newOwnedCategoriesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OwnedCategoriesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, OwnedCategoriesTable, OwnedCategoriesColumn),
 	)
 }
 func newAffiliationsStep() *sqlgraph.Step {

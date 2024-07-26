@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/studylog"
@@ -79,17 +80,20 @@ func (slu *StudyLogUpdate) SetUserID(id uuid.UUID) *StudyLogUpdate {
 	return slu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (slu *StudyLogUpdate) SetNillableUserID(id *uuid.UUID) *StudyLogUpdate {
-	if id != nil {
-		slu = slu.SetUserID(*id)
-	}
-	return slu
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (slu *StudyLogUpdate) SetUser(u *User) *StudyLogUpdate {
 	return slu.SetUserID(u.ID)
+}
+
+// SetCategoryID sets the "category" edge to the Category entity by ID.
+func (slu *StudyLogUpdate) SetCategoryID(id uuid.UUID) *StudyLogUpdate {
+	slu.mutation.SetCategoryID(id)
+	return slu
+}
+
+// SetCategory sets the "category" edge to the Category entity.
+func (slu *StudyLogUpdate) SetCategory(c *Category) *StudyLogUpdate {
+	return slu.SetCategoryID(c.ID)
 }
 
 // AddSharedGroupIDs adds the "shared_group" edge to the Group entity by IDs.
@@ -115,6 +119,12 @@ func (slu *StudyLogUpdate) Mutation() *StudyLogMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (slu *StudyLogUpdate) ClearUser() *StudyLogUpdate {
 	slu.mutation.ClearUser()
+	return slu
+}
+
+// ClearCategory clears the "category" edge to the Category entity.
+func (slu *StudyLogUpdate) ClearCategory() *StudyLogUpdate {
+	slu.mutation.ClearCategory()
 	return slu
 }
 
@@ -166,7 +176,21 @@ func (slu *StudyLogUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (slu *StudyLogUpdate) check() error {
+	if _, ok := slu.mutation.UserID(); slu.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "StudyLog.user"`)
+	}
+	if _, ok := slu.mutation.CategoryID(); slu.mutation.CategoryCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "StudyLog.category"`)
+	}
+	return nil
+}
+
 func (slu *StudyLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := slu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(studylog.Table, studylog.Columns, sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID))
 	if ps := slu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -206,6 +230,35 @@ func (slu *StudyLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if slu.mutation.CategoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   studylog.CategoryTable,
+			Columns: []string{studylog.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := slu.mutation.CategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   studylog.CategoryTable,
+			Columns: []string{studylog.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -326,17 +379,20 @@ func (sluo *StudyLogUpdateOne) SetUserID(id uuid.UUID) *StudyLogUpdateOne {
 	return sluo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (sluo *StudyLogUpdateOne) SetNillableUserID(id *uuid.UUID) *StudyLogUpdateOne {
-	if id != nil {
-		sluo = sluo.SetUserID(*id)
-	}
-	return sluo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (sluo *StudyLogUpdateOne) SetUser(u *User) *StudyLogUpdateOne {
 	return sluo.SetUserID(u.ID)
+}
+
+// SetCategoryID sets the "category" edge to the Category entity by ID.
+func (sluo *StudyLogUpdateOne) SetCategoryID(id uuid.UUID) *StudyLogUpdateOne {
+	sluo.mutation.SetCategoryID(id)
+	return sluo
+}
+
+// SetCategory sets the "category" edge to the Category entity.
+func (sluo *StudyLogUpdateOne) SetCategory(c *Category) *StudyLogUpdateOne {
+	return sluo.SetCategoryID(c.ID)
 }
 
 // AddSharedGroupIDs adds the "shared_group" edge to the Group entity by IDs.
@@ -362,6 +418,12 @@ func (sluo *StudyLogUpdateOne) Mutation() *StudyLogMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (sluo *StudyLogUpdateOne) ClearUser() *StudyLogUpdateOne {
 	sluo.mutation.ClearUser()
+	return sluo
+}
+
+// ClearCategory clears the "category" edge to the Category entity.
+func (sluo *StudyLogUpdateOne) ClearCategory() *StudyLogUpdateOne {
+	sluo.mutation.ClearCategory()
 	return sluo
 }
 
@@ -426,7 +488,21 @@ func (sluo *StudyLogUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (sluo *StudyLogUpdateOne) check() error {
+	if _, ok := sluo.mutation.UserID(); sluo.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "StudyLog.user"`)
+	}
+	if _, ok := sluo.mutation.CategoryID(); sluo.mutation.CategoryCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "StudyLog.category"`)
+	}
+	return nil
+}
+
 func (sluo *StudyLogUpdateOne) sqlSave(ctx context.Context) (_node *StudyLog, err error) {
+	if err := sluo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(studylog.Table, studylog.Columns, sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID))
 	id, ok := sluo.mutation.ID()
 	if !ok {
@@ -483,6 +559,35 @@ func (sluo *StudyLogUpdateOne) sqlSave(ctx context.Context) (_node *StudyLog, er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if sluo.mutation.CategoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   studylog.CategoryTable,
+			Columns: []string{studylog.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := sluo.mutation.CategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   studylog.CategoryTable,
+			Columns: []string{studylog.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

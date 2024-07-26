@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Affiliation is the client for interacting with the Affiliation builders.
 	Affiliation *AffiliationClient
+	// Category is the client for interacting with the Category builders.
+	Category *CategoryClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// InviteCode is the client for interacting with the InviteCode builders.
@@ -156,6 +158,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Affiliation = NewAffiliationClient(tx.config)
+	tx.Category = NewCategoryClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.InviteCode = NewInviteCodeClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)

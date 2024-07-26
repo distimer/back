@@ -378,6 +378,29 @@ func HasRefreshTokensWith(preds ...predicate.RefreshToken) predicate.User {
 	})
 }
 
+// HasOwnedCategories applies the HasEdge predicate on the "owned_categories" edge.
+func HasOwnedCategories() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, OwnedCategoriesTable, OwnedCategoriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOwnedCategoriesWith applies the HasEdge predicate on the "owned_categories" edge with a given conditions (other predicates).
+func HasOwnedCategoriesWith(preds ...predicate.Category) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newOwnedCategoriesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasAffiliations applies the HasEdge predicate on the "affiliations" edge.
 func HasAffiliations() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

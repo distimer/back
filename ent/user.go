@@ -42,11 +42,13 @@ type UserEdges struct {
 	StudyLogs []*StudyLog `json:"study_logs,omitempty"`
 	// RefreshTokens holds the value of the refresh_tokens edge.
 	RefreshTokens []*RefreshToken `json:"refresh_tokens,omitempty"`
+	// OwnedCategories holds the value of the owned_categories edge.
+	OwnedCategories []*Category `json:"owned_categories,omitempty"`
 	// Affiliations holds the value of the affiliations edge.
 	Affiliations []*Affiliation `json:"affiliations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // JoinedGroupsOrErr returns the JoinedGroups value or an error if the edge
@@ -85,10 +87,19 @@ func (e UserEdges) RefreshTokensOrErr() ([]*RefreshToken, error) {
 	return nil, &NotLoadedError{edge: "refresh_tokens"}
 }
 
+// OwnedCategoriesOrErr returns the OwnedCategories value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) OwnedCategoriesOrErr() ([]*Category, error) {
+	if e.loadedTypes[4] {
+		return e.OwnedCategories, nil
+	}
+	return nil, &NotLoadedError{edge: "owned_categories"}
+}
+
 // AffiliationsOrErr returns the Affiliations value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) AffiliationsOrErr() ([]*Affiliation, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.Affiliations, nil
 	}
 	return nil, &NotLoadedError{edge: "affiliations"}
@@ -183,6 +194,11 @@ func (u *User) QueryStudyLogs() *StudyLogQuery {
 // QueryRefreshTokens queries the "refresh_tokens" edge of the User entity.
 func (u *User) QueryRefreshTokens() *RefreshTokenQuery {
 	return NewUserClient(u.config).QueryRefreshTokens(u)
+}
+
+// QueryOwnedCategories queries the "owned_categories" edge of the User entity.
+func (u *User) QueryOwnedCategories() *CategoryQuery {
+	return NewUserClient(u.config).QueryOwnedCategories(u)
 }
 
 // QueryAffiliations queries the "affiliations" edge of the User entity.

@@ -35,14 +35,6 @@ func (rtu *RefreshTokenUpdate) SetUserID(id uuid.UUID) *RefreshTokenUpdate {
 	return rtu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (rtu *RefreshTokenUpdate) SetNillableUserID(id *uuid.UUID) *RefreshTokenUpdate {
-	if id != nil {
-		rtu = rtu.SetUserID(*id)
-	}
-	return rtu
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (rtu *RefreshTokenUpdate) SetUser(u *User) *RefreshTokenUpdate {
 	return rtu.SetUserID(u.ID)
@@ -86,7 +78,18 @@ func (rtu *RefreshTokenUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (rtu *RefreshTokenUpdate) check() error {
+	if _, ok := rtu.mutation.UserID(); rtu.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "RefreshToken.user"`)
+	}
+	return nil
+}
+
 func (rtu *RefreshTokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := rtu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(refreshtoken.Table, refreshtoken.Columns, sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID))
 	if ps := rtu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -150,14 +153,6 @@ func (rtuo *RefreshTokenUpdateOne) SetUserID(id uuid.UUID) *RefreshTokenUpdateOn
 	return rtuo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (rtuo *RefreshTokenUpdateOne) SetNillableUserID(id *uuid.UUID) *RefreshTokenUpdateOne {
-	if id != nil {
-		rtuo = rtuo.SetUserID(*id)
-	}
-	return rtuo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (rtuo *RefreshTokenUpdateOne) SetUser(u *User) *RefreshTokenUpdateOne {
 	return rtuo.SetUserID(u.ID)
@@ -214,7 +209,18 @@ func (rtuo *RefreshTokenUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (rtuo *RefreshTokenUpdateOne) check() error {
+	if _, ok := rtuo.mutation.UserID(); rtuo.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "RefreshToken.user"`)
+	}
+	return nil
+}
+
 func (rtuo *RefreshTokenUpdateOne) sqlSave(ctx context.Context) (_node *RefreshToken, err error) {
+	if err := rtuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(refreshtoken.Table, refreshtoken.Columns, sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID))
 	id, ok := rtuo.mutation.ID()
 	if !ok {

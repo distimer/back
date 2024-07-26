@@ -59,7 +59,7 @@ func ValidColumn(column string) bool {
 
 var (
 	// DefaultUsed holds the default value on creation for the "used" field.
-	DefaultUsed int
+	DefaultUsed int32
 )
 
 // OrderOption defines the ordering options for the InviteCode queries.

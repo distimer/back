@@ -44,14 +44,14 @@ func (icu *InviteCodeUpdate) SetNillableCode(s *string) *InviteCodeUpdate {
 }
 
 // SetUsed sets the "used" field.
-func (icu *InviteCodeUpdate) SetUsed(i int) *InviteCodeUpdate {
+func (icu *InviteCodeUpdate) SetUsed(i int32) *InviteCodeUpdate {
 	icu.mutation.ResetUsed()
 	icu.mutation.SetUsed(i)
 	return icu
 }
 
 // SetNillableUsed sets the "used" field if the given value is not nil.
-func (icu *InviteCodeUpdate) SetNillableUsed(i *int) *InviteCodeUpdate {
+func (icu *InviteCodeUpdate) SetNillableUsed(i *int32) *InviteCodeUpdate {
 	if i != nil {
 		icu.SetUsed(*i)
 	}
@@ -59,7 +59,7 @@ func (icu *InviteCodeUpdate) SetNillableUsed(i *int) *InviteCodeUpdate {
 }
 
 // AddUsed adds i to the "used" field.
-func (icu *InviteCodeUpdate) AddUsed(i int) *InviteCodeUpdate {
+func (icu *InviteCodeUpdate) AddUsed(i int32) *InviteCodeUpdate {
 	icu.mutation.AddUsed(i)
 	return icu
 }
@@ -137,10 +137,10 @@ func (icu *InviteCodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(invitecode.FieldCode, field.TypeString, value)
 	}
 	if value, ok := icu.mutation.Used(); ok {
-		_spec.SetField(invitecode.FieldUsed, field.TypeInt, value)
+		_spec.SetField(invitecode.FieldUsed, field.TypeInt32, value)
 	}
 	if value, ok := icu.mutation.AddedUsed(); ok {
-		_spec.AddField(invitecode.FieldUsed, field.TypeInt, value)
+		_spec.AddField(invitecode.FieldUsed, field.TypeInt32, value)
 	}
 	if icu.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -206,14 +206,14 @@ func (icuo *InviteCodeUpdateOne) SetNillableCode(s *string) *InviteCodeUpdateOne
 }
 
 // SetUsed sets the "used" field.
-func (icuo *InviteCodeUpdateOne) SetUsed(i int) *InviteCodeUpdateOne {
+func (icuo *InviteCodeUpdateOne) SetUsed(i int32) *InviteCodeUpdateOne {
 	icuo.mutation.ResetUsed()
 	icuo.mutation.SetUsed(i)
 	return icuo
 }
 
 // SetNillableUsed sets the "used" field if the given value is not nil.
-func (icuo *InviteCodeUpdateOne) SetNillableUsed(i *int) *InviteCodeUpdateOne {
+func (icuo *InviteCodeUpdateOne) SetNillableUsed(i *int32) *InviteCodeUpdateOne {
 	if i != nil {
 		icuo.SetUsed(*i)
 	}
@@ -221,7 +221,7 @@ func (icuo *InviteCodeUpdateOne) SetNillableUsed(i *int) *InviteCodeUpdateOne {
 }
 
 // AddUsed adds i to the "used" field.
-func (icuo *InviteCodeUpdateOne) AddUsed(i int) *InviteCodeUpdateOne {
+func (icuo *InviteCodeUpdateOne) AddUsed(i int32) *InviteCodeUpdateOne {
 	icuo.mutation.AddUsed(i)
 	return icuo
 }
@@ -329,10 +329,10 @@ func (icuo *InviteCodeUpdateOne) sqlSave(ctx context.Context) (_node *InviteCode
 		_spec.SetField(invitecode.FieldCode, field.TypeString, value)
 	}
 	if value, ok := icuo.mutation.Used(); ok {
-		_spec.SetField(invitecode.FieldUsed, field.TypeInt, value)
+		_spec.SetField(invitecode.FieldUsed, field.TypeInt32, value)
 	}
 	if value, ok := icuo.mutation.AddedUsed(); ok {
-		_spec.AddField(invitecode.FieldUsed, field.TypeInt, value)
+		_spec.AddField(invitecode.FieldUsed, field.TypeInt32, value)
 	}
 	if icuo.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -21,6 +21,8 @@ const (
 	FieldContent = "content"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeCategory holds the string denoting the category edge name in mutations.
+	EdgeCategory = "category"
 	// EdgeSharedGroup holds the string denoting the shared_group edge name in mutations.
 	EdgeSharedGroup = "shared_group"
 	// Table holds the table name of the studylog in the database.
@@ -32,6 +34,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_study_logs"
+	// CategoryTable is the table that holds the category relation/edge.
+	CategoryTable = "study_logs"
+	// CategoryInverseTable is the table name for the Category entity.
+	// It exists in this package in order to avoid circular dependency with the "category" package.
+	CategoryInverseTable = "categories"
+	// CategoryColumn is the table column denoting the category relation/edge.
+	CategoryColumn = "category_study_logs"
 	// SharedGroupTable is the table that holds the shared_group relation/edge. The primary key declared below.
 	SharedGroupTable = "study_log_shared_group"
 	// SharedGroupInverseTable is the table name for the Group entity.
@@ -50,6 +59,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "study_logs"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"category_study_logs",
 	"user_study_logs",
 }
 
@@ -109,6 +119,13 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
+// ByCategoryField orders the results by category field.
+func ByCategoryField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCategoryStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // BySharedGroupCount orders the results by shared_group count.
 func BySharedGroupCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -127,6 +144,13 @@ func newUserStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newCategoryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CategoryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
 	)
 }
 func newSharedGroupStep() *sqlgraph.Step {

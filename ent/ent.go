@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"pentag.kr/distimer/ent/affiliation"
+	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/refreshtoken"
@@ -79,6 +80,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			affiliation.Table:  affiliation.ValidColumn,
+			category.Table:     category.ValidColumn,
 			group.Table:        group.ValidColumn,
 			invitecode.Table:   invitecode.ValidColumn,
 			refreshtoken.Table: refreshtoken.ValidColumn,

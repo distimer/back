@@ -9,6 +9,9 @@ import (
 // Affiliation is the predicate function for affiliation builders.
 type Affiliation func(*sql.Selector)
 
+// Category is the predicate function for category builders.
+type Category func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 

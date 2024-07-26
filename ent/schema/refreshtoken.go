@@ -27,6 +27,7 @@ func (RefreshToken) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
 			Ref("refresh_tokens").
-			Unique(),
+			Unique().
+			Required(),
 	}
 }

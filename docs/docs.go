@@ -652,6 +652,51 @@ const docTemplate = `{
                 }
             }
         },
+        "ent.Category": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "description": "Color holds the value of the \"color\" field.",
+                    "type": "integer"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the CategoryQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.CategoryEdges"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.CategoryEdges": {
+            "type": "object",
+            "properties": {
+                "study_logs": {
+                    "description": "StudyLogs holds the value of the study_logs edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.StudyLog"
+                    }
+                },
+                "user": {
+                    "description": "User holds the value of the user edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.User"
+                        }
+                    ]
+                }
+            }
+        },
         "ent.Group": {
             "type": "object",
             "properties": {
@@ -831,6 +876,14 @@ const docTemplate = `{
         "ent.StudyLogEdges": {
             "type": "object",
             "properties": {
+                "category": {
+                    "description": "Category holds the value of the category edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.Category"
+                        }
+                    ]
+                },
                 "shared_group": {
                     "description": "SharedGroup holds the value of the shared_group edge.",
                     "type": "array",
@@ -896,6 +949,13 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.Group"
+                    }
+                },
+                "owned_categories": {
+                    "description": "OwnedCategories holds the value of the owned_categories edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Category"
                     }
                 },
                 "owned_groups": {

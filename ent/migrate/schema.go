@@ -35,6 +35,46 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "affiliation_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliationsColumns[3]},
+			},
+			{
+				Name:    "affiliation_group_id",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliationsColumns[4]},
+			},
+		},
+	}
+	// CategoriesColumns holds the columns for the "categories" table.
+	CategoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
+		{Name: "color", Type: field.TypeInt32},
+		{Name: "user_owned_categories", Type: field.TypeUUID},
+	}
+	// CategoriesTable holds the schema information for the "categories" table.
+	CategoriesTable = &schema.Table{
+		Name:       "categories",
+		Columns:    CategoriesColumns,
+		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "categories_users_owned_categories",
+				Columns:    []*schema.Column{CategoriesColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "category_user_owned_categories",
+				Unique:  false,
+				Columns: []*schema.Column{CategoriesColumns[3]},
+			},
+		},
 	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
@@ -65,7 +105,7 @@ var (
 	InviteCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "code", Type: field.TypeString, Unique: true},
-		{Name: "used", Type: field.TypeInt, Default: 0},
+		{Name: "used", Type: field.TypeInt32, Default: 0},
 		{Name: "group_invite_codes", Type: field.TypeUUID},
 	}
 	// InviteCodesTable holds the schema information for the "invite_codes" table.
@@ -86,7 +126,7 @@ var (
 	RefreshTokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "user_refresh_tokens", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_refresh_tokens", Type: field.TypeUUID},
 	}
 	// RefreshTokensTable holds the schema information for the "refresh_tokens" table.
 	RefreshTokensTable = &schema.Table{
@@ -98,7 +138,7 @@ var (
 				Symbol:     "refresh_tokens_users_refresh_tokens",
 				Columns:    []*schema.Column{RefreshTokensColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -108,7 +148,8 @@ var (
 		{Name: "start_at", Type: field.TypeTime},
 		{Name: "end_at", Type: field.TypeTime},
 		{Name: "content", Type: field.TypeString},
-		{Name: "user_study_logs", Type: field.TypeUUID, Nullable: true},
+		{Name: "category_study_logs", Type: field.TypeUUID},
+		{Name: "user_study_logs", Type: field.TypeUUID},
 	}
 	// StudyLogsTable holds the schema information for the "study_logs" table.
 	StudyLogsTable = &schema.Table{
@@ -117,17 +158,30 @@ var (
 		PrimaryKey: []*schema.Column{StudyLogsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "study_logs_users_study_logs",
+				Symbol:     "study_logs_categories_study_logs",
 				Columns:    []*schema.Column{StudyLogsColumns[4]},
+				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "study_logs_users_study_logs",
+				Columns:    []*schema.Column{StudyLogsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "studylog_user_study_logs",
+				Unique:  false,
+				Columns: []*schema.Column{StudyLogsColumns[5]},
 			},
 		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "name", Type: field.TypeString, Default: "User"},
+		{Name: "name", Type: field.TypeString, Default: "유저"},
 		{Name: "oauth_id", Type: field.TypeString},
 		{Name: "oauth_provider", Type: field.TypeInt8},
 		{Name: "created_at", Type: field.TypeTime},
@@ -137,6 +191,13 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_oauth_id_oauth_provider",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[2], UsersColumns[3]},
+			},
+		},
 	}
 	// StudyLogSharedGroupColumns holds the columns for the "study_log_shared_group" table.
 	StudyLogSharedGroupColumns = []*schema.Column{
@@ -166,6 +227,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AffiliationsTable,
+		CategoriesTable,
 		GroupsTable,
 		InviteCodesTable,
 		RefreshTokensTable,
@@ -178,10 +240,12 @@ var (
 func init() {
 	AffiliationsTable.ForeignKeys[0].RefTable = UsersTable
 	AffiliationsTable.ForeignKeys[1].RefTable = GroupsTable
+	CategoriesTable.ForeignKeys[0].RefTable = UsersTable
 	GroupsTable.ForeignKeys[0].RefTable = UsersTable
 	InviteCodesTable.ForeignKeys[0].RefTable = GroupsTable
 	RefreshTokensTable.ForeignKeys[0].RefTable = UsersTable
-	StudyLogsTable.ForeignKeys[0].RefTable = UsersTable
+	StudyLogsTable.ForeignKeys[0].RefTable = CategoriesTable
+	StudyLogsTable.ForeignKeys[1].RefTable = UsersTable
 	StudyLogSharedGroupTable.ForeignKeys[0].RefTable = StudyLogsTable
 	StudyLogSharedGroupTable.ForeignKeys[1].RefTable = GroupsTable
 }

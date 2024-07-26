@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/refreshtoken"
@@ -140,6 +141,21 @@ func (uu *UserUpdate) AddRefreshTokens(r ...*RefreshToken) *UserUpdate {
 	return uu.AddRefreshTokenIDs(ids...)
 }
 
+// AddOwnedCategoryIDs adds the "owned_categories" edge to the Category entity by IDs.
+func (uu *UserUpdate) AddOwnedCategoryIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddOwnedCategoryIDs(ids...)
+	return uu
+}
+
+// AddOwnedCategories adds the "owned_categories" edges to the Category entity.
+func (uu *UserUpdate) AddOwnedCategories(c ...*Category) *UserUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.AddOwnedCategoryIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -227,6 +243,27 @@ func (uu *UserUpdate) RemoveRefreshTokens(r ...*RefreshToken) *UserUpdate {
 		ids[i] = r[i].ID
 	}
 	return uu.RemoveRefreshTokenIDs(ids...)
+}
+
+// ClearOwnedCategories clears all "owned_categories" edges to the Category entity.
+func (uu *UserUpdate) ClearOwnedCategories() *UserUpdate {
+	uu.mutation.ClearOwnedCategories()
+	return uu
+}
+
+// RemoveOwnedCategoryIDs removes the "owned_categories" edge to Category entities by IDs.
+func (uu *UserUpdate) RemoveOwnedCategoryIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveOwnedCategoryIDs(ids...)
+	return uu
+}
+
+// RemoveOwnedCategories removes "owned_categories" edges to Category entities.
+func (uu *UserUpdate) RemoveOwnedCategories(c ...*Category) *UserUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.RemoveOwnedCategoryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -469,6 +506,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.OwnedCategoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OwnedCategoriesTable,
+			Columns: []string{user.OwnedCategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedOwnedCategoriesIDs(); len(nodes) > 0 && !uu.mutation.OwnedCategoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OwnedCategoriesTable,
+			Columns: []string{user.OwnedCategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.OwnedCategoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OwnedCategoriesTable,
+			Columns: []string{user.OwnedCategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -598,6 +680,21 @@ func (uuo *UserUpdateOne) AddRefreshTokens(r ...*RefreshToken) *UserUpdateOne {
 	return uuo.AddRefreshTokenIDs(ids...)
 }
 
+// AddOwnedCategoryIDs adds the "owned_categories" edge to the Category entity by IDs.
+func (uuo *UserUpdateOne) AddOwnedCategoryIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddOwnedCategoryIDs(ids...)
+	return uuo
+}
+
+// AddOwnedCategories adds the "owned_categories" edges to the Category entity.
+func (uuo *UserUpdateOne) AddOwnedCategories(c ...*Category) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.AddOwnedCategoryIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -685,6 +782,27 @@ func (uuo *UserUpdateOne) RemoveRefreshTokens(r ...*RefreshToken) *UserUpdateOne
 		ids[i] = r[i].ID
 	}
 	return uuo.RemoveRefreshTokenIDs(ids...)
+}
+
+// ClearOwnedCategories clears all "owned_categories" edges to the Category entity.
+func (uuo *UserUpdateOne) ClearOwnedCategories() *UserUpdateOne {
+	uuo.mutation.ClearOwnedCategories()
+	return uuo
+}
+
+// RemoveOwnedCategoryIDs removes the "owned_categories" edge to Category entities by IDs.
+func (uuo *UserUpdateOne) RemoveOwnedCategoryIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveOwnedCategoryIDs(ids...)
+	return uuo
+}
+
+// RemoveOwnedCategories removes "owned_categories" edges to Category entities.
+func (uuo *UserUpdateOne) RemoveOwnedCategories(c ...*Category) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.RemoveOwnedCategoryIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -950,6 +1068,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.OwnedCategoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OwnedCategoriesTable,
+			Columns: []string{user.OwnedCategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedOwnedCategoriesIDs(); len(nodes) > 0 && !uuo.mutation.OwnedCategoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OwnedCategoriesTable,
+			Columns: []string{user.OwnedCategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.OwnedCategoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OwnedCategoriesTable,
+			Columns: []string{user.OwnedCategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

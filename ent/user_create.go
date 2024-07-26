@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
@@ -128,6 +129,21 @@ func (uc *UserCreate) AddRefreshTokens(r ...*RefreshToken) *UserCreate {
 		ids[i] = r[i].ID
 	}
 	return uc.AddRefreshTokenIDs(ids...)
+}
+
+// AddOwnedCategoryIDs adds the "owned_categories" edge to the Category entity by IDs.
+func (uc *UserCreate) AddOwnedCategoryIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddOwnedCategoryIDs(ids...)
+	return uc
+}
+
+// AddOwnedCategories adds the "owned_categories" edges to the Category entity.
+func (uc *UserCreate) AddOwnedCategories(c ...*Category) *UserCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uc.AddOwnedCategoryIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -301,6 +317,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.OwnedCategoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OwnedCategoriesTable,
+			Columns: []string{user.OwnedCategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
