@@ -397,6 +397,49 @@ const docTemplate = `{
             }
         },
         "/group/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Modify Group Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "group id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "modifyGroupInfoReq",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.modifyGroupInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.modifyGroupInfoRes"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -961,6 +1004,36 @@ const docTemplate = `{
             "properties": {
                 "group": {
                     "$ref": "#/definitions/ent.Group"
+                }
+            }
+        },
+        "groupctrl.modifyGroupInfoReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "description between 0 and 100"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "name between 3 and 30"
+                }
+            }
+        },
+        "groupctrl.modifyGroupInfoRes": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
