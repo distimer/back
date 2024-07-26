@@ -378,21 +378,21 @@ func HasRefreshTokensWith(preds ...predicate.RefreshToken) predicate.User {
 	})
 }
 
-// HasAffilations applies the HasEdge predicate on the "affilations" edge.
-func HasAffilations() predicate.User {
+// HasAffiliations applies the HasEdge predicate on the "affiliations" edge.
+func HasAffiliations() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, AffilationsTable, AffilationsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, AffiliationsTable, AffiliationsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasAffilationsWith applies the HasEdge predicate on the "affilations" edge with a given conditions (other predicates).
-func HasAffilationsWith(preds ...predicate.Affiliation) predicate.User {
+// HasAffiliationsWith applies the HasEdge predicate on the "affiliations" edge with a given conditions (other predicates).
+func HasAffiliationsWith(preds ...predicate.Affiliation) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newAffilationsStep()
+		step := newAffiliationsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

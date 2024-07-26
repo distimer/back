@@ -42,8 +42,8 @@ type UserEdges struct {
 	StudyLogs []*StudyLog `json:"study_logs,omitempty"`
 	// RefreshTokens holds the value of the refresh_tokens edge.
 	RefreshTokens []*RefreshToken `json:"refresh_tokens,omitempty"`
-	// Affilations holds the value of the affilations edge.
-	Affilations []*Affiliation `json:"affilations,omitempty"`
+	// Affiliations holds the value of the affiliations edge.
+	Affiliations []*Affiliation `json:"affiliations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [5]bool
@@ -85,13 +85,13 @@ func (e UserEdges) RefreshTokensOrErr() ([]*RefreshToken, error) {
 	return nil, &NotLoadedError{edge: "refresh_tokens"}
 }
 
-// AffilationsOrErr returns the Affilations value or an error if the edge
+// AffiliationsOrErr returns the Affiliations value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) AffilationsOrErr() ([]*Affiliation, error) {
+func (e UserEdges) AffiliationsOrErr() ([]*Affiliation, error) {
 	if e.loadedTypes[4] {
-		return e.Affilations, nil
+		return e.Affiliations, nil
 	}
-	return nil, &NotLoadedError{edge: "affilations"}
+	return nil, &NotLoadedError{edge: "affiliations"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -185,9 +185,9 @@ func (u *User) QueryRefreshTokens() *RefreshTokenQuery {
 	return NewUserClient(u.config).QueryRefreshTokens(u)
 }
 
-// QueryAffilations queries the "affilations" edge of the User entity.
-func (u *User) QueryAffilations() *AffiliationQuery {
-	return NewUserClient(u.config).QueryAffilations(u)
+// QueryAffiliations queries the "affiliations" edge of the User entity.
+func (u *User) QueryAffiliations() *AffiliationQuery {
+	return NewUserClient(u.config).QueryAffiliations(u)
 }
 
 // Update returns a builder for updating this User.

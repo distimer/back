@@ -841,8 +841,8 @@ const docTemplate = `{
         "ent.UserEdges": {
             "type": "object",
             "properties": {
-                "affilations": {
-                    "description": "Affilations holds the value of the affilations edge.",
+                "affiliations": {
+                    "description": "Affiliations holds the value of the affiliations edge.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.Affiliation"

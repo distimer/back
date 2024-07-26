@@ -31,7 +31,7 @@ type UserQuery struct {
 	withOwnedGroups   *GroupQuery
 	withStudyLogs     *StudyLogQuery
 	withRefreshTokens *RefreshTokenQuery
-	withAffilations   *AffiliationQuery
+	withAffiliations  *AffiliationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -156,8 +156,8 @@ func (uq *UserQuery) QueryRefreshTokens() *RefreshTokenQuery {
 	return query
 }
 
-// QueryAffilations chains the current query on the "affilations" edge.
-func (uq *UserQuery) QueryAffilations() *AffiliationQuery {
+// QueryAffiliations chains the current query on the "affiliations" edge.
+func (uq *UserQuery) QueryAffiliations() *AffiliationQuery {
 	query := (&AffiliationClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -170,7 +170,7 @@ func (uq *UserQuery) QueryAffilations() *AffiliationQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(affiliation.Table, affiliation.UserColumn),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.AffilationsTable, user.AffilationsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.AffiliationsTable, user.AffiliationsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -374,7 +374,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withOwnedGroups:   uq.withOwnedGroups.Clone(),
 		withStudyLogs:     uq.withStudyLogs.Clone(),
 		withRefreshTokens: uq.withRefreshTokens.Clone(),
-		withAffilations:   uq.withAffilations.Clone(),
+		withAffiliations:  uq.withAffiliations.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -425,14 +425,14 @@ func (uq *UserQuery) WithRefreshTokens(opts ...func(*RefreshTokenQuery)) *UserQu
 	return uq
 }
 
-// WithAffilations tells the query-builder to eager-load the nodes that are connected to
-// the "affilations" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithAffilations(opts ...func(*AffiliationQuery)) *UserQuery {
+// WithAffiliations tells the query-builder to eager-load the nodes that are connected to
+// the "affiliations" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithAffiliations(opts ...func(*AffiliationQuery)) *UserQuery {
 	query := (&AffiliationClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withAffilations = query
+	uq.withAffiliations = query
 	return uq
 }
 
@@ -519,7 +519,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			uq.withOwnedGroups != nil,
 			uq.withStudyLogs != nil,
 			uq.withRefreshTokens != nil,
-			uq.withAffilations != nil,
+			uq.withAffiliations != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -568,10 +568,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := uq.withAffilations; query != nil {
-		if err := uq.loadAffilations(ctx, query, nodes,
-			func(n *User) { n.Edges.Affilations = []*Affiliation{} },
-			func(n *User, e *Affiliation) { n.Edges.Affilations = append(n.Edges.Affilations, e) }); err != nil {
+	if query := uq.withAffiliations; query != nil {
+		if err := uq.loadAffiliations(ctx, query, nodes,
+			func(n *User) { n.Edges.Affiliations = []*Affiliation{} },
+			func(n *User, e *Affiliation) { n.Edges.Affiliations = append(n.Edges.Affiliations, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -732,7 +732,7 @@ func (uq *UserQuery) loadRefreshTokens(ctx context.Context, query *RefreshTokenQ
 	}
 	return nil
 }
-func (uq *UserQuery) loadAffilations(ctx context.Context, query *AffiliationQuery, nodes []*User, init func(*User), assign func(*User, *Affiliation)) error {
+func (uq *UserQuery) loadAffiliations(ctx context.Context, query *AffiliationQuery, nodes []*User, init func(*User), assign func(*User, *Affiliation)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -746,7 +746,7 @@ func (uq *UserQuery) loadAffilations(ctx context.Context, query *AffiliationQuer
 		query.ctx.AppendFieldOnce(affiliation.FieldUserID)
 	}
 	query.Where(predicate.Affiliation(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.AffilationsColumn), fks...))
+		s.Where(sql.InValues(s.C(user.AffiliationsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

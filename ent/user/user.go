@@ -30,8 +30,8 @@ const (
 	EdgeStudyLogs = "study_logs"
 	// EdgeRefreshTokens holds the string denoting the refresh_tokens edge name in mutations.
 	EdgeRefreshTokens = "refresh_tokens"
-	// EdgeAffilations holds the string denoting the affilations edge name in mutations.
-	EdgeAffilations = "affilations"
+	// EdgeAffiliations holds the string denoting the affiliations edge name in mutations.
+	EdgeAffiliations = "affiliations"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// JoinedGroupsTable is the table that holds the joined_groups relation/edge. The primary key declared below.
@@ -60,13 +60,13 @@ const (
 	RefreshTokensInverseTable = "refresh_tokens"
 	// RefreshTokensColumn is the table column denoting the refresh_tokens relation/edge.
 	RefreshTokensColumn = "user_refresh_tokens"
-	// AffilationsTable is the table that holds the affilations relation/edge.
-	AffilationsTable = "affiliations"
-	// AffilationsInverseTable is the table name for the Affiliation entity.
+	// AffiliationsTable is the table that holds the affiliations relation/edge.
+	AffiliationsTable = "affiliations"
+	// AffiliationsInverseTable is the table name for the Affiliation entity.
 	// It exists in this package in order to avoid circular dependency with the "affiliation" package.
-	AffilationsInverseTable = "affiliations"
-	// AffilationsColumn is the table column denoting the affilations relation/edge.
-	AffilationsColumn = "user_id"
+	AffiliationsInverseTable = "affiliations"
+	// AffiliationsColumn is the table column denoting the affiliations relation/edge.
+	AffiliationsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -185,17 +185,17 @@ func ByRefreshTokens(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByAffilationsCount orders the results by affilations count.
-func ByAffilationsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByAffiliationsCount orders the results by affiliations count.
+func ByAffiliationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAffilationsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newAffiliationsStep(), opts...)
 	}
 }
 
-// ByAffilations orders the results by affilations terms.
-func ByAffilations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByAffiliations orders the results by affiliations terms.
+func ByAffiliations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAffilationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newAffiliationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newJoinedGroupsStep() *sqlgraph.Step {
@@ -226,10 +226,10 @@ func newRefreshTokensStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, RefreshTokensTable, RefreshTokensColumn),
 	)
 }
-func newAffilationsStep() *sqlgraph.Step {
+func newAffiliationsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AffilationsInverseTable, AffilationsColumn),
-		sqlgraph.Edge(sqlgraph.O2M, true, AffilationsTable, AffilationsColumn),
+		sqlgraph.To(AffiliationsInverseTable, AffiliationsColumn),
+		sqlgraph.Edge(sqlgraph.O2M, true, AffiliationsTable, AffiliationsColumn),
 	)
 }

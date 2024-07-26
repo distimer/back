@@ -28,7 +28,7 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("joined_groups", Group.Type).Through("affilations", Affiliation.Type),
+		edge.To("joined_groups", Group.Type).Through("affiliations", Affiliation.Type),
 		edge.To("owned_groups", Group.Type),
 		edge.To("study_logs", StudyLog.Type),
 		edge.To("refresh_tokens", RefreshToken.Type),

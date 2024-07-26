@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Affilation holds the schema definition for the Affilation entity.
+// Affiliation holds the schema definition for the Affiliation entity.
 type Affiliation struct {
 	ent.Schema
 }
@@ -21,7 +21,7 @@ func (Affiliation) Annotations() []schema.Annotation {
 	}
 }
 
-// Fields of the Affilation.
+// Fields of the Affiliation.
 func (Affiliation) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("user_id", uuid.UUID{}),
@@ -32,7 +32,7 @@ func (Affiliation) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Affilation.
+// Edges of the Affiliation.
 func (Affiliation) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("user", User.Type).

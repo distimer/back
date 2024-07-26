@@ -1194,15 +1194,15 @@ func (c *UserClient) QueryRefreshTokens(u *User) *RefreshTokenQuery {
 	return query
 }
 
-// QueryAffilations queries the affilations edge of a User.
-func (c *UserClient) QueryAffilations(u *User) *AffiliationQuery {
+// QueryAffiliations queries the affiliations edge of a User.
+func (c *UserClient) QueryAffiliations(u *User) *AffiliationQuery {
 	query := (&AffiliationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(affiliation.Table, affiliation.UserColumn),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.AffilationsTable, user.AffilationsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.AffiliationsTable, user.AffiliationsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
