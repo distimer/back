@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 	"pentag.kr/distimer/configs"
@@ -19,12 +21,13 @@ import (
 // @name Authorization
 // @BasePath /
 func main() {
+
 	// Load environment variables
 	configs.LoadEnv()
 
 	// Initialize logger
 	logger.InitLogger(configs.Env.LogLevel)
-
+	logger.Debug(time.Now().Format(time.RFC3339))
 	// Connect database client
 	db.ConnectDBClient()
 
