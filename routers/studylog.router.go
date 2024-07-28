@@ -15,4 +15,8 @@ func initStudylogRouter(router fiber.Router) {
 	studylogRouter.Get("/", studylogctrl.GetAllMyStudyLogs)
 	studylogRouter.Post("/", studylogctrl.CreateStudyLog)
 
+	// studylog statistics
+	studylogRouter.Get("/statistics/term", studylogctrl.GetStatisticsWithTerm)
+
+	studylogRouter.Get("/subject/:id", studylogctrl.GetStudyLogWithSubject)
 }

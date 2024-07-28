@@ -16,5 +16,4 @@ func initSubjectRouter(router fiber.Router) {
 	subjectRouter.Delete("/:id", subjectctrl.DeleteSubject)
 	subjectRouter.Put("/:id", subjectctrl.ModifySubjectInfo)
 
-	subjectRouter.Get("/studylog/:id", subjectctrl.GetStudyLogWithSubject)
 }

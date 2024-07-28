@@ -753,6 +753,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/studylog/statistics/term": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get Statistics with Term",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "2006-01-02",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "2006-01-03",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studylogctrl.dailyStudyLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/studylog/subject/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get Study Log with Subject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subject ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "count",
+                        "name": "count",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studylogctrl.getStudyLogRes"
+                        }
+                    }
+                }
+            }
+        },
         "/subject": {
             "post": {
                 "security": [
@@ -803,42 +905,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/subject/studylog/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Subject"
-                ],
-                "summary": "Get Study Log with Subject",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Subject ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/subjectctrl.getStudyLogRes"
-                        }
                     }
                 }
             }
@@ -1743,10 +1809,46 @@ const docTemplate = `{
                 }
             }
         },
+        "studylogctrl.dailyStudyLog": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "log": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studylogctrl.dailySubjectLog"
+                    }
+                }
+            }
+        },
+        "studylogctrl.dailySubjectLog": {
+            "type": "object",
+            "properties": {
+                "study_time": {
+                    "type": "integer"
+                },
+                "subject_id": {
+                    "type": "string"
+                }
+            }
+        },
         "studylogctrl.getStudyLogListRes": {
             "type": "object",
             "properties": {
                 "studyLogs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.StudyLog"
+                    }
+                }
+            }
+        },
+        "studylogctrl.getStudyLogRes": {
+            "type": "object",
+            "properties": {
+                "study_logs": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.StudyLog"
@@ -1783,17 +1885,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                }
-            }
-        },
-        "subjectctrl.getStudyLogRes": {
-            "type": "object",
-            "properties": {
-                "study_logs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.StudyLog"
-                    }
                 }
             }
         },
