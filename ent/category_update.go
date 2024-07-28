@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/predicate"
-	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -44,27 +44,6 @@ func (cu *CategoryUpdate) SetNillableName(s *string) *CategoryUpdate {
 	return cu
 }
 
-// SetColor sets the "color" field.
-func (cu *CategoryUpdate) SetColor(i int32) *CategoryUpdate {
-	cu.mutation.ResetColor()
-	cu.mutation.SetColor(i)
-	return cu
-}
-
-// SetNillableColor sets the "color" field if the given value is not nil.
-func (cu *CategoryUpdate) SetNillableColor(i *int32) *CategoryUpdate {
-	if i != nil {
-		cu.SetColor(*i)
-	}
-	return cu
-}
-
-// AddColor adds i to the "color" field.
-func (cu *CategoryUpdate) AddColor(i int32) *CategoryUpdate {
-	cu.mutation.AddColor(i)
-	return cu
-}
-
 // SetUserID sets the "user" edge to the User entity by ID.
 func (cu *CategoryUpdate) SetUserID(id uuid.UUID) *CategoryUpdate {
 	cu.mutation.SetUserID(id)
@@ -76,19 +55,19 @@ func (cu *CategoryUpdate) SetUser(u *User) *CategoryUpdate {
 	return cu.SetUserID(u.ID)
 }
 
-// AddStudyLogIDs adds the "study_logs" edge to the StudyLog entity by IDs.
-func (cu *CategoryUpdate) AddStudyLogIDs(ids ...uuid.UUID) *CategoryUpdate {
-	cu.mutation.AddStudyLogIDs(ids...)
+// AddSubjectIDs adds the "subjects" edge to the Subject entity by IDs.
+func (cu *CategoryUpdate) AddSubjectIDs(ids ...uuid.UUID) *CategoryUpdate {
+	cu.mutation.AddSubjectIDs(ids...)
 	return cu
 }
 
-// AddStudyLogs adds the "study_logs" edges to the StudyLog entity.
-func (cu *CategoryUpdate) AddStudyLogs(s ...*StudyLog) *CategoryUpdate {
+// AddSubjects adds the "subjects" edges to the Subject entity.
+func (cu *CategoryUpdate) AddSubjects(s ...*Subject) *CategoryUpdate {
 	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return cu.AddStudyLogIDs(ids...)
+	return cu.AddSubjectIDs(ids...)
 }
 
 // Mutation returns the CategoryMutation object of the builder.
@@ -102,25 +81,25 @@ func (cu *CategoryUpdate) ClearUser() *CategoryUpdate {
 	return cu
 }
 
-// ClearStudyLogs clears all "study_logs" edges to the StudyLog entity.
-func (cu *CategoryUpdate) ClearStudyLogs() *CategoryUpdate {
-	cu.mutation.ClearStudyLogs()
+// ClearSubjects clears all "subjects" edges to the Subject entity.
+func (cu *CategoryUpdate) ClearSubjects() *CategoryUpdate {
+	cu.mutation.ClearSubjects()
 	return cu
 }
 
-// RemoveStudyLogIDs removes the "study_logs" edge to StudyLog entities by IDs.
-func (cu *CategoryUpdate) RemoveStudyLogIDs(ids ...uuid.UUID) *CategoryUpdate {
-	cu.mutation.RemoveStudyLogIDs(ids...)
+// RemoveSubjectIDs removes the "subjects" edge to Subject entities by IDs.
+func (cu *CategoryUpdate) RemoveSubjectIDs(ids ...uuid.UUID) *CategoryUpdate {
+	cu.mutation.RemoveSubjectIDs(ids...)
 	return cu
 }
 
-// RemoveStudyLogs removes "study_logs" edges to StudyLog entities.
-func (cu *CategoryUpdate) RemoveStudyLogs(s ...*StudyLog) *CategoryUpdate {
+// RemoveSubjects removes "subjects" edges to Subject entities.
+func (cu *CategoryUpdate) RemoveSubjects(s ...*Subject) *CategoryUpdate {
 	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return cu.RemoveStudyLogIDs(ids...)
+	return cu.RemoveSubjectIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -173,12 +152,6 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.Color(); ok {
-		_spec.SetField(category.FieldColor, field.TypeInt32, value)
-	}
-	if value, ok := cu.mutation.AddedColor(); ok {
-		_spec.AddField(category.FieldColor, field.TypeInt32, value)
-	}
 	if cu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -208,28 +181,28 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cu.mutation.StudyLogsCleared() {
+	if cu.mutation.SubjectsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.StudyLogsTable,
-			Columns: []string{category.StudyLogsColumn},
+			Table:   category.SubjectsTable,
+			Columns: []string{category.SubjectsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RemovedStudyLogsIDs(); len(nodes) > 0 && !cu.mutation.StudyLogsCleared() {
+	if nodes := cu.mutation.RemovedSubjectsIDs(); len(nodes) > 0 && !cu.mutation.SubjectsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.StudyLogsTable,
-			Columns: []string{category.StudyLogsColumn},
+			Table:   category.SubjectsTable,
+			Columns: []string{category.SubjectsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -237,15 +210,15 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.StudyLogsIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.SubjectsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.StudyLogsTable,
-			Columns: []string{category.StudyLogsColumn},
+			Table:   category.SubjectsTable,
+			Columns: []string{category.SubjectsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -287,27 +260,6 @@ func (cuo *CategoryUpdateOne) SetNillableName(s *string) *CategoryUpdateOne {
 	return cuo
 }
 
-// SetColor sets the "color" field.
-func (cuo *CategoryUpdateOne) SetColor(i int32) *CategoryUpdateOne {
-	cuo.mutation.ResetColor()
-	cuo.mutation.SetColor(i)
-	return cuo
-}
-
-// SetNillableColor sets the "color" field if the given value is not nil.
-func (cuo *CategoryUpdateOne) SetNillableColor(i *int32) *CategoryUpdateOne {
-	if i != nil {
-		cuo.SetColor(*i)
-	}
-	return cuo
-}
-
-// AddColor adds i to the "color" field.
-func (cuo *CategoryUpdateOne) AddColor(i int32) *CategoryUpdateOne {
-	cuo.mutation.AddColor(i)
-	return cuo
-}
-
 // SetUserID sets the "user" edge to the User entity by ID.
 func (cuo *CategoryUpdateOne) SetUserID(id uuid.UUID) *CategoryUpdateOne {
 	cuo.mutation.SetUserID(id)
@@ -319,19 +271,19 @@ func (cuo *CategoryUpdateOne) SetUser(u *User) *CategoryUpdateOne {
 	return cuo.SetUserID(u.ID)
 }
 
-// AddStudyLogIDs adds the "study_logs" edge to the StudyLog entity by IDs.
-func (cuo *CategoryUpdateOne) AddStudyLogIDs(ids ...uuid.UUID) *CategoryUpdateOne {
-	cuo.mutation.AddStudyLogIDs(ids...)
+// AddSubjectIDs adds the "subjects" edge to the Subject entity by IDs.
+func (cuo *CategoryUpdateOne) AddSubjectIDs(ids ...uuid.UUID) *CategoryUpdateOne {
+	cuo.mutation.AddSubjectIDs(ids...)
 	return cuo
 }
 
-// AddStudyLogs adds the "study_logs" edges to the StudyLog entity.
-func (cuo *CategoryUpdateOne) AddStudyLogs(s ...*StudyLog) *CategoryUpdateOne {
+// AddSubjects adds the "subjects" edges to the Subject entity.
+func (cuo *CategoryUpdateOne) AddSubjects(s ...*Subject) *CategoryUpdateOne {
 	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return cuo.AddStudyLogIDs(ids...)
+	return cuo.AddSubjectIDs(ids...)
 }
 
 // Mutation returns the CategoryMutation object of the builder.
@@ -345,25 +297,25 @@ func (cuo *CategoryUpdateOne) ClearUser() *CategoryUpdateOne {
 	return cuo
 }
 
-// ClearStudyLogs clears all "study_logs" edges to the StudyLog entity.
-func (cuo *CategoryUpdateOne) ClearStudyLogs() *CategoryUpdateOne {
-	cuo.mutation.ClearStudyLogs()
+// ClearSubjects clears all "subjects" edges to the Subject entity.
+func (cuo *CategoryUpdateOne) ClearSubjects() *CategoryUpdateOne {
+	cuo.mutation.ClearSubjects()
 	return cuo
 }
 
-// RemoveStudyLogIDs removes the "study_logs" edge to StudyLog entities by IDs.
-func (cuo *CategoryUpdateOne) RemoveStudyLogIDs(ids ...uuid.UUID) *CategoryUpdateOne {
-	cuo.mutation.RemoveStudyLogIDs(ids...)
+// RemoveSubjectIDs removes the "subjects" edge to Subject entities by IDs.
+func (cuo *CategoryUpdateOne) RemoveSubjectIDs(ids ...uuid.UUID) *CategoryUpdateOne {
+	cuo.mutation.RemoveSubjectIDs(ids...)
 	return cuo
 }
 
-// RemoveStudyLogs removes "study_logs" edges to StudyLog entities.
-func (cuo *CategoryUpdateOne) RemoveStudyLogs(s ...*StudyLog) *CategoryUpdateOne {
+// RemoveSubjects removes "subjects" edges to Subject entities.
+func (cuo *CategoryUpdateOne) RemoveSubjects(s ...*Subject) *CategoryUpdateOne {
 	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return cuo.RemoveStudyLogIDs(ids...)
+	return cuo.RemoveSubjectIDs(ids...)
 }
 
 // Where appends a list predicates to the CategoryUpdate builder.
@@ -446,12 +398,6 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 	if value, ok := cuo.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
 	}
-	if value, ok := cuo.mutation.Color(); ok {
-		_spec.SetField(category.FieldColor, field.TypeInt32, value)
-	}
-	if value, ok := cuo.mutation.AddedColor(); ok {
-		_spec.AddField(category.FieldColor, field.TypeInt32, value)
-	}
 	if cuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -481,28 +427,28 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cuo.mutation.StudyLogsCleared() {
+	if cuo.mutation.SubjectsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.StudyLogsTable,
-			Columns: []string{category.StudyLogsColumn},
+			Table:   category.SubjectsTable,
+			Columns: []string{category.SubjectsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RemovedStudyLogsIDs(); len(nodes) > 0 && !cuo.mutation.StudyLogsCleared() {
+	if nodes := cuo.mutation.RemovedSubjectsIDs(); len(nodes) > 0 && !cuo.mutation.SubjectsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.StudyLogsTable,
-			Columns: []string{category.StudyLogsColumn},
+			Table:   category.SubjectsTable,
+			Columns: []string{category.SubjectsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -510,15 +456,15 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.StudyLogsIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.SubjectsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.StudyLogsTable,
-			Columns: []string{category.StudyLogsColumn},
+			Table:   category.SubjectsTable,
+			Columns: []string{category.SubjectsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

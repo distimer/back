@@ -14,12 +14,10 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldColor holds the string denoting the color field in the database.
-	FieldColor = "color"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
-	// EdgeStudyLogs holds the string denoting the study_logs edge name in mutations.
-	EdgeStudyLogs = "study_logs"
+	// EdgeSubjects holds the string denoting the subjects edge name in mutations.
+	EdgeSubjects = "subjects"
 	// Table holds the table name of the category in the database.
 	Table = "categories"
 	// UserTable is the table that holds the user relation/edge.
@@ -29,20 +27,19 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_owned_categories"
-	// StudyLogsTable is the table that holds the study_logs relation/edge.
-	StudyLogsTable = "study_logs"
-	// StudyLogsInverseTable is the table name for the StudyLog entity.
-	// It exists in this package in order to avoid circular dependency with the "studylog" package.
-	StudyLogsInverseTable = "study_logs"
-	// StudyLogsColumn is the table column denoting the study_logs relation/edge.
-	StudyLogsColumn = "category_study_logs"
+	// SubjectsTable is the table that holds the subjects relation/edge.
+	SubjectsTable = "subjects"
+	// SubjectsInverseTable is the table name for the Subject entity.
+	// It exists in this package in order to avoid circular dependency with the "subject" package.
+	SubjectsInverseTable = "subjects"
+	// SubjectsColumn is the table column denoting the subjects relation/edge.
+	SubjectsColumn = "category_subjects"
 )
 
 // Columns holds all SQL columns for category fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
-	FieldColor,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "categories"
@@ -79,11 +76,6 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByColor orders the results by the color field.
-func ByColor(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldColor, opts...).ToFunc()
-}
-
 // ByUserField orders the results by user field.
 func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -91,17 +83,17 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByStudyLogsCount orders the results by study_logs count.
-func ByStudyLogsCount(opts ...sql.OrderTermOption) OrderOption {
+// BySubjectsCount orders the results by subjects count.
+func BySubjectsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newStudyLogsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newSubjectsStep(), opts...)
 	}
 }
 
-// ByStudyLogs orders the results by study_logs terms.
-func ByStudyLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// BySubjects orders the results by subjects terms.
+func BySubjects(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newStudyLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newSubjectsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newUserStep() *sqlgraph.Step {
@@ -111,10 +103,10 @@ func newUserStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }
-func newStudyLogsStep() *sqlgraph.Step {
+func newSubjectsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(StudyLogsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, StudyLogsTable, StudyLogsColumn),
+		sqlgraph.To(SubjectsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SubjectsTable, SubjectsColumn),
 	)
 }

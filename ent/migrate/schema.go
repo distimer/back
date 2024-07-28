@@ -52,7 +52,6 @@ var (
 	CategoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString},
-		{Name: "color", Type: field.TypeInt32},
 		{Name: "user_owned_categories", Type: field.TypeUUID},
 	}
 	// CategoriesTable holds the schema information for the "categories" table.
@@ -63,7 +62,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "categories_users_owned_categories",
-				Columns:    []*schema.Column{CategoriesColumns[3]},
+				Columns:    []*schema.Column{CategoriesColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -72,7 +71,7 @@ var (
 			{
 				Name:    "category_user_owned_categories",
 				Unique:  false,
-				Columns: []*schema.Column{CategoriesColumns[3]},
+				Columns: []*schema.Column{CategoriesColumns[2]},
 			},
 		},
 	}
@@ -148,7 +147,7 @@ var (
 		{Name: "start_at", Type: field.TypeTime},
 		{Name: "end_at", Type: field.TypeTime},
 		{Name: "content", Type: field.TypeString},
-		{Name: "category_study_logs", Type: field.TypeUUID},
+		{Name: "subject_study_logs", Type: field.TypeUUID},
 		{Name: "user_study_logs", Type: field.TypeUUID},
 	}
 	// StudyLogsTable holds the schema information for the "study_logs" table.
@@ -158,9 +157,9 @@ var (
 		PrimaryKey: []*schema.Column{StudyLogsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "study_logs_categories_study_logs",
+				Symbol:     "study_logs_subjects_study_logs",
 				Columns:    []*schema.Column{StudyLogsColumns[4]},
-				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				RefColumns: []*schema.Column{SubjectsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
@@ -175,6 +174,49 @@ var (
 				Name:    "studylog_user_study_logs",
 				Unique:  false,
 				Columns: []*schema.Column{StudyLogsColumns[5]},
+			},
+			{
+				Name:    "studylog_user_study_logs_subject_study_logs",
+				Unique:  false,
+				Columns: []*schema.Column{StudyLogsColumns[5], StudyLogsColumns[4]},
+			},
+			{
+				Name:    "studylog_start_at",
+				Unique:  false,
+				Columns: []*schema.Column{StudyLogsColumns[1]},
+			},
+			{
+				Name:    "studylog_end_at",
+				Unique:  false,
+				Columns: []*schema.Column{StudyLogsColumns[2]},
+			},
+		},
+	}
+	// SubjectsColumns holds the columns for the "subjects" table.
+	SubjectsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
+		{Name: "color", Type: field.TypeInt32},
+		{Name: "category_subjects", Type: field.TypeUUID},
+	}
+	// SubjectsTable holds the schema information for the "subjects" table.
+	SubjectsTable = &schema.Table{
+		Name:       "subjects",
+		Columns:    SubjectsColumns,
+		PrimaryKey: []*schema.Column{SubjectsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subjects_categories_subjects",
+				Columns:    []*schema.Column{SubjectsColumns[3]},
+				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subject_category_subjects",
+				Unique:  false,
+				Columns: []*schema.Column{SubjectsColumns[3]},
 			},
 		},
 	}
@@ -232,6 +274,7 @@ var (
 		InviteCodesTable,
 		RefreshTokensTable,
 		StudyLogsTable,
+		SubjectsTable,
 		UsersTable,
 		StudyLogSharedGroupTable,
 	}
@@ -244,8 +287,9 @@ func init() {
 	GroupsTable.ForeignKeys[0].RefTable = UsersTable
 	InviteCodesTable.ForeignKeys[0].RefTable = GroupsTable
 	RefreshTokensTable.ForeignKeys[0].RefTable = UsersTable
-	StudyLogsTable.ForeignKeys[0].RefTable = CategoriesTable
+	StudyLogsTable.ForeignKeys[0].RefTable = SubjectsTable
 	StudyLogsTable.ForeignKeys[1].RefTable = UsersTable
+	SubjectsTable.ForeignKeys[0].RefTable = CategoriesTable
 	StudyLogSharedGroupTable.ForeignKeys[0].RefTable = StudyLogsTable
 	StudyLogSharedGroupTable.ForeignKeys[1].RefTable = GroupsTable
 }

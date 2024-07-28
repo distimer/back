@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"pentag.kr/distimer/ent/category"
-	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -25,12 +25,6 @@ type CategoryCreate struct {
 // SetName sets the "name" field.
 func (cc *CategoryCreate) SetName(s string) *CategoryCreate {
 	cc.mutation.SetName(s)
-	return cc
-}
-
-// SetColor sets the "color" field.
-func (cc *CategoryCreate) SetColor(i int32) *CategoryCreate {
-	cc.mutation.SetColor(i)
 	return cc
 }
 
@@ -51,19 +45,19 @@ func (cc *CategoryCreate) SetUser(u *User) *CategoryCreate {
 	return cc.SetUserID(u.ID)
 }
 
-// AddStudyLogIDs adds the "study_logs" edge to the StudyLog entity by IDs.
-func (cc *CategoryCreate) AddStudyLogIDs(ids ...uuid.UUID) *CategoryCreate {
-	cc.mutation.AddStudyLogIDs(ids...)
+// AddSubjectIDs adds the "subjects" edge to the Subject entity by IDs.
+func (cc *CategoryCreate) AddSubjectIDs(ids ...uuid.UUID) *CategoryCreate {
+	cc.mutation.AddSubjectIDs(ids...)
 	return cc
 }
 
-// AddStudyLogs adds the "study_logs" edges to the StudyLog entity.
-func (cc *CategoryCreate) AddStudyLogs(s ...*StudyLog) *CategoryCreate {
+// AddSubjects adds the "subjects" edges to the Subject entity.
+func (cc *CategoryCreate) AddSubjects(s ...*Subject) *CategoryCreate {
 	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return cc.AddStudyLogIDs(ids...)
+	return cc.AddSubjectIDs(ids...)
 }
 
 // Mutation returns the CategoryMutation object of the builder.
@@ -102,9 +96,6 @@ func (cc *CategoryCreate) ExecX(ctx context.Context) {
 func (cc *CategoryCreate) check() error {
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Category.name"`)}
-	}
-	if _, ok := cc.mutation.Color(); !ok {
-		return &ValidationError{Name: "color", err: errors.New(`ent: missing required field "Category.color"`)}
 	}
 	if _, ok := cc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Category.user"`)}
@@ -148,10 +139,6 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		_spec.SetField(category.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := cc.mutation.Color(); ok {
-		_spec.SetField(category.FieldColor, field.TypeInt32, value)
-		_node.Color = value
-	}
 	if nodes := cc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -169,15 +156,15 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		_node.user_owned_categories = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cc.mutation.StudyLogsIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.SubjectsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.StudyLogsTable,
-			Columns: []string{category.StudyLogsColumn},
+			Table:   category.SubjectsTable,
+			Columns: []string{category.SubjectsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

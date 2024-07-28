@@ -14,20 +14,20 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/predicate"
-	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
 // CategoryQuery is the builder for querying Category entities.
 type CategoryQuery struct {
 	config
-	ctx           *QueryContext
-	order         []category.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.Category
-	withUser      *UserQuery
-	withStudyLogs *StudyLogQuery
-	withFKs       bool
+	ctx          *QueryContext
+	order        []category.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.Category
+	withUser     *UserQuery
+	withSubjects *SubjectQuery
+	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,9 +86,9 @@ func (cq *CategoryQuery) QueryUser() *UserQuery {
 	return query
 }
 
-// QueryStudyLogs chains the current query on the "study_logs" edge.
-func (cq *CategoryQuery) QueryStudyLogs() *StudyLogQuery {
-	query := (&StudyLogClient{config: cq.config}).Query()
+// QuerySubjects chains the current query on the "subjects" edge.
+func (cq *CategoryQuery) QuerySubjects() *SubjectQuery {
+	query := (&SubjectClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -99,8 +99,8 @@ func (cq *CategoryQuery) QueryStudyLogs() *StudyLogQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(category.Table, category.FieldID, selector),
-			sqlgraph.To(studylog.Table, studylog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, category.StudyLogsTable, category.StudyLogsColumn),
+			sqlgraph.To(subject.Table, subject.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, category.SubjectsTable, category.SubjectsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +295,13 @@ func (cq *CategoryQuery) Clone() *CategoryQuery {
 		return nil
 	}
 	return &CategoryQuery{
-		config:        cq.config,
-		ctx:           cq.ctx.Clone(),
-		order:         append([]category.OrderOption{}, cq.order...),
-		inters:        append([]Interceptor{}, cq.inters...),
-		predicates:    append([]predicate.Category{}, cq.predicates...),
-		withUser:      cq.withUser.Clone(),
-		withStudyLogs: cq.withStudyLogs.Clone(),
+		config:       cq.config,
+		ctx:          cq.ctx.Clone(),
+		order:        append([]category.OrderOption{}, cq.order...),
+		inters:       append([]Interceptor{}, cq.inters...),
+		predicates:   append([]predicate.Category{}, cq.predicates...),
+		withUser:     cq.withUser.Clone(),
+		withSubjects: cq.withSubjects.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -319,14 +319,14 @@ func (cq *CategoryQuery) WithUser(opts ...func(*UserQuery)) *CategoryQuery {
 	return cq
 }
 
-// WithStudyLogs tells the query-builder to eager-load the nodes that are connected to
-// the "study_logs" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *CategoryQuery) WithStudyLogs(opts ...func(*StudyLogQuery)) *CategoryQuery {
-	query := (&StudyLogClient{config: cq.config}).Query()
+// WithSubjects tells the query-builder to eager-load the nodes that are connected to
+// the "subjects" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CategoryQuery) WithSubjects(opts ...func(*SubjectQuery)) *CategoryQuery {
+	query := (&SubjectClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cq.withStudyLogs = query
+	cq.withSubjects = query
 	return cq
 }
 
@@ -411,7 +411,7 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cat
 		_spec       = cq.querySpec()
 		loadedTypes = [2]bool{
 			cq.withUser != nil,
-			cq.withStudyLogs != nil,
+			cq.withSubjects != nil,
 		}
 	)
 	if cq.withUser != nil {
@@ -444,10 +444,10 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cat
 			return nil, err
 		}
 	}
-	if query := cq.withStudyLogs; query != nil {
-		if err := cq.loadStudyLogs(ctx, query, nodes,
-			func(n *Category) { n.Edges.StudyLogs = []*StudyLog{} },
-			func(n *Category, e *StudyLog) { n.Edges.StudyLogs = append(n.Edges.StudyLogs, e) }); err != nil {
+	if query := cq.withSubjects; query != nil {
+		if err := cq.loadSubjects(ctx, query, nodes,
+			func(n *Category) { n.Edges.Subjects = []*Subject{} },
+			func(n *Category, e *Subject) { n.Edges.Subjects = append(n.Edges.Subjects, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -486,7 +486,7 @@ func (cq *CategoryQuery) loadUser(ctx context.Context, query *UserQuery, nodes [
 	}
 	return nil
 }
-func (cq *CategoryQuery) loadStudyLogs(ctx context.Context, query *StudyLogQuery, nodes []*Category, init func(*Category), assign func(*Category, *StudyLog)) error {
+func (cq *CategoryQuery) loadSubjects(ctx context.Context, query *SubjectQuery, nodes []*Category, init func(*Category), assign func(*Category, *Subject)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Category)
 	for i := range nodes {
@@ -497,21 +497,21 @@ func (cq *CategoryQuery) loadStudyLogs(ctx context.Context, query *StudyLogQuery
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.StudyLog(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(category.StudyLogsColumn), fks...))
+	query.Where(predicate.Subject(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(category.SubjectsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.category_study_logs
+		fk := n.category_subjects
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "category_study_logs" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "category_subjects" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "category_study_logs" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "category_subjects" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

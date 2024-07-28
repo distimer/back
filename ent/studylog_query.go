@@ -12,10 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -27,7 +27,7 @@ type StudyLogQuery struct {
 	inters          []Interceptor
 	predicates      []predicate.StudyLog
 	withUser        *UserQuery
-	withCategory    *CategoryQuery
+	withSubject     *SubjectQuery
 	withSharedGroup *GroupQuery
 	withFKs         bool
 	// intermediate query (i.e. traversal path).
@@ -88,9 +88,9 @@ func (slq *StudyLogQuery) QueryUser() *UserQuery {
 	return query
 }
 
-// QueryCategory chains the current query on the "category" edge.
-func (slq *StudyLogQuery) QueryCategory() *CategoryQuery {
-	query := (&CategoryClient{config: slq.config}).Query()
+// QuerySubject chains the current query on the "subject" edge.
+func (slq *StudyLogQuery) QuerySubject() *SubjectQuery {
+	query := (&SubjectClient{config: slq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := slq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -101,8 +101,8 @@ func (slq *StudyLogQuery) QueryCategory() *CategoryQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(studylog.Table, studylog.FieldID, selector),
-			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, studylog.CategoryTable, studylog.CategoryColumn),
+			sqlgraph.To(subject.Table, subject.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, studylog.SubjectTable, studylog.SubjectColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(slq.driver.Dialect(), step)
 		return fromU, nil
@@ -325,7 +325,7 @@ func (slq *StudyLogQuery) Clone() *StudyLogQuery {
 		inters:          append([]Interceptor{}, slq.inters...),
 		predicates:      append([]predicate.StudyLog{}, slq.predicates...),
 		withUser:        slq.withUser.Clone(),
-		withCategory:    slq.withCategory.Clone(),
+		withSubject:     slq.withSubject.Clone(),
 		withSharedGroup: slq.withSharedGroup.Clone(),
 		// clone intermediate query.
 		sql:  slq.sql.Clone(),
@@ -344,14 +344,14 @@ func (slq *StudyLogQuery) WithUser(opts ...func(*UserQuery)) *StudyLogQuery {
 	return slq
 }
 
-// WithCategory tells the query-builder to eager-load the nodes that are connected to
-// the "category" edge. The optional arguments are used to configure the query builder of the edge.
-func (slq *StudyLogQuery) WithCategory(opts ...func(*CategoryQuery)) *StudyLogQuery {
-	query := (&CategoryClient{config: slq.config}).Query()
+// WithSubject tells the query-builder to eager-load the nodes that are connected to
+// the "subject" edge. The optional arguments are used to configure the query builder of the edge.
+func (slq *StudyLogQuery) WithSubject(opts ...func(*SubjectQuery)) *StudyLogQuery {
+	query := (&SubjectClient{config: slq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	slq.withCategory = query
+	slq.withSubject = query
 	return slq
 }
 
@@ -447,11 +447,11 @@ func (slq *StudyLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*St
 		_spec       = slq.querySpec()
 		loadedTypes = [3]bool{
 			slq.withUser != nil,
-			slq.withCategory != nil,
+			slq.withSubject != nil,
 			slq.withSharedGroup != nil,
 		}
 	)
-	if slq.withUser != nil || slq.withCategory != nil {
+	if slq.withUser != nil || slq.withSubject != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -481,9 +481,9 @@ func (slq *StudyLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*St
 			return nil, err
 		}
 	}
-	if query := slq.withCategory; query != nil {
-		if err := slq.loadCategory(ctx, query, nodes, nil,
-			func(n *StudyLog, e *Category) { n.Edges.Category = e }); err != nil {
+	if query := slq.withSubject; query != nil {
+		if err := slq.loadSubject(ctx, query, nodes, nil,
+			func(n *StudyLog, e *Subject) { n.Edges.Subject = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -529,14 +529,14 @@ func (slq *StudyLogQuery) loadUser(ctx context.Context, query *UserQuery, nodes 
 	}
 	return nil
 }
-func (slq *StudyLogQuery) loadCategory(ctx context.Context, query *CategoryQuery, nodes []*StudyLog, init func(*StudyLog), assign func(*StudyLog, *Category)) error {
+func (slq *StudyLogQuery) loadSubject(ctx context.Context, query *SubjectQuery, nodes []*StudyLog, init func(*StudyLog), assign func(*StudyLog, *Subject)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*StudyLog)
 	for i := range nodes {
-		if nodes[i].category_study_logs == nil {
+		if nodes[i].subject_study_logs == nil {
 			continue
 		}
-		fk := *nodes[i].category_study_logs
+		fk := *nodes[i].subject_study_logs
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -545,7 +545,7 @@ func (slq *StudyLogQuery) loadCategory(ctx context.Context, query *CategoryQuery
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(category.IDIn(ids...))
+	query.Where(subject.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -553,7 +553,7 @@ func (slq *StudyLogQuery) loadCategory(ctx context.Context, query *CategoryQuery
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "category_study_logs" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "subject_study_logs" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

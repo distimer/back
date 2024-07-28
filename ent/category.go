@@ -20,8 +20,6 @@ type Category struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// Color holds the value of the "color" field.
-	Color int32 `json:"color,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CategoryQuery when eager-loading is set.
 	Edges                 CategoryEdges `json:"edges"`
@@ -33,8 +31,8 @@ type Category struct {
 type CategoryEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
-	// StudyLogs holds the value of the study_logs edge.
-	StudyLogs []*StudyLog `json:"study_logs,omitempty"`
+	// Subjects holds the value of the subjects edge.
+	Subjects []*Subject `json:"subjects,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -51,13 +49,13 @@ func (e CategoryEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
-// StudyLogsOrErr returns the StudyLogs value or an error if the edge
+// SubjectsOrErr returns the Subjects value or an error if the edge
 // was not loaded in eager-loading.
-func (e CategoryEdges) StudyLogsOrErr() ([]*StudyLog, error) {
+func (e CategoryEdges) SubjectsOrErr() ([]*Subject, error) {
 	if e.loadedTypes[1] {
-		return e.StudyLogs, nil
+		return e.Subjects, nil
 	}
-	return nil, &NotLoadedError{edge: "study_logs"}
+	return nil, &NotLoadedError{edge: "subjects"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -65,8 +63,6 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case category.FieldColor:
-			values[i] = new(sql.NullInt64)
 		case category.FieldName:
 			values[i] = new(sql.NullString)
 		case category.FieldID:
@@ -100,12 +96,6 @@ func (c *Category) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.Name = value.String
 			}
-		case category.FieldColor:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field color", values[i])
-			} else if value.Valid {
-				c.Color = int32(value.Int64)
-			}
 		case category.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field user_owned_categories", values[i])
@@ -131,9 +121,9 @@ func (c *Category) QueryUser() *UserQuery {
 	return NewCategoryClient(c.config).QueryUser(c)
 }
 
-// QueryStudyLogs queries the "study_logs" edge of the Category entity.
-func (c *Category) QueryStudyLogs() *StudyLogQuery {
-	return NewCategoryClient(c.config).QueryStudyLogs(c)
+// QuerySubjects queries the "subjects" edge of the Category entity.
+func (c *Category) QuerySubjects() *SubjectQuery {
+	return NewCategoryClient(c.config).QuerySubjects(c)
 }
 
 // Update returns a builder for updating this Category.
@@ -161,9 +151,6 @@ func (c *Category) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("name=")
 	builder.WriteString(c.Name)
-	builder.WriteString(", ")
-	builder.WriteString("color=")
-	builder.WriteString(fmt.Sprintf("%v", c.Color))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -31,7 +31,7 @@ func (StudyLog) Edges() []ent.Edge {
 			Unique().
 			Required(),
 
-		edge.From("category", Category.Type).
+		edge.From("subject", Subject.Type).
 			Ref("study_logs").
 			Unique().
 			Required(),
@@ -44,5 +44,8 @@ func (StudyLog) Edges() []ent.Edge {
 func (StudyLog) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Edges("user"),
+		index.Edges("user", "subject"),
+		index.Fields("start_at"),
+		index.Fields("end_at"),
 	}
 }

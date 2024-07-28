@@ -18,7 +18,6 @@ func (Category) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}),
 		field.String("name"),
-		field.Int32("color"),
 	}
 }
 
@@ -29,8 +28,7 @@ func (Category) Edges() []ent.Edge {
 			Ref("owned_categories").
 			Unique().
 			Required(),
-
-		edge.To("study_logs", StudyLog.Type),
+		edge.To("subjects", Subject.Type),
 	}
 }
 

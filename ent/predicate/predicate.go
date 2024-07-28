@@ -24,5 +24,8 @@ type RefreshToken func(*sql.Selector)
 // StudyLog is the predicate function for studylog builders.
 type StudyLog func(*sql.Selector)
 
+// Subject is the predicate function for subject builders.
+type Subject func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

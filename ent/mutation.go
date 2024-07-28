@@ -19,6 +19,7 @@ import (
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -37,6 +38,7 @@ const (
 	TypeInviteCode   = "InviteCode"
 	TypeRefreshToken = "RefreshToken"
 	TypeStudyLog     = "StudyLog"
+	TypeSubject      = "Subject"
 	TypeUser         = "User"
 )
 
@@ -563,21 +565,19 @@ func (m *AffiliationMutation) ResetEdge(name string) error {
 // CategoryMutation represents an operation that mutates the Category nodes in the graph.
 type CategoryMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *uuid.UUID
-	name              *string
-	color             *int32
-	addcolor          *int32
-	clearedFields     map[string]struct{}
-	user              *uuid.UUID
-	cleareduser       bool
-	study_logs        map[uuid.UUID]struct{}
-	removedstudy_logs map[uuid.UUID]struct{}
-	clearedstudy_logs bool
-	done              bool
-	oldValue          func(context.Context) (*Category, error)
-	predicates        []predicate.Category
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	name            *string
+	clearedFields   map[string]struct{}
+	user            *uuid.UUID
+	cleareduser     bool
+	subjects        map[uuid.UUID]struct{}
+	removedsubjects map[uuid.UUID]struct{}
+	clearedsubjects bool
+	done            bool
+	oldValue        func(context.Context) (*Category, error)
+	predicates      []predicate.Category
 }
 
 var _ ent.Mutation = (*CategoryMutation)(nil)
@@ -720,62 +720,6 @@ func (m *CategoryMutation) ResetName() {
 	m.name = nil
 }
 
-// SetColor sets the "color" field.
-func (m *CategoryMutation) SetColor(i int32) {
-	m.color = &i
-	m.addcolor = nil
-}
-
-// Color returns the value of the "color" field in the mutation.
-func (m *CategoryMutation) Color() (r int32, exists bool) {
-	v := m.color
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldColor returns the old "color" field's value of the Category entity.
-// If the Category object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CategoryMutation) OldColor(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldColor is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldColor requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldColor: %w", err)
-	}
-	return oldValue.Color, nil
-}
-
-// AddColor adds i to the "color" field.
-func (m *CategoryMutation) AddColor(i int32) {
-	if m.addcolor != nil {
-		*m.addcolor += i
-	} else {
-		m.addcolor = &i
-	}
-}
-
-// AddedColor returns the value that was added to the "color" field in this mutation.
-func (m *CategoryMutation) AddedColor() (r int32, exists bool) {
-	v := m.addcolor
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetColor resets all changes to the "color" field.
-func (m *CategoryMutation) ResetColor() {
-	m.color = nil
-	m.addcolor = nil
-}
-
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *CategoryMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
@@ -815,58 +759,58 @@ func (m *CategoryMutation) ResetUser() {
 	m.cleareduser = false
 }
 
-// AddStudyLogIDs adds the "study_logs" edge to the StudyLog entity by ids.
-func (m *CategoryMutation) AddStudyLogIDs(ids ...uuid.UUID) {
-	if m.study_logs == nil {
-		m.study_logs = make(map[uuid.UUID]struct{})
+// AddSubjectIDs adds the "subjects" edge to the Subject entity by ids.
+func (m *CategoryMutation) AddSubjectIDs(ids ...uuid.UUID) {
+	if m.subjects == nil {
+		m.subjects = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.study_logs[ids[i]] = struct{}{}
+		m.subjects[ids[i]] = struct{}{}
 	}
 }
 
-// ClearStudyLogs clears the "study_logs" edge to the StudyLog entity.
-func (m *CategoryMutation) ClearStudyLogs() {
-	m.clearedstudy_logs = true
+// ClearSubjects clears the "subjects" edge to the Subject entity.
+func (m *CategoryMutation) ClearSubjects() {
+	m.clearedsubjects = true
 }
 
-// StudyLogsCleared reports if the "study_logs" edge to the StudyLog entity was cleared.
-func (m *CategoryMutation) StudyLogsCleared() bool {
-	return m.clearedstudy_logs
+// SubjectsCleared reports if the "subjects" edge to the Subject entity was cleared.
+func (m *CategoryMutation) SubjectsCleared() bool {
+	return m.clearedsubjects
 }
 
-// RemoveStudyLogIDs removes the "study_logs" edge to the StudyLog entity by IDs.
-func (m *CategoryMutation) RemoveStudyLogIDs(ids ...uuid.UUID) {
-	if m.removedstudy_logs == nil {
-		m.removedstudy_logs = make(map[uuid.UUID]struct{})
+// RemoveSubjectIDs removes the "subjects" edge to the Subject entity by IDs.
+func (m *CategoryMutation) RemoveSubjectIDs(ids ...uuid.UUID) {
+	if m.removedsubjects == nil {
+		m.removedsubjects = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.study_logs, ids[i])
-		m.removedstudy_logs[ids[i]] = struct{}{}
+		delete(m.subjects, ids[i])
+		m.removedsubjects[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedStudyLogs returns the removed IDs of the "study_logs" edge to the StudyLog entity.
-func (m *CategoryMutation) RemovedStudyLogsIDs() (ids []uuid.UUID) {
-	for id := range m.removedstudy_logs {
+// RemovedSubjects returns the removed IDs of the "subjects" edge to the Subject entity.
+func (m *CategoryMutation) RemovedSubjectsIDs() (ids []uuid.UUID) {
+	for id := range m.removedsubjects {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// StudyLogsIDs returns the "study_logs" edge IDs in the mutation.
-func (m *CategoryMutation) StudyLogsIDs() (ids []uuid.UUID) {
-	for id := range m.study_logs {
+// SubjectsIDs returns the "subjects" edge IDs in the mutation.
+func (m *CategoryMutation) SubjectsIDs() (ids []uuid.UUID) {
+	for id := range m.subjects {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetStudyLogs resets all changes to the "study_logs" edge.
-func (m *CategoryMutation) ResetStudyLogs() {
-	m.study_logs = nil
-	m.clearedstudy_logs = false
-	m.removedstudy_logs = nil
+// ResetSubjects resets all changes to the "subjects" edge.
+func (m *CategoryMutation) ResetSubjects() {
+	m.subjects = nil
+	m.clearedsubjects = false
+	m.removedsubjects = nil
 }
 
 // Where appends a list predicates to the CategoryMutation builder.
@@ -903,12 +847,9 @@ func (m *CategoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CategoryMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 1)
 	if m.name != nil {
 		fields = append(fields, category.FieldName)
-	}
-	if m.color != nil {
-		fields = append(fields, category.FieldColor)
 	}
 	return fields
 }
@@ -920,8 +861,6 @@ func (m *CategoryMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case category.FieldName:
 		return m.Name()
-	case category.FieldColor:
-		return m.Color()
 	}
 	return nil, false
 }
@@ -933,8 +872,6 @@ func (m *CategoryMutation) OldField(ctx context.Context, name string) (ent.Value
 	switch name {
 	case category.FieldName:
 		return m.OldName(ctx)
-	case category.FieldColor:
-		return m.OldColor(ctx)
 	}
 	return nil, fmt.Errorf("unknown Category field %s", name)
 }
@@ -951,13 +888,6 @@ func (m *CategoryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case category.FieldColor:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetColor(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Category field %s", name)
 }
@@ -965,21 +895,13 @@ func (m *CategoryMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CategoryMutation) AddedFields() []string {
-	var fields []string
-	if m.addcolor != nil {
-		fields = append(fields, category.FieldColor)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CategoryMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case category.FieldColor:
-		return m.AddedColor()
-	}
 	return nil, false
 }
 
@@ -988,13 +910,6 @@ func (m *CategoryMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CategoryMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case category.FieldColor:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddColor(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Category numeric field %s", name)
 }
@@ -1025,9 +940,6 @@ func (m *CategoryMutation) ResetField(name string) error {
 	case category.FieldName:
 		m.ResetName()
 		return nil
-	case category.FieldColor:
-		m.ResetColor()
-		return nil
 	}
 	return fmt.Errorf("unknown Category field %s", name)
 }
@@ -1038,8 +950,8 @@ func (m *CategoryMutation) AddedEdges() []string {
 	if m.user != nil {
 		edges = append(edges, category.EdgeUser)
 	}
-	if m.study_logs != nil {
-		edges = append(edges, category.EdgeStudyLogs)
+	if m.subjects != nil {
+		edges = append(edges, category.EdgeSubjects)
 	}
 	return edges
 }
@@ -1052,9 +964,9 @@ func (m *CategoryMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
-	case category.EdgeStudyLogs:
-		ids := make([]ent.Value, 0, len(m.study_logs))
-		for id := range m.study_logs {
+	case category.EdgeSubjects:
+		ids := make([]ent.Value, 0, len(m.subjects))
+		for id := range m.subjects {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1065,8 +977,8 @@ func (m *CategoryMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CategoryMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedstudy_logs != nil {
-		edges = append(edges, category.EdgeStudyLogs)
+	if m.removedsubjects != nil {
+		edges = append(edges, category.EdgeSubjects)
 	}
 	return edges
 }
@@ -1075,9 +987,9 @@ func (m *CategoryMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *CategoryMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case category.EdgeStudyLogs:
-		ids := make([]ent.Value, 0, len(m.removedstudy_logs))
-		for id := range m.removedstudy_logs {
+	case category.EdgeSubjects:
+		ids := make([]ent.Value, 0, len(m.removedsubjects))
+		for id := range m.removedsubjects {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1091,8 +1003,8 @@ func (m *CategoryMutation) ClearedEdges() []string {
 	if m.cleareduser {
 		edges = append(edges, category.EdgeUser)
 	}
-	if m.clearedstudy_logs {
-		edges = append(edges, category.EdgeStudyLogs)
+	if m.clearedsubjects {
+		edges = append(edges, category.EdgeSubjects)
 	}
 	return edges
 }
@@ -1103,8 +1015,8 @@ func (m *CategoryMutation) EdgeCleared(name string) bool {
 	switch name {
 	case category.EdgeUser:
 		return m.cleareduser
-	case category.EdgeStudyLogs:
-		return m.clearedstudy_logs
+	case category.EdgeSubjects:
+		return m.clearedsubjects
 	}
 	return false
 }
@@ -1127,8 +1039,8 @@ func (m *CategoryMutation) ResetEdge(name string) error {
 	case category.EdgeUser:
 		m.ResetUser()
 		return nil
-	case category.EdgeStudyLogs:
-		m.ResetStudyLogs()
+	case category.EdgeSubjects:
+		m.ResetSubjects()
 		return nil
 	}
 	return fmt.Errorf("unknown Category edge %s", name)
@@ -3017,8 +2929,8 @@ type StudyLogMutation struct {
 	clearedFields       map[string]struct{}
 	user                *uuid.UUID
 	cleareduser         bool
-	category            *uuid.UUID
-	clearedcategory     bool
+	subject             *uuid.UUID
+	clearedsubject      bool
 	shared_group        map[uuid.UUID]struct{}
 	removedshared_group map[uuid.UUID]struct{}
 	clearedshared_group bool
@@ -3278,43 +3190,43 @@ func (m *StudyLogMutation) ResetUser() {
 	m.cleareduser = false
 }
 
-// SetCategoryID sets the "category" edge to the Category entity by id.
-func (m *StudyLogMutation) SetCategoryID(id uuid.UUID) {
-	m.category = &id
+// SetSubjectID sets the "subject" edge to the Subject entity by id.
+func (m *StudyLogMutation) SetSubjectID(id uuid.UUID) {
+	m.subject = &id
 }
 
-// ClearCategory clears the "category" edge to the Category entity.
-func (m *StudyLogMutation) ClearCategory() {
-	m.clearedcategory = true
+// ClearSubject clears the "subject" edge to the Subject entity.
+func (m *StudyLogMutation) ClearSubject() {
+	m.clearedsubject = true
 }
 
-// CategoryCleared reports if the "category" edge to the Category entity was cleared.
-func (m *StudyLogMutation) CategoryCleared() bool {
-	return m.clearedcategory
+// SubjectCleared reports if the "subject" edge to the Subject entity was cleared.
+func (m *StudyLogMutation) SubjectCleared() bool {
+	return m.clearedsubject
 }
 
-// CategoryID returns the "category" edge ID in the mutation.
-func (m *StudyLogMutation) CategoryID() (id uuid.UUID, exists bool) {
-	if m.category != nil {
-		return *m.category, true
+// SubjectID returns the "subject" edge ID in the mutation.
+func (m *StudyLogMutation) SubjectID() (id uuid.UUID, exists bool) {
+	if m.subject != nil {
+		return *m.subject, true
 	}
 	return
 }
 
-// CategoryIDs returns the "category" edge IDs in the mutation.
+// SubjectIDs returns the "subject" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CategoryID instead. It exists only for internal usage by the builders.
-func (m *StudyLogMutation) CategoryIDs() (ids []uuid.UUID) {
-	if id := m.category; id != nil {
+// SubjectID instead. It exists only for internal usage by the builders.
+func (m *StudyLogMutation) SubjectIDs() (ids []uuid.UUID) {
+	if id := m.subject; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetCategory resets all changes to the "category" edge.
-func (m *StudyLogMutation) ResetCategory() {
-	m.category = nil
-	m.clearedcategory = false
+// ResetSubject resets all changes to the "subject" edge.
+func (m *StudyLogMutation) ResetSubject() {
+	m.subject = nil
+	m.clearedsubject = false
 }
 
 // AddSharedGroupIDs adds the "shared_group" edge to the Group entity by ids.
@@ -3542,8 +3454,8 @@ func (m *StudyLogMutation) AddedEdges() []string {
 	if m.user != nil {
 		edges = append(edges, studylog.EdgeUser)
 	}
-	if m.category != nil {
-		edges = append(edges, studylog.EdgeCategory)
+	if m.subject != nil {
+		edges = append(edges, studylog.EdgeSubject)
 	}
 	if m.shared_group != nil {
 		edges = append(edges, studylog.EdgeSharedGroup)
@@ -3559,8 +3471,8 @@ func (m *StudyLogMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
-	case studylog.EdgeCategory:
-		if id := m.category; id != nil {
+	case studylog.EdgeSubject:
+		if id := m.subject; id != nil {
 			return []ent.Value{*id}
 		}
 	case studylog.EdgeSharedGroup:
@@ -3602,8 +3514,8 @@ func (m *StudyLogMutation) ClearedEdges() []string {
 	if m.cleareduser {
 		edges = append(edges, studylog.EdgeUser)
 	}
-	if m.clearedcategory {
-		edges = append(edges, studylog.EdgeCategory)
+	if m.clearedsubject {
+		edges = append(edges, studylog.EdgeSubject)
 	}
 	if m.clearedshared_group {
 		edges = append(edges, studylog.EdgeSharedGroup)
@@ -3617,8 +3529,8 @@ func (m *StudyLogMutation) EdgeCleared(name string) bool {
 	switch name {
 	case studylog.EdgeUser:
 		return m.cleareduser
-	case studylog.EdgeCategory:
-		return m.clearedcategory
+	case studylog.EdgeSubject:
+		return m.clearedsubject
 	case studylog.EdgeSharedGroup:
 		return m.clearedshared_group
 	}
@@ -3632,8 +3544,8 @@ func (m *StudyLogMutation) ClearEdge(name string) error {
 	case studylog.EdgeUser:
 		m.ClearUser()
 		return nil
-	case studylog.EdgeCategory:
-		m.ClearCategory()
+	case studylog.EdgeSubject:
+		m.ClearSubject()
 		return nil
 	}
 	return fmt.Errorf("unknown StudyLog unique edge %s", name)
@@ -3646,14 +3558,588 @@ func (m *StudyLogMutation) ResetEdge(name string) error {
 	case studylog.EdgeUser:
 		m.ResetUser()
 		return nil
-	case studylog.EdgeCategory:
-		m.ResetCategory()
+	case studylog.EdgeSubject:
+		m.ResetSubject()
 		return nil
 	case studylog.EdgeSharedGroup:
 		m.ResetSharedGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown StudyLog edge %s", name)
+}
+
+// SubjectMutation represents an operation that mutates the Subject nodes in the graph.
+type SubjectMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	name              *string
+	color             *int32
+	addcolor          *int32
+	clearedFields     map[string]struct{}
+	category          *uuid.UUID
+	clearedcategory   bool
+	study_logs        map[uuid.UUID]struct{}
+	removedstudy_logs map[uuid.UUID]struct{}
+	clearedstudy_logs bool
+	done              bool
+	oldValue          func(context.Context) (*Subject, error)
+	predicates        []predicate.Subject
+}
+
+var _ ent.Mutation = (*SubjectMutation)(nil)
+
+// subjectOption allows management of the mutation configuration using functional options.
+type subjectOption func(*SubjectMutation)
+
+// newSubjectMutation creates new mutation for the Subject entity.
+func newSubjectMutation(c config, op Op, opts ...subjectOption) *SubjectMutation {
+	m := &SubjectMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubject,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubjectID sets the ID field of the mutation.
+func withSubjectID(id uuid.UUID) subjectOption {
+	return func(m *SubjectMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Subject
+		)
+		m.oldValue = func(ctx context.Context) (*Subject, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Subject.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubject sets the old Subject of the mutation.
+func withSubject(node *Subject) subjectOption {
+	return func(m *SubjectMutation) {
+		m.oldValue = func(context.Context) (*Subject, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubjectMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubjectMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Subject entities.
+func (m *SubjectMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubjectMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubjectMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Subject.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *SubjectMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *SubjectMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Subject entity.
+// If the Subject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubjectMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *SubjectMutation) ResetName() {
+	m.name = nil
+}
+
+// SetColor sets the "color" field.
+func (m *SubjectMutation) SetColor(i int32) {
+	m.color = &i
+	m.addcolor = nil
+}
+
+// Color returns the value of the "color" field in the mutation.
+func (m *SubjectMutation) Color() (r int32, exists bool) {
+	v := m.color
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldColor returns the old "color" field's value of the Subject entity.
+// If the Subject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubjectMutation) OldColor(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldColor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldColor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldColor: %w", err)
+	}
+	return oldValue.Color, nil
+}
+
+// AddColor adds i to the "color" field.
+func (m *SubjectMutation) AddColor(i int32) {
+	if m.addcolor != nil {
+		*m.addcolor += i
+	} else {
+		m.addcolor = &i
+	}
+}
+
+// AddedColor returns the value that was added to the "color" field in this mutation.
+func (m *SubjectMutation) AddedColor() (r int32, exists bool) {
+	v := m.addcolor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetColor resets all changes to the "color" field.
+func (m *SubjectMutation) ResetColor() {
+	m.color = nil
+	m.addcolor = nil
+}
+
+// SetCategoryID sets the "category" edge to the Category entity by id.
+func (m *SubjectMutation) SetCategoryID(id uuid.UUID) {
+	m.category = &id
+}
+
+// ClearCategory clears the "category" edge to the Category entity.
+func (m *SubjectMutation) ClearCategory() {
+	m.clearedcategory = true
+}
+
+// CategoryCleared reports if the "category" edge to the Category entity was cleared.
+func (m *SubjectMutation) CategoryCleared() bool {
+	return m.clearedcategory
+}
+
+// CategoryID returns the "category" edge ID in the mutation.
+func (m *SubjectMutation) CategoryID() (id uuid.UUID, exists bool) {
+	if m.category != nil {
+		return *m.category, true
+	}
+	return
+}
+
+// CategoryIDs returns the "category" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CategoryID instead. It exists only for internal usage by the builders.
+func (m *SubjectMutation) CategoryIDs() (ids []uuid.UUID) {
+	if id := m.category; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCategory resets all changes to the "category" edge.
+func (m *SubjectMutation) ResetCategory() {
+	m.category = nil
+	m.clearedcategory = false
+}
+
+// AddStudyLogIDs adds the "study_logs" edge to the StudyLog entity by ids.
+func (m *SubjectMutation) AddStudyLogIDs(ids ...uuid.UUID) {
+	if m.study_logs == nil {
+		m.study_logs = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.study_logs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearStudyLogs clears the "study_logs" edge to the StudyLog entity.
+func (m *SubjectMutation) ClearStudyLogs() {
+	m.clearedstudy_logs = true
+}
+
+// StudyLogsCleared reports if the "study_logs" edge to the StudyLog entity was cleared.
+func (m *SubjectMutation) StudyLogsCleared() bool {
+	return m.clearedstudy_logs
+}
+
+// RemoveStudyLogIDs removes the "study_logs" edge to the StudyLog entity by IDs.
+func (m *SubjectMutation) RemoveStudyLogIDs(ids ...uuid.UUID) {
+	if m.removedstudy_logs == nil {
+		m.removedstudy_logs = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.study_logs, ids[i])
+		m.removedstudy_logs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedStudyLogs returns the removed IDs of the "study_logs" edge to the StudyLog entity.
+func (m *SubjectMutation) RemovedStudyLogsIDs() (ids []uuid.UUID) {
+	for id := range m.removedstudy_logs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// StudyLogsIDs returns the "study_logs" edge IDs in the mutation.
+func (m *SubjectMutation) StudyLogsIDs() (ids []uuid.UUID) {
+	for id := range m.study_logs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetStudyLogs resets all changes to the "study_logs" edge.
+func (m *SubjectMutation) ResetStudyLogs() {
+	m.study_logs = nil
+	m.clearedstudy_logs = false
+	m.removedstudy_logs = nil
+}
+
+// Where appends a list predicates to the SubjectMutation builder.
+func (m *SubjectMutation) Where(ps ...predicate.Subject) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubjectMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubjectMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Subject, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubjectMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubjectMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Subject).
+func (m *SubjectMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubjectMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.name != nil {
+		fields = append(fields, subject.FieldName)
+	}
+	if m.color != nil {
+		fields = append(fields, subject.FieldColor)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubjectMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subject.FieldName:
+		return m.Name()
+	case subject.FieldColor:
+		return m.Color()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubjectMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subject.FieldName:
+		return m.OldName(ctx)
+	case subject.FieldColor:
+		return m.OldColor(ctx)
+	}
+	return nil, fmt.Errorf("unknown Subject field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubjectMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subject.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case subject.FieldColor:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetColor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Subject field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubjectMutation) AddedFields() []string {
+	var fields []string
+	if m.addcolor != nil {
+		fields = append(fields, subject.FieldColor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubjectMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case subject.FieldColor:
+		return m.AddedColor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubjectMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case subject.FieldColor:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddColor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Subject numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubjectMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubjectMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubjectMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Subject nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubjectMutation) ResetField(name string) error {
+	switch name {
+	case subject.FieldName:
+		m.ResetName()
+		return nil
+	case subject.FieldColor:
+		m.ResetColor()
+		return nil
+	}
+	return fmt.Errorf("unknown Subject field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubjectMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.category != nil {
+		edges = append(edges, subject.EdgeCategory)
+	}
+	if m.study_logs != nil {
+		edges = append(edges, subject.EdgeStudyLogs)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubjectMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case subject.EdgeCategory:
+		if id := m.category; id != nil {
+			return []ent.Value{*id}
+		}
+	case subject.EdgeStudyLogs:
+		ids := make([]ent.Value, 0, len(m.study_logs))
+		for id := range m.study_logs {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubjectMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedstudy_logs != nil {
+		edges = append(edges, subject.EdgeStudyLogs)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubjectMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case subject.EdgeStudyLogs:
+		ids := make([]ent.Value, 0, len(m.removedstudy_logs))
+		for id := range m.removedstudy_logs {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubjectMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedcategory {
+		edges = append(edges, subject.EdgeCategory)
+	}
+	if m.clearedstudy_logs {
+		edges = append(edges, subject.EdgeStudyLogs)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubjectMutation) EdgeCleared(name string) bool {
+	switch name {
+	case subject.EdgeCategory:
+		return m.clearedcategory
+	case subject.EdgeStudyLogs:
+		return m.clearedstudy_logs
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubjectMutation) ClearEdge(name string) error {
+	switch name {
+	case subject.EdgeCategory:
+		m.ClearCategory()
+		return nil
+	}
+	return fmt.Errorf("unknown Subject unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubjectMutation) ResetEdge(name string) error {
+	switch name {
+	case subject.EdgeCategory:
+		m.ResetCategory()
+		return nil
+	case subject.EdgeStudyLogs:
+		m.ResetStudyLogs()
+		return nil
+	}
+	return fmt.Errorf("unknown Subject edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.

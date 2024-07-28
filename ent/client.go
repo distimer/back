@@ -22,6 +22,7 @@ import (
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -42,6 +43,8 @@ type Client struct {
 	RefreshToken *RefreshTokenClient
 	// StudyLog is the client for interacting with the StudyLog builders.
 	StudyLog *StudyLogClient
+	// Subject is the client for interacting with the Subject builders.
+	Subject *SubjectClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -61,6 +64,7 @@ func (c *Client) init() {
 	c.InviteCode = NewInviteCodeClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
 	c.StudyLog = NewStudyLogClient(c.config)
+	c.Subject = NewSubjectClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -160,6 +164,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		InviteCode:   NewInviteCodeClient(cfg),
 		RefreshToken: NewRefreshTokenClient(cfg),
 		StudyLog:     NewStudyLogClient(cfg),
+		Subject:      NewSubjectClient(cfg),
 		User:         NewUserClient(cfg),
 	}, nil
 }
@@ -186,6 +191,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		InviteCode:   NewInviteCodeClient(cfg),
 		RefreshToken: NewRefreshTokenClient(cfg),
 		StudyLog:     NewStudyLogClient(cfg),
+		Subject:      NewSubjectClient(cfg),
 		User:         NewUserClient(cfg),
 	}, nil
 }
@@ -217,7 +223,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Affiliation, c.Category, c.Group, c.InviteCode, c.RefreshToken, c.StudyLog,
-		c.User,
+		c.Subject, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -228,7 +234,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Affiliation, c.Category, c.Group, c.InviteCode, c.RefreshToken, c.StudyLog,
-		c.User,
+		c.Subject, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -249,6 +255,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RefreshToken.mutate(ctx, m)
 	case *StudyLogMutation:
 		return c.StudyLog.mutate(ctx, m)
+	case *SubjectMutation:
+		return c.Subject.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -496,15 +504,15 @@ func (c *CategoryClient) QueryUser(ca *Category) *UserQuery {
 	return query
 }
 
-// QueryStudyLogs queries the study_logs edge of a Category.
-func (c *CategoryClient) QueryStudyLogs(ca *Category) *StudyLogQuery {
-	query := (&StudyLogClient{config: c.config}).Query()
+// QuerySubjects queries the subjects edge of a Category.
+func (c *CategoryClient) QuerySubjects(ca *Category) *SubjectQuery {
+	query := (&SubjectClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ca.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(category.Table, category.FieldID, id),
-			sqlgraph.To(studylog.Table, studylog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, category.StudyLogsTable, category.StudyLogsColumn),
+			sqlgraph.To(subject.Table, subject.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, category.SubjectsTable, category.SubjectsColumn),
 		)
 		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 		return fromV, nil
@@ -1156,15 +1164,15 @@ func (c *StudyLogClient) QueryUser(sl *StudyLog) *UserQuery {
 	return query
 }
 
-// QueryCategory queries the category edge of a StudyLog.
-func (c *StudyLogClient) QueryCategory(sl *StudyLog) *CategoryQuery {
-	query := (&CategoryClient{config: c.config}).Query()
+// QuerySubject queries the subject edge of a StudyLog.
+func (c *StudyLogClient) QuerySubject(sl *StudyLog) *SubjectQuery {
+	query := (&SubjectClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := sl.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(studylog.Table, studylog.FieldID, id),
-			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, studylog.CategoryTable, studylog.CategoryColumn),
+			sqlgraph.To(subject.Table, subject.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, studylog.SubjectTable, studylog.SubjectColumn),
 		)
 		fromV = sqlgraph.Neighbors(sl.driver.Dialect(), step)
 		return fromV, nil
@@ -1210,6 +1218,171 @@ func (c *StudyLogClient) mutate(ctx context.Context, m *StudyLogMutation) (Value
 		return (&StudyLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown StudyLog mutation op: %q", m.Op())
+	}
+}
+
+// SubjectClient is a client for the Subject schema.
+type SubjectClient struct {
+	config
+}
+
+// NewSubjectClient returns a client for the Subject from the given config.
+func NewSubjectClient(c config) *SubjectClient {
+	return &SubjectClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subject.Hooks(f(g(h())))`.
+func (c *SubjectClient) Use(hooks ...Hook) {
+	c.hooks.Subject = append(c.hooks.Subject, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subject.Intercept(f(g(h())))`.
+func (c *SubjectClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Subject = append(c.inters.Subject, interceptors...)
+}
+
+// Create returns a builder for creating a Subject entity.
+func (c *SubjectClient) Create() *SubjectCreate {
+	mutation := newSubjectMutation(c.config, OpCreate)
+	return &SubjectCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Subject entities.
+func (c *SubjectClient) CreateBulk(builders ...*SubjectCreate) *SubjectCreateBulk {
+	return &SubjectCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubjectClient) MapCreateBulk(slice any, setFunc func(*SubjectCreate, int)) *SubjectCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubjectCreateBulk{err: fmt.Errorf("calling to SubjectClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubjectCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubjectCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Subject.
+func (c *SubjectClient) Update() *SubjectUpdate {
+	mutation := newSubjectMutation(c.config, OpUpdate)
+	return &SubjectUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubjectClient) UpdateOne(s *Subject) *SubjectUpdateOne {
+	mutation := newSubjectMutation(c.config, OpUpdateOne, withSubject(s))
+	return &SubjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubjectClient) UpdateOneID(id uuid.UUID) *SubjectUpdateOne {
+	mutation := newSubjectMutation(c.config, OpUpdateOne, withSubjectID(id))
+	return &SubjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Subject.
+func (c *SubjectClient) Delete() *SubjectDelete {
+	mutation := newSubjectMutation(c.config, OpDelete)
+	return &SubjectDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubjectClient) DeleteOne(s *Subject) *SubjectDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubjectClient) DeleteOneID(id uuid.UUID) *SubjectDeleteOne {
+	builder := c.Delete().Where(subject.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubjectDeleteOne{builder}
+}
+
+// Query returns a query builder for Subject.
+func (c *SubjectClient) Query() *SubjectQuery {
+	return &SubjectQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubject},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Subject entity by its id.
+func (c *SubjectClient) Get(ctx context.Context, id uuid.UUID) (*Subject, error) {
+	return c.Query().Where(subject.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubjectClient) GetX(ctx context.Context, id uuid.UUID) *Subject {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCategory queries the category edge of a Subject.
+func (c *SubjectClient) QueryCategory(s *Subject) *CategoryQuery {
+	query := (&CategoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subject.Table, subject.FieldID, id),
+			sqlgraph.To(category.Table, category.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, subject.CategoryTable, subject.CategoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStudyLogs queries the study_logs edge of a Subject.
+func (c *SubjectClient) QueryStudyLogs(s *Subject) *StudyLogQuery {
+	query := (&StudyLogClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subject.Table, subject.FieldID, id),
+			sqlgraph.To(studylog.Table, studylog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, subject.StudyLogsTable, subject.StudyLogsColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubjectClient) Hooks() []Hook {
+	return c.hooks.Subject
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubjectClient) Interceptors() []Interceptor {
+	return c.inters.Subject
+}
+
+func (c *SubjectClient) mutate(ctx context.Context, m *SubjectMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubjectCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubjectUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubjectDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Subject mutation op: %q", m.Op())
 	}
 }
 
@@ -1445,11 +1618,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Affiliation, Category, Group, InviteCode, RefreshToken, StudyLog,
+		Affiliation, Category, Group, InviteCode, RefreshToken, StudyLog, Subject,
 		User []ent.Hook
 	}
 	inters struct {
-		Affiliation, Category, Group, InviteCode, RefreshToken, StudyLog,
+		Affiliation, Category, Group, InviteCode, RefreshToken, StudyLog, Subject,
 		User []ent.Interceptor
 	}
 )

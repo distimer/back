@@ -24,6 +24,8 @@ type Tx struct {
 	RefreshToken *RefreshTokenClient
 	// StudyLog is the client for interacting with the StudyLog builders.
 	StudyLog *StudyLogClient
+	// Subject is the client for interacting with the Subject builders.
+	Subject *SubjectClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -163,6 +165,7 @@ func (tx *Tx) init() {
 	tx.InviteCode = NewInviteCodeClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)
 	tx.StudyLog = NewStudyLogClient(tx.config)
+	tx.Subject = NewSubjectClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

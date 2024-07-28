@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -28,18 +28,18 @@ type StudyLog struct {
 	Content string `json:"content,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the StudyLogQuery when eager-loading is set.
-	Edges               StudyLogEdges `json:"edges"`
-	category_study_logs *uuid.UUID
-	user_study_logs     *uuid.UUID
-	selectValues        sql.SelectValues
+	Edges              StudyLogEdges `json:"edges"`
+	subject_study_logs *uuid.UUID
+	user_study_logs    *uuid.UUID
+	selectValues       sql.SelectValues
 }
 
 // StudyLogEdges holds the relations/edges for other nodes in the graph.
 type StudyLogEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
-	// Category holds the value of the category edge.
-	Category *Category `json:"category,omitempty"`
+	// Subject holds the value of the subject edge.
+	Subject *Subject `json:"subject,omitempty"`
 	// SharedGroup holds the value of the shared_group edge.
 	SharedGroup []*Group `json:"shared_group,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -58,15 +58,15 @@ func (e StudyLogEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
-// CategoryOrErr returns the Category value or an error if the edge
+// SubjectOrErr returns the Subject value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e StudyLogEdges) CategoryOrErr() (*Category, error) {
-	if e.Category != nil {
-		return e.Category, nil
+func (e StudyLogEdges) SubjectOrErr() (*Subject, error) {
+	if e.Subject != nil {
+		return e.Subject, nil
 	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: category.Label}
+		return nil, &NotFoundError{label: subject.Label}
 	}
-	return nil, &NotLoadedError{edge: "category"}
+	return nil, &NotLoadedError{edge: "subject"}
 }
 
 // SharedGroupOrErr returns the SharedGroup value or an error if the edge
@@ -89,7 +89,7 @@ func (*StudyLog) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case studylog.FieldID:
 			values[i] = new(uuid.UUID)
-		case studylog.ForeignKeys[0]: // category_study_logs
+		case studylog.ForeignKeys[0]: // subject_study_logs
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case studylog.ForeignKeys[1]: // user_study_logs
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -134,10 +134,10 @@ func (sl *StudyLog) assignValues(columns []string, values []any) error {
 			}
 		case studylog.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field category_study_logs", values[i])
+				return fmt.Errorf("unexpected type %T for field subject_study_logs", values[i])
 			} else if value.Valid {
-				sl.category_study_logs = new(uuid.UUID)
-				*sl.category_study_logs = *value.S.(*uuid.UUID)
+				sl.subject_study_logs = new(uuid.UUID)
+				*sl.subject_study_logs = *value.S.(*uuid.UUID)
 			}
 		case studylog.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -164,9 +164,9 @@ func (sl *StudyLog) QueryUser() *UserQuery {
 	return NewStudyLogClient(sl.config).QueryUser(sl)
 }
 
-// QueryCategory queries the "category" edge of the StudyLog entity.
-func (sl *StudyLog) QueryCategory() *CategoryQuery {
-	return NewStudyLogClient(sl.config).QueryCategory(sl)
+// QuerySubject queries the "subject" edge of the StudyLog entity.
+func (sl *StudyLog) QuerySubject() *SubjectQuery {
+	return NewStudyLogClient(sl.config).QuerySubject(sl)
 }
 
 // QuerySharedGroup queries the "shared_group" edge of the StudyLog entity.

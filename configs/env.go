@@ -10,15 +10,17 @@ import (
 var Env ServerEnv
 
 type ServerEnv struct {
-	LogLevel      string `env:"LOG_LEVEL"`
-	DBHost        string `env:"DB_HOST"`
-	DBPort        string `env:"DB_PORT"`
-	DBUser        string `env:"DB_USER"`
-	DBPass        string `env:"DB_PASS"`
-	DBName        string `env:"DB_NAME"`
-	JWTSecret     string `env:"JWT_SECRET"`
-	JWTExpire     int    `env:"JWT_EXPIRE"`
-	AppleClientID string `env:"APPLE_CLIENT_ID"`
+	LogLevel           string `env:"LOG_LEVEL"`
+	DBHost             string `env:"DB_HOST"`
+	DBPort             string `env:"DB_PORT"`
+	DBUser             string `env:"DB_USER"`
+	DBPass             string `env:"DB_PASS"`
+	DBName             string `env:"DB_NAME"`
+	JWTSecret          string `env:"JWT_SECRET"`
+	JWTExpire          int    `env:"JWT_EXPIRE"`
+	AppleClientID      string `env:"APPLE_CLIENT_ID"`
+	GoogleClientID     string `env:"GOOGLE_CLIENT_ID"`
+	GoogleClientSecret string `env:"GOOGLE_CLIENT_SECRET"`
 }
 
 func getEnvStr(envName string) string {

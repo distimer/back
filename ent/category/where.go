@@ -59,11 +59,6 @@ func Name(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldName, v))
 }
 
-// Color applies equality check predicate on the "color" field. It's identical to ColorEQ.
-func Color(v int32) predicate.Category {
-	return predicate.Category(sql.FieldEQ(FieldColor, v))
-}
-
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldName, v))
@@ -129,46 +124,6 @@ func NameContainsFold(v string) predicate.Category {
 	return predicate.Category(sql.FieldContainsFold(FieldName, v))
 }
 
-// ColorEQ applies the EQ predicate on the "color" field.
-func ColorEQ(v int32) predicate.Category {
-	return predicate.Category(sql.FieldEQ(FieldColor, v))
-}
-
-// ColorNEQ applies the NEQ predicate on the "color" field.
-func ColorNEQ(v int32) predicate.Category {
-	return predicate.Category(sql.FieldNEQ(FieldColor, v))
-}
-
-// ColorIn applies the In predicate on the "color" field.
-func ColorIn(vs ...int32) predicate.Category {
-	return predicate.Category(sql.FieldIn(FieldColor, vs...))
-}
-
-// ColorNotIn applies the NotIn predicate on the "color" field.
-func ColorNotIn(vs ...int32) predicate.Category {
-	return predicate.Category(sql.FieldNotIn(FieldColor, vs...))
-}
-
-// ColorGT applies the GT predicate on the "color" field.
-func ColorGT(v int32) predicate.Category {
-	return predicate.Category(sql.FieldGT(FieldColor, v))
-}
-
-// ColorGTE applies the GTE predicate on the "color" field.
-func ColorGTE(v int32) predicate.Category {
-	return predicate.Category(sql.FieldGTE(FieldColor, v))
-}
-
-// ColorLT applies the LT predicate on the "color" field.
-func ColorLT(v int32) predicate.Category {
-	return predicate.Category(sql.FieldLT(FieldColor, v))
-}
-
-// ColorLTE applies the LTE predicate on the "color" field.
-func ColorLTE(v int32) predicate.Category {
-	return predicate.Category(sql.FieldLTE(FieldColor, v))
-}
-
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
@@ -192,21 +147,21 @@ func HasUserWith(preds ...predicate.User) predicate.Category {
 	})
 }
 
-// HasStudyLogs applies the HasEdge predicate on the "study_logs" edge.
-func HasStudyLogs() predicate.Category {
+// HasSubjects applies the HasEdge predicate on the "subjects" edge.
+func HasSubjects() predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, StudyLogsTable, StudyLogsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, SubjectsTable, SubjectsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasStudyLogsWith applies the HasEdge predicate on the "study_logs" edge with a given conditions (other predicates).
-func HasStudyLogsWith(preds ...predicate.StudyLog) predicate.Category {
+// HasSubjectsWith applies the HasEdge predicate on the "subjects" edge with a given conditions (other predicates).
+func HasSubjectsWith(preds ...predicate.Subject) predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
-		step := newStudyLogsStep()
+		step := newSubjectsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

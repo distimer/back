@@ -239,21 +239,21 @@ func HasUserWith(preds ...predicate.User) predicate.StudyLog {
 	})
 }
 
-// HasCategory applies the HasEdge predicate on the "category" edge.
-func HasCategory() predicate.StudyLog {
+// HasSubject applies the HasEdge predicate on the "subject" edge.
+func HasSubject() predicate.StudyLog {
 	return predicate.StudyLog(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, SubjectTable, SubjectColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasCategoryWith applies the HasEdge predicate on the "category" edge with a given conditions (other predicates).
-func HasCategoryWith(preds ...predicate.Category) predicate.StudyLog {
+// HasSubjectWith applies the HasEdge predicate on the "subject" edge with a given conditions (other predicates).
+func HasSubjectWith(preds ...predicate.Subject) predicate.StudyLog {
 	return predicate.StudyLog(func(s *sql.Selector) {
-		step := newCategoryStep()
+		step := newSubjectStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

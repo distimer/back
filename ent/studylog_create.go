@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -67,15 +67,15 @@ func (slc *StudyLogCreate) SetUser(u *User) *StudyLogCreate {
 	return slc.SetUserID(u.ID)
 }
 
-// SetCategoryID sets the "category" edge to the Category entity by ID.
-func (slc *StudyLogCreate) SetCategoryID(id uuid.UUID) *StudyLogCreate {
-	slc.mutation.SetCategoryID(id)
+// SetSubjectID sets the "subject" edge to the Subject entity by ID.
+func (slc *StudyLogCreate) SetSubjectID(id uuid.UUID) *StudyLogCreate {
+	slc.mutation.SetSubjectID(id)
 	return slc
 }
 
-// SetCategory sets the "category" edge to the Category entity.
-func (slc *StudyLogCreate) SetCategory(c *Category) *StudyLogCreate {
-	return slc.SetCategoryID(c.ID)
+// SetSubject sets the "subject" edge to the Subject entity.
+func (slc *StudyLogCreate) SetSubject(s *Subject) *StudyLogCreate {
+	return slc.SetSubjectID(s.ID)
 }
 
 // AddSharedGroupIDs adds the "shared_group" edge to the Group entity by IDs.
@@ -148,8 +148,8 @@ func (slc *StudyLogCreate) check() error {
 	if _, ok := slc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "StudyLog.user"`)}
 	}
-	if _, ok := slc.mutation.CategoryID(); !ok {
-		return &ValidationError{Name: "category", err: errors.New(`ent: missing required edge "StudyLog.category"`)}
+	if _, ok := slc.mutation.SubjectID(); !ok {
+		return &ValidationError{Name: "subject", err: errors.New(`ent: missing required edge "StudyLog.subject"`)}
 	}
 	return nil
 }
@@ -215,21 +215,21 @@ func (slc *StudyLogCreate) createSpec() (*StudyLog, *sqlgraph.CreateSpec) {
 		_node.user_study_logs = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := slc.mutation.CategoryIDs(); len(nodes) > 0 {
+	if nodes := slc.mutation.SubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   studylog.CategoryTable,
-			Columns: []string{studylog.CategoryColumn},
+			Table:   studylog.SubjectTable,
+			Columns: []string{studylog.SubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.category_study_logs = &nodes[0]
+		_node.subject_study_logs = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := slc.mutation.SharedGroupIDs(); len(nodes) > 0 {

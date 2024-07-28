@@ -144,6 +144,115 @@ const docTemplate = `{
                 }
             }
         },
+        "/category": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "[EDGE INCLUDED!]Subject list is included in each category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "Get Category List",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/categoryctrl.getCategoryListRes"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "Create Category",
+                "parameters": [
+                    {
+                        "description": "createCategoryReq",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/categoryctrl.createCategoryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/categoryctrl.createCategoryRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/category/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "Delete Category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/group": {
             "get": {
                 "security": [
@@ -218,7 +327,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Group"
+                    "Invite"
                 ],
                 "summary": "Get Invite Code List",
                 "parameters": [
@@ -239,80 +348,6 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Group"
-                ],
-                "summary": "Invite to Group",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "group id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/groupctrl.inviteGroupRes"
-                        }
-                    }
-                }
-            }
-        },
-        "/group/invite/{id}/{code}": {
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Group"
-                ],
-                "summary": "Delete Invite Code",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "group id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "invite code",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
                     }
                 }
             }
@@ -512,6 +547,390 @@ const docTemplate = `{
                 }
             }
         },
+        "/invite/group/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invite"
+                ],
+                "summary": "Invite to Group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "group id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/invitectrl.inviteGroupRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/invite/group/{id}/{code}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invite"
+                ],
+                "summary": "Delete Invite Code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "group id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "invite code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/invite/{code}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invite"
+                ],
+                "summary": "Get Invite Code Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "invite code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/invitectrl.inviteCodeInfoRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/studylog": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get All My Study Logs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "count",
+                        "name": "count",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studylogctrl.getStudyLogListRes"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Create Study Log",
+                "parameters": [
+                    {
+                        "description": "createStudyLogReq",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/studylogctrl.createStudyLogReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studylogctrl.createStudyLogRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/subject": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subject"
+                ],
+                "summary": "Create Subject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "createSubjectReq",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/subjectctrl.createSubjectReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/subjectctrl.createSubjectRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/subject/studylog/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subject"
+                ],
+                "summary": "Get Study Log with Subject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subject ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/subjectctrl.getStudyLogRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/subject/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subject"
+                ],
+                "summary": "Modify Subject Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subject ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "modifySubjectInfoRequest",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/subjectctrl.modifySubjectInfoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/subjectctrl.modifySubjectInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Subject"
+                ],
+                "summary": "Delete Subject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subject ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "security": [
@@ -638,6 +1057,37 @@ const docTemplate = `{
                 }
             }
         },
+        "categoryctrl.createCategoryReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "name between 1 and 20"
+                }
+            }
+        },
+        "categoryctrl.createCategoryRes": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/ent.Category"
+                }
+            }
+        },
+        "categoryctrl.getCategoryListRes": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Category"
+                    }
+                }
+            }
+        },
         "ent.Affiliation": {
             "type": "object",
             "properties": {
@@ -695,10 +1145,6 @@ const docTemplate = `{
         "ent.Category": {
             "type": "object",
             "properties": {
-                "color": {
-                    "description": "Color holds the value of the \"color\" field.",
-                    "type": "integer"
-                },
                 "edges": {
                     "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the CategoryQuery when eager-loading is set.",
                     "allOf": [
@@ -720,11 +1166,11 @@ const docTemplate = `{
         "ent.CategoryEdges": {
             "type": "object",
             "properties": {
-                "study_logs": {
-                    "description": "StudyLogs holds the value of the study_logs edge.",
+                "subjects": {
+                    "description": "Subjects holds the value of the subjects edge.",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ent.StudyLog"
+                        "$ref": "#/definitions/ent.Subject"
                     }
                 },
                 "user": {
@@ -916,20 +1362,20 @@ const docTemplate = `{
         "ent.StudyLogEdges": {
             "type": "object",
             "properties": {
-                "category": {
-                    "description": "Category holds the value of the category edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Category"
-                        }
-                    ]
-                },
                 "shared_group": {
                     "description": "SharedGroup holds the value of the shared_group edge.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.Group"
                     }
+                },
+                "subject": {
+                    "description": "Subject holds the value of the subject edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.Subject"
+                        }
+                    ]
                 },
                 "user": {
                     "description": "User holds the value of the user edge.",
@@ -938,6 +1384,51 @@ const docTemplate = `{
                             "$ref": "#/definitions/ent.User"
                         }
                     ]
+                }
+            }
+        },
+        "ent.Subject": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "description": "Color holds the value of the \"color\" field.",
+                    "type": "integer"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the SubjectQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.SubjectEdges"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.SubjectEdges": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "description": "Category holds the value of the category edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.Category"
+                        }
+                    ]
+                },
+                "study_logs": {
+                    "description": "StudyLogs holds the value of the study_logs edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.StudyLog"
+                    }
                 }
             }
         },
@@ -1080,14 +1571,6 @@ const docTemplate = `{
                 }
             }
         },
-        "groupctrl.inviteGroupRes": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                }
-            }
-        },
         "groupctrl.joinReq": {
             "type": "object",
             "required": [
@@ -1172,6 +1655,177 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 2,
                     "minimum": 0
+                }
+            }
+        },
+        "invitectrl.inviteCodeInfoRes": {
+            "type": "object",
+            "properties": {
+                "group_description": {
+                    "type": "string"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "group_owner_nickname": {
+                    "type": "string"
+                }
+            }
+        },
+        "invitectrl.inviteGroupRes": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
+        "studylogctrl.createStudyLogReq": {
+            "type": "object",
+            "required": [
+                "content",
+                "end_at",
+                "groups_to_share",
+                "start_at",
+                "subject_id"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "content between 0 and 30"
+                },
+                "end_at": {
+                    "type": "string",
+                    "example": "2020-08-28T09:20:26.187+09:00"
+                },
+                "groups_to_share": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "group_id"
+                    ]
+                },
+                "start_at": {
+                    "type": "string",
+                    "example": "2020-08-28T09:20:26.187+09:00"
+                },
+                "subject_id": {
+                    "type": "string",
+                    "example": "subject_id"
+                }
+            }
+        },
+        "studylogctrl.createStudyLogRes": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "groups_to_share": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "subject_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "studylogctrl.getStudyLogListRes": {
+            "type": "object",
+            "properties": {
+                "studyLogs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.StudyLog"
+                    }
+                }
+            }
+        },
+        "subjectctrl.createSubjectReq": {
+            "type": "object",
+            "required": [
+                "color",
+                "name"
+            ],
+            "properties": {
+                "color": {
+                    "type": "integer",
+                    "maximum": 16777215,
+                    "minimum": 0
+                },
+                "name": {
+                    "type": "string",
+                    "example": "name between 1 and 20"
+                }
+            }
+        },
+        "subjectctrl.createSubjectRes": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "subjectctrl.getStudyLogRes": {
+            "type": "object",
+            "properties": {
+                "study_logs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.StudyLog"
+                    }
+                }
+            }
+        },
+        "subjectctrl.modifySubjectInfoRequest": {
+            "type": "object",
+            "required": [
+                "color",
+                "name"
+            ],
+            "properties": {
+                "color": {
+                    "type": "integer",
+                    "maximum": 16777215,
+                    "minimum": 0
+                },
+                "name": {
+                    "type": "string",
+                    "example": "name between 1 and 20"
+                }
+            }
+        },
+        "subjectctrl.modifySubjectInfoResponse": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

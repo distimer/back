@@ -5,9 +5,13 @@ import (
 )
 
 func EnrollRouter(app *fiber.App) {
-	// api base path = /api
+	// api base path = /
 	apiRouter := app.Group("/")
 	initAuthRouter(apiRouter)
 	initGroupRouter(apiRouter)
 	initUserRouter(apiRouter)
+	initCategoryRouter(apiRouter)
+	initSubjectRouter(apiRouter)
+	initStudylogRouter(apiRouter)
+	initInviteRouter(apiRouter)
 }

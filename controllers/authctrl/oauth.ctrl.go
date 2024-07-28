@@ -36,13 +36,87 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 	if err := dto.Bind(c, data); err != nil {
 		return err
 	}
-	// TODO: Implement Google Oauth Login
+
+	claims, err := crypt.VerifyGoogleToken(data.Token)
+	if err != nil {
+		return c.Status(401).JSON(fiber.Map{
+			"error": "Invalid Google Token",
+		})
+	}
+
+	dbConn := db.GetDBClient()
+	var findUser *ent.User
+	findUser, err = dbConn.User.Query().Where(user.And(user.OauthID(claims.SUB), user.OauthProvider(1))).Only(context.Background())
+	if err != nil {
+		if ent.IsNotFound(err) {
+			// Create User
+			userID := uuid.New()
+			findUser, err = dbConn.User.Create().
+				SetID(userID).
+				SetOauthID(claims.SUB).
+				SetOauthProvider(1).
+				Save(context.Background())
+			if err != nil {
+				logger.Error(c, err)
+				return c.Status(500).JSON(fiber.Map{
+					"error": "Internal server error",
+				})
+			}
+
+			// add Default Category
+			categoryObj, err := dbConn.Category.Create().
+				SetName("미분류").
+				SetUserID(userID).
+				Save(context.Background())
+			if err != nil {
+				logger.Error(c, err)
+				return c.Status(500).JSON(fiber.Map{
+					"error": "Internal server error",
+				})
+			}
+
+			// add Default Subject
+			_, err = dbConn.Subject.Create().
+				SetName("미분류").
+				SetColor(0).
+				SetCategory(categoryObj).
+				Save(context.Background())
+			if err != nil {
+				logger.Error(c, err)
+				return c.Status(500).JSON(fiber.Map{
+					"error": "Internal server error",
+				})
+			}
+		} else {
+			logger.Error(c, err)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Internal server error",
+			})
+		}
+	}
+
+	// create new refresh token
+	newRefreshToken := uuid.New()
+	_, err = dbConn.RefreshToken.Create().
+		SetID(newRefreshToken).
+		SetUserID(findUser.ID).
+		Save(context.Background())
+	if err != nil {
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+
+	// create new access token
+	newAccessToken := crypt.NewJWT(findUser.ID)
+
 	return c.JSON(
 		loginRes{
-			UserID:       "user-id",
-			Name:         "name",
-			AccessToken:  "access-token",
-			RefreshToken: "refresh-token",
+			UserID:       findUser.ID.String(),
+			Name:         findUser.Name,
+			AccessToken:  newAccessToken,
+			RefreshToken: newRefreshToken.String(),
 		},
 	)
 }

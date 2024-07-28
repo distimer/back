@@ -18,6 +18,7 @@ import (
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -85,6 +86,7 @@ func checkColumn(table, column string) error {
 			invitecode.Table:   invitecode.ValidColumn,
 			refreshtoken.Table: refreshtoken.ValidColumn,
 			studylog.Table:     studylog.ValidColumn,
+			subject.Table:      subject.ValidColumn,
 			user.Table:         user.ValidColumn,
 		})
 	})
