@@ -20,9 +20,9 @@ type modifyGroupInfoReq struct {
 }
 
 type modifyGroupInfoRes struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          string `json:"id" validate:"required"`
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
 }
 
 // @Summary Modify Group Info

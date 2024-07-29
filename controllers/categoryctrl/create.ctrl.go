@@ -5,6 +5,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gofiber/fiber/v2"
+	"pentag.kr/distimer/controllers/subjectctrl"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/dto"
@@ -53,8 +54,9 @@ func CreateCategory(c *fiber.Ctx) error {
 
 	return c.JSON(
 		categoryDTO{
-			ID:   categoryObj.ID.String(),
-			Name: categoryObj.Name,
+			ID:       categoryObj.ID.String(),
+			Name:     categoryObj.Name,
+			Subjects: []subjectctrl.SubjectDTO{},
 		},
 	)
 }

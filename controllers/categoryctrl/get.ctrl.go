@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gofiber/fiber/v2"
+	"pentag.kr/distimer/controllers/subjectctrl"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/category"
@@ -40,6 +41,23 @@ func GetCategoryList(c *fiber.Ctx) error {
 		result[i] = categoryDTO{
 			ID:   category.ID.String(),
 			Name: category.Name,
+			Subjects: func() []subjectctrl.SubjectDTO {
+				subjects := category.Edges.Subjects
+				if subjects == nil {
+					subjects = []*ent.Subject{}
+				}
+
+				result := make([]subjectctrl.SubjectDTO, len(subjects))
+				for i, subject := range subjects {
+					result[i] = subjectctrl.SubjectDTO{
+						ID:    subject.ID.String(),
+						Name:  subject.Name,
+						Color: subject.Color,
+					}
+				}
+
+				return result
+			}(),
 		}
 	}
 

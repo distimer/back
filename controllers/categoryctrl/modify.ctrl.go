@@ -15,6 +15,11 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
+type modifyCategoryRes struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // @Summary Modify Category
 // @Tags Category
 // @Accept json
@@ -22,7 +27,7 @@ import (
 // @Security Bearer
 // @Param id path string true "Category ID"
 // @Param request body createCategoryReq true "createCategoryReq"
-// @Success 200 {object} categoryDTO
+// @Success 200 {object} modifyCategoryRes
 // @Failure 400
 // @Failure 404
 // @Failure 500
@@ -79,7 +84,7 @@ func ModifyCategory(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(categoryDTO{
+	return c.JSON(modifyCategoryRes{
 		ID:   categoryObj.ID.String(),
 		Name: data.Name,
 	})

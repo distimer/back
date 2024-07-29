@@ -10,6 +10,11 @@ definitions:
         type: string
       user_id:
         type: string
+    required:
+    - access_token
+    - name
+    - refresh_token
+    - user_id
     type: object
   authctrl.logoutTokenReq:
     properties:
@@ -38,6 +43,9 @@ definitions:
         type: string
       refresh_token:
         type: string
+    required:
+    - access_token
+    - refresh_token
     type: object
   categoryctrl.categoryDTO:
     properties:
@@ -45,6 +53,14 @@ definitions:
         type: string
       name:
         type: string
+      subjects:
+        items:
+          $ref: '#/definitions/subjectctrl.SubjectDTO'
+        type: array
+    required:
+    - id
+    - name
+    - subjects
     type: object
   categoryctrl.createCategoryReq:
     properties:
@@ -54,6 +70,13 @@ definitions:
     required:
     - name
     type: object
+  categoryctrl.modifyCategoryRes:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   groupctrl.affiliationDTO:
     properties:
       group_id:
@@ -61,11 +84,20 @@ definitions:
       joined_at:
         type: string
       nickname:
+        example: nickname between 1 and 20
         type: string
       role:
+        maximum: 2
+        minimum: 0
         type: integer
       user_id:
         type: string
+    required:
+    - group_id
+    - joined_at
+    - nickname
+    - role
+    - user_id
     type: object
   groupctrl.createGroupReq:
     properties:
@@ -111,6 +143,14 @@ definitions:
         type: string
       reveal_policy:
         type: integer
+    required:
+    - create_at
+    - description
+    - id
+    - invite_policy
+    - name
+    - nickname_policy
+    - reveal_policy
     type: object
   groupctrl.joinReq:
     properties:
@@ -138,6 +178,10 @@ definitions:
         type: string
       name:
         type: string
+    required:
+    - description
+    - id
+    - name
     type: object
   groupctrl.modifyGroupPolicyReq:
     properties:
@@ -175,11 +219,18 @@ definitions:
         type: string
       group_owner_nickname:
         type: string
+    required:
+    - group_description
+    - group_name
+    - group_owner_nickname
     type: object
   invitectrl.inviteGroupRes:
     properties:
       code:
+        example: "1111111"
         type: string
+    required:
+    - code
     type: object
   studylogctrl.createStudyLogReq:
     properties:
@@ -240,6 +291,26 @@ definitions:
         type: string
       subject_id:
         type: string
+    required:
+    - content
+    - end_at
+    - groups_to_share
+    - id
+    - start_at
+    - subject_id
+    type: object
+  subjectctrl.SubjectDTO:
+    properties:
+      color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    required:
+    - color
+    - id
+    - name
     type: object
   subjectctrl.createSubjectReq:
     properties:
@@ -263,15 +334,6 @@ definitions:
     - color
     - name
     type: object
-  subjectctrl.subjectDTO:
-    properties:
-      color:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-    type: object
   timerctrl.createTimerReq:
     properties:
       content:
@@ -292,6 +354,11 @@ definitions:
         type: string
       subject_id:
         type: string
+    required:
+    - content
+    - id
+    - start_at
+    - subject_id
     type: object
   userctrl.modifyUserInfoReq:
     properties:
@@ -521,7 +588,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/categoryctrl.categoryDTO'
+            $ref: '#/definitions/categoryctrl.modifyCategoryRes'
         "400":
           description: Bad Request
         "404":
@@ -959,7 +1026,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/subjectctrl.subjectDTO'
+            $ref: '#/definitions/subjectctrl.SubjectDTO'
         "400":
           description: Bad Request
         "404":
@@ -992,7 +1059,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/subjectctrl.subjectDTO'
+            $ref: '#/definitions/subjectctrl.SubjectDTO'
         "400":
           description: Bad Request
         "404":

@@ -280,7 +280,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/categoryctrl.categoryDTO"
+                            "$ref": "#/definitions/categoryctrl.modifyCategoryRes"
                         }
                     },
                     "400": {
@@ -994,7 +994,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/subjectctrl.subjectDTO"
+                            "$ref": "#/definitions/subjectctrl.SubjectDTO"
                         }
                     },
                     "400": {
@@ -1046,7 +1046,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/subjectctrl.subjectDTO"
+                            "$ref": "#/definitions/subjectctrl.SubjectDTO"
                         }
                     },
                     "400": {
@@ -1345,6 +1345,12 @@ const docTemplate = `{
     "definitions": {
         "authctrl.loginRes": {
             "type": "object",
+            "required": [
+                "access_token",
+                "name",
+                "refresh_token",
+                "user_id"
+            ],
             "properties": {
                 "access_token": {
                     "type": "string"
@@ -1395,6 +1401,10 @@ const docTemplate = `{
         },
         "authctrl.refreshTokenRes": {
             "type": "object",
+            "required": [
+                "access_token",
+                "refresh_token"
+            ],
             "properties": {
                 "access_token": {
                     "type": "string"
@@ -1406,12 +1416,23 @@ const docTemplate = `{
         },
         "categoryctrl.categoryDTO": {
             "type": "object",
+            "required": [
+                "id",
+                "name",
+                "subjects"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "subjects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/subjectctrl.SubjectDTO"
+                    }
                 }
             }
         },
@@ -1427,8 +1448,26 @@ const docTemplate = `{
                 }
             }
         },
+        "categoryctrl.modifyCategoryRes": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "groupctrl.affiliationDTO": {
             "type": "object",
+            "required": [
+                "group_id",
+                "joined_at",
+                "nickname",
+                "role",
+                "user_id"
+            ],
             "properties": {
                 "group_id": {
                     "type": "string"
@@ -1437,10 +1476,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "nickname": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "nickname between 1 and 20"
                 },
                 "role": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 2,
+                    "minimum": 0
                 },
                 "user_id": {
                     "type": "string"
@@ -1486,6 +1528,15 @@ const docTemplate = `{
         },
         "groupctrl.groupDTO": {
             "type": "object",
+            "required": [
+                "create_at",
+                "description",
+                "id",
+                "invite_policy",
+                "name",
+                "nickname_policy",
+                "reveal_policy"
+            ],
             "properties": {
                 "create_at": {
                     "type": "string"
@@ -1539,6 +1590,11 @@ const docTemplate = `{
         },
         "groupctrl.modifyGroupInfoRes": {
             "type": "object",
+            "required": [
+                "description",
+                "id",
+                "name"
+            ],
             "properties": {
                 "description": {
                     "type": "string"
@@ -1591,6 +1647,11 @@ const docTemplate = `{
         },
         "invitectrl.inviteCodeInfoRes": {
             "type": "object",
+            "required": [
+                "group_description",
+                "group_name",
+                "group_owner_nickname"
+            ],
             "properties": {
                 "group_description": {
                     "type": "string"
@@ -1605,9 +1666,13 @@ const docTemplate = `{
         },
         "invitectrl.inviteGroupRes": {
             "type": "object",
+            "required": [
+                "code"
+            ],
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1111111"
                 }
             }
         },
@@ -1675,6 +1740,14 @@ const docTemplate = `{
         },
         "studylogctrl.myStudyLogDTO": {
             "type": "object",
+            "required": [
+                "content",
+                "end_at",
+                "groups_to_share",
+                "id",
+                "start_at",
+                "subject_id"
+            ],
             "properties": {
                 "content": {
                     "type": "string"
@@ -1695,6 +1768,25 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "subject_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "subjectctrl.SubjectDTO": {
+            "type": "object",
+            "required": [
+                "color",
+                "id",
+                "name"
+            ],
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1731,20 +1823,6 @@ const docTemplate = `{
                 }
             }
         },
-        "subjectctrl.subjectDTO": {
-            "type": "object",
-            "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "timerctrl.createTimerReq": {
             "type": "object",
             "required": [
@@ -1762,6 +1840,12 @@ const docTemplate = `{
         },
         "timerctrl.timerDTO": {
             "type": "object",
+            "required": [
+                "content",
+                "id",
+                "start_at",
+                "subject_id"
+            ],
             "properties": {
                 "content": {
                     "type": "string"

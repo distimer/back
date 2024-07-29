@@ -26,7 +26,7 @@ type modifySubjectInfoReq struct {
 // @Security Bearer
 // @Param id path string true "Subject ID"
 // @Param request body modifySubjectInfoReq true "modifySubjectInfoReq"
-// @Success 200 {object} subjectDTO
+// @Success 200 {object} SubjectDTO
 // @Failure 400
 // @Failure 404
 // @Failure 500
@@ -82,7 +82,7 @@ func ModifySubjectInfo(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(subjectDTO{
+	return c.JSON(SubjectDTO{
 		ID:    subjectID.String(),
 		Name:  data.Name,
 		Color: data.Color,

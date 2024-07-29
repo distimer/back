@@ -19,7 +19,7 @@ import (
 const InviteCodePerGroupLimit = 3
 
 type inviteGroupRes struct {
-	Code string `json:"code"`
+	Code string `json:"code" validate:"required" example:"1111111"`
 }
 
 // @Summary Invite to Group

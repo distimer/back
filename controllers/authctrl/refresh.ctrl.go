@@ -17,8 +17,8 @@ type refreshTokenReq struct {
 }
 
 type refreshTokenRes struct {
-	RefreshToken string `json:"refresh_token"`
-	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token" validate:"required,uuid"`
+	AccessToken  string `json:"access_token" validate:"required"`
 }
 
 // @Summary Refresh Token

@@ -14,9 +14,9 @@ import (
 )
 
 type inviteCodeInfoRes struct {
-	GroupName          string `json:"group_name"`
-	GroupOwnerNickname string `json:"group_owner_nickname"`
-	GroupDescription   string `json:"group_description"`
+	GroupName          string `json:"group_name" validate:"required"`
+	GroupOwnerNickname string `json:"group_owner_nickname" validate:"required"`
+	GroupDescription   string `json:"group_description" validate:"required"`
 }
 
 // @Summary Get Invite Code Info

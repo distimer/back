@@ -26,7 +26,7 @@ type createSubjectReq struct {
 // @Security Bearer
 // @Param id path string true "Category ID"
 // @Param request body createSubjectReq true "createSubjectReq"
-// @Success 200 {object} subjectDTO
+// @Success 200 {object} SubjectDTO
 // @Failure 400
 // @Failure 404
 // @Failure 500
@@ -81,7 +81,7 @@ func CreateSubject(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(
-		subjectDTO{
+		SubjectDTO{
 			ID:    subjectObj.ID.String(),
 			Name:  subjectObj.Name,
 			Color: subjectObj.Color,

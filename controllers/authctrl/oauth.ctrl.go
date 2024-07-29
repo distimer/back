@@ -19,10 +19,10 @@ type oauthLoginReq struct {
 }
 
 type loginRes struct {
-	UserID       string `json:"user_id"`
-	Name         string `json:"name"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	UserID       string `json:"user_id" validate:"required,uuid"`
+	Name         string `json:"name" validate:"required"`
+	AccessToken  string `json:"access_token" validate:"required"`
+	RefreshToken string `json:"refresh_token" validate:"required,uuid"`
 }
 
 // @Summary Google Oauth Login
