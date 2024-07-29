@@ -1099,6 +1099,19 @@ paths:
       tags:
       - Timer
   /user:
+    delete:
+      responses:
+        "204":
+          description: No Content
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Quit Service
+      tags:
+      - User
     get:
       consumes:
       - application/json

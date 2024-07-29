@@ -13,4 +13,5 @@ func initUserRouter(router fiber.Router) {
 
 	userRouter.Get("/", userctrl.GetMyUserInfo)
 	userRouter.Put("/", userctrl.ModifyUserInfo)
+	userRouter.Delete("/", userctrl.QuitService)
 }
