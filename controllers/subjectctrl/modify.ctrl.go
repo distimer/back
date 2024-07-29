@@ -16,7 +16,7 @@ import (
 
 type modifySubjectInfoRequest struct {
 	Name  string `json:"name" validate:"required" example:"name between 1 and 20"`
-	Color string `json:"color" validate:"required,len=6"`
+	Color string `json:"color" validate:"required,hexcolor"`
 }
 
 type modifySubjectInfoResponse struct {
@@ -48,7 +48,9 @@ func ModifySubjectInfo(c *fiber.Ctx) error {
 
 	data := new(modifySubjectInfoRequest)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 	if utf8.RuneCountInString(data.Name) < 1 || utf8.RuneCountInString(data.Name) > 20 {
 		return c.Status(400).JSON(fiber.Map{

@@ -43,7 +43,9 @@ func ModifyGroupPolicy(c *fiber.Ctx) error {
 
 	data := new(modifyGroupPolicyReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 
 	userID := middlewares.GetUserIDFromMiddleware(c)

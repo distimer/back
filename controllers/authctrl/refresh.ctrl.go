@@ -13,7 +13,6 @@ import (
 )
 
 type refreshTokenReq struct {
-	dto.BaseDTO
 	RefreshToken string `json:"refresh_token" validate:"required,uuid"`
 }
 
@@ -32,7 +31,9 @@ type refreshTokenRes struct {
 func Refresh(c *fiber.Ctx) error {
 	data := new(refreshTokenReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 	dbConn := db.GetDBClient()
 	refreshToken := uuid.MustParse(data.RefreshToken)

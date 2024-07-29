@@ -12,7 +12,7 @@ func initSubjectRouter(router fiber.Router) {
 	subjectRouter.Use(middlewares.JWTMiddleware)
 
 	// subject
-	subjectRouter.Post("/", subjectctrl.CreateSubject)
+	subjectRouter.Post("/:id", subjectctrl.CreateSubject)
 	subjectRouter.Delete("/:id", subjectctrl.DeleteSubject)
 	subjectRouter.Put("/:id", subjectctrl.ModifySubjectInfo)
 

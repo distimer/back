@@ -38,7 +38,9 @@ type loginRes struct {
 func GoogleOauthLogin(c *fiber.Ctx) error {
 	data := new(oauthLoginReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 
 	claims, err := crypt.VerifyGoogleToken(data.Token)
@@ -151,7 +153,9 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 func AppleOauthLogin(c *fiber.Ctx) error {
 	data := new(oauthLoginReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 
 	claims, err := crypt.VerifyAppleToken(data.Token)

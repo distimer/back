@@ -41,6 +41,14 @@ func (sc *SubjectCreate) SetID(u uuid.UUID) *SubjectCreate {
 	return sc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (sc *SubjectCreate) SetNillableID(u *uuid.UUID) *SubjectCreate {
+	if u != nil {
+		sc.SetID(*u)
+	}
+	return sc
+}
+
 // SetCategoryID sets the "category" edge to the Category entity by ID.
 func (sc *SubjectCreate) SetCategoryID(id uuid.UUID) *SubjectCreate {
 	sc.mutation.SetCategoryID(id)
@@ -89,6 +97,7 @@ func (sc *SubjectCreate) Mutation() *SubjectMutation {
 
 // Save creates the Subject in the database.
 func (sc *SubjectCreate) Save(ctx context.Context) (*Subject, error) {
+	sc.defaults()
 	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
@@ -111,6 +120,14 @@ func (sc *SubjectCreate) Exec(ctx context.Context) error {
 func (sc *SubjectCreate) ExecX(ctx context.Context) {
 	if err := sc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (sc *SubjectCreate) defaults() {
+	if _, ok := sc.mutation.ID(); !ok {
+		v := subject.DefaultID()
+		sc.mutation.SetID(v)
 	}
 }
 
@@ -238,6 +255,7 @@ func (scb *SubjectCreateBulk) Save(ctx context.Context) ([]*Subject, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SubjectMutation)
 				if !ok {

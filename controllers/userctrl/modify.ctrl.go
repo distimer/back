@@ -30,7 +30,9 @@ type modifyUserInfoRes struct {
 func ModifyUserInfo(c *fiber.Ctx) error {
 	data := new(modifyUserInfoReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 	if utf8.RuneCountInString(data.Name) < 1 || utf8.RuneCountInString(data.Name) > 20 {
 		return c.Status(400).JSON(fiber.Map{

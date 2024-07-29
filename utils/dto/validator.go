@@ -2,32 +2,31 @@ package dto
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
-var validate = validator.New()
-var myValidator = XValidator{Validator: validate}
-
 type (
-	XValidator struct {
-		Validator *validator.Validate
-	}
-
-	ErrorResponse struct {
+	ValidationErrorResponse struct {
 		Error       bool
 		FailedField string
 		Tag         string
 		Value       interface{}
 	}
+	XValidator struct {
+		validator *validator.Validate
+	}
 )
 
-func (v XValidator) Validate(data interface{}) []ErrorResponse {
-	validationErrors := []ErrorResponse{}
+var Validator = &XValidator{validator: validator.New()}
 
-	errs := validate.Struct(data)
+func (v XValidator) Validate(data interface{}) []ValidationErrorResponse {
+	validationErrors := []ValidationErrorResponse{}
+
+	errs := v.validator.Struct(data)
 	if errs != nil {
 		for _, err := range errs.(validator.ValidationErrors) {
 			// In this case data object is actually holding the User struct
-			var elem ErrorResponse
+			var elem ValidationErrorResponse
 
 			elem.FailedField = err.Field() // Export struct field name
 			elem.Tag = err.Tag()           // Export struct tag
@@ -39,4 +38,20 @@ func (v XValidator) Validate(data interface{}) []ErrorResponse {
 	}
 
 	return validationErrors
+}
+
+func Bind(c *fiber.Ctx, target interface{}) []ValidationErrorResponse {
+	if err := c.BodyParser(target); err != nil {
+		return []ValidationErrorResponse{
+			{
+				Error:       true,
+				FailedField: "body",
+				Tag:         err.Error(),
+			},
+		}
+	}
+	if errArr := Validator.Validate(target); len(errArr) != 0 {
+		return errArr
+	}
+	return nil
 }

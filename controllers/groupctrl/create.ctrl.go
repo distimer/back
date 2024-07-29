@@ -19,7 +19,6 @@ const (
 )
 
 type createGroupReq struct {
-	dto.BaseDTO
 	Name           string `json:"name" validate:"required" example:"name between 3 and 30"`
 	Nickname       string `json:"nickname" validate:"required" example:"nickname between 1 and 20"`
 	Description    string `json:"description" example:"description between 0 and 100"`
@@ -49,7 +48,9 @@ type createGroupRes struct {
 func CreateGroup(c *fiber.Ctx) error {
 	data := new(createGroupReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 	if utf8.RuneCountInString(data.Nickname) < 1 || utf8.RuneCountInString(data.Nickname) > 20 {
 		return c.Status(400).JSON(fiber.Map{

@@ -31,7 +31,9 @@ type createCategoryRes struct {
 func CreateCategory(c *fiber.Ctx) error {
 	data := new(createCategoryReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 	if utf8.RuneCountInString(data.Name) < 1 || utf8.RuneCountInString(data.Name) > 20 {
 		return c.Status(400).JSON(fiber.Map{

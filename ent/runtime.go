@@ -7,11 +7,13 @@ import (
 
 	"github.com/google/uuid"
 	"pentag.kr/distimer/ent/affiliation"
+	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/schema"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
@@ -26,6 +28,12 @@ func init() {
 	affiliationDescJoinedAt := affiliationFields[4].Descriptor()
 	// affiliation.DefaultJoinedAt holds the default value on creation for the joined_at field.
 	affiliation.DefaultJoinedAt = affiliationDescJoinedAt.Default.(func() time.Time)
+	categoryFields := schema.Category{}.Fields()
+	_ = categoryFields
+	// categoryDescID is the schema descriptor for id field.
+	categoryDescID := categoryFields[0].Descriptor()
+	// category.DefaultID holds the default value on creation for the id field.
+	category.DefaultID = categoryDescID.Default.(func() uuid.UUID)
 	groupFields := schema.Group{}.Fields()
 	_ = groupFields
 	// groupDescDescription is the schema descriptor for description field.
@@ -62,6 +70,12 @@ func init() {
 	studylogDescID := studylogFields[0].Descriptor()
 	// studylog.DefaultID holds the default value on creation for the id field.
 	studylog.DefaultID = studylogDescID.Default.(func() uuid.UUID)
+	subjectFields := schema.Subject{}.Fields()
+	_ = subjectFields
+	// subjectDescID is the schema descriptor for id field.
+	subjectDescID := subjectFields[0].Descriptor()
+	// subject.DefaultID holds the default value on creation for the id field.
+	subject.DefaultID = subjectDescID.Default.(func() uuid.UUID)
 	timerFields := schema.Timer{}.Fields()
 	_ = timerFields
 	// timerDescStartAt is the schema descriptor for start_at field.

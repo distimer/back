@@ -16,7 +16,7 @@ type Category struct {
 // Fields of the Category.
 func (Category) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}),
+		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
 		field.String("name"),
 	}
 }

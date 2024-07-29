@@ -54,7 +54,9 @@ func CreateStudyLog(c *fiber.Ctx) error {
 
 	data := new(createStudyLogReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 	if utf8.RuneCountInString(data.Content) > 30 {
 		return c.Status(400).JSON(fiber.Map{

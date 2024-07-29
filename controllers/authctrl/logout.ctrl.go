@@ -12,7 +12,6 @@ import (
 )
 
 type logoutTokenReq struct {
-	dto.BaseDTO
 	RefreshToken string `json:"refresh_token" validate:"required,uuid"`
 }
 
@@ -26,7 +25,9 @@ type logoutTokenReq struct {
 func Logout(c *fiber.Ctx) error {
 	data := new(logoutTokenReq)
 	if err := dto.Bind(c, data); err != nil {
-		return err
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 	dbConn := db.GetDBClient()
 	refreshToken := uuid.MustParse(data.RefreshToken)
