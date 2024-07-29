@@ -33,7 +33,9 @@ func main() {
 
 	app := fiber.New()
 	if configs.Env.LogLevel == "DEBUG" {
-		app.Get("/swagger/*", swagger.HandlerDefault) // default
+		swaggerConf := swagger.ConfigDefault
+		swaggerConf.CustomStyle = configs.SwaggerDarkStyle
+		app.Get("/swagger/*", swagger.New(swaggerConf)) // default
 	}
 
 	// Register routers

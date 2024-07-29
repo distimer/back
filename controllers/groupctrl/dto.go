@@ -10,7 +10,7 @@ type groupDTO struct {
 	CreateAt       string `json:"create_at" validate:"required"`
 }
 
-type affiliationDTO struct {
+type AffiliationDTO struct {
 	GroupID  string `json:"group_id" validate:"required"`
 	UserID   string `json:"user_id" validate:"required"`
 	Nickname string `json:"nickname" validate:"required" example:"nickname between 1 and 20"`

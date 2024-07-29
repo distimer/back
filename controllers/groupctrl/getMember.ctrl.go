@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @Security Bearer
 // @Param id path string true "group id"
-// @Success 200 {array} affiliationDTO
+// @Success 200 {array} AffiliationDTO
 // @Router /group/member/{id} [get]
 func GetAllGroupMembers(c *fiber.Ctx) error {
 	groupIDStr := c.Params("id")
@@ -52,9 +52,9 @@ func GetAllGroupMembers(c *fiber.Ctx) error {
 		})
 	}
 
-	result := make([]affiliationDTO, len(affiliations))
+	result := make([]AffiliationDTO, len(affiliations))
 	for i, affiliation := range affiliations {
-		result[i] = affiliationDTO{
+		result[i] = AffiliationDTO{
 			UserID:   affiliation.UserID.String(),
 			GroupID:  affiliation.GroupID.String(),
 			Nickname: affiliation.Nickname,

@@ -6,6 +6,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"pentag.kr/distimer/controllers/groupctrl"
+	"pentag.kr/distimer/controllers/subjectctrl"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
@@ -19,7 +21,7 @@ import (
 // @Produce json
 // @Security Bearer
 // @Param id path string true "Group ID"
-// @Success 200 {array} timerDTO
+// @Success 200 {array} timerWithEdgeInfoDTO
 // @Failure 400
 // @Failure 403
 // @Failure 404
@@ -60,20 +62,39 @@ func GetTimerByGroup(c *fiber.Ctx) error {
 		})
 	}
 
-	timers, err := affiliationObj.Edges.Group.QuerySharedTimer().All(context.Background())
+	timers, err := affiliationObj.Edges.Group.QuerySharedTimer().WithUser().WithSubject().All(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
 	}
-	result := make([]timerDTO, len(timers))
+	result := make([]timerWithEdgeInfoDTO, len(timers))
 	for i, timer := range timers {
-		result[i] = timerDTO{
-			ID:        timer.ID.String(),
-			SubjectID: timer.SubjectID.String(),
-			Content:   timer.Content,
-			StartAt:   timer.StartAt.Format(time.RFC3339),
+
+		affiliationObj, err := timer.Edges.User.QueryAffiliations().Where(affiliation.GroupID(groupID)).Only(context.Background())
+		if err != nil {
+			logger.Error(c, err)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Internal server error",
+			})
+		}
+		result[i] = timerWithEdgeInfoDTO{
+			ID: timer.ID.String(),
+			Subject: subjectctrl.SubjectDTO{
+				ID:    timer.Edges.Subject.ID.String(),
+				Name:  timer.Edges.Subject.Name,
+				Color: timer.Edges.Subject.Color,
+			},
+			Content: timer.Content,
+			StartAt: timer.StartAt.Format(time.RFC3339),
+			Affiliation: groupctrl.AffiliationDTO{
+				GroupID:  affiliationObj.GroupID.String(),
+				UserID:   affiliationObj.UserID.String(),
+				Role:     affiliationObj.Role,
+				Nickname: affiliationObj.Nickname,
+				JoinedAt: affiliationObj.JoinedAt.Format(time.RFC3339),
+			},
 		}
 	}
 	return c.JSON(result)
