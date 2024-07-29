@@ -30,6 +30,10 @@ type loginRes struct {
 // @Produce json
 // @Param request body authctrl.oauthLoginReq true "oauthLoginReq"
 // @Success 200 {object} loginRes
+// @Success 201 {object} loginRes
+// @Failure 400
+// @Failure 401
+// @Failure 500
 // @Router /auth/oauth/google [post]
 func GoogleOauthLogin(c *fiber.Ctx) error {
 	data := new(oauthLoginReq)
@@ -46,6 +50,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 	var findUser *ent.User
+	new := false
 	findUser, err = dbConn.User.Query().Where(user.And(user.OauthID(claims.SUB), user.OauthProvider(1))).Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -87,6 +92,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 					"error": "Internal server error",
 				})
 			}
+			new = true
 		} else {
 			logger.Error(c, err)
 			return c.Status(500).JSON(fiber.Map{
@@ -111,6 +117,16 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 	// create new access token
 	newAccessToken := crypt.NewJWT(findUser.ID)
 
+	if new {
+		return c.Status(201).JSON(
+			loginRes{
+				UserID:       findUser.ID.String(),
+				Name:         findUser.Name,
+				AccessToken:  newAccessToken,
+				RefreshToken: newRefreshToken.String(),
+			},
+		)
+	}
 	return c.JSON(
 		loginRes{
 			UserID:       findUser.ID.String(),
@@ -127,6 +143,10 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 // @Produce json
 // @Param request body authctrl.oauthLoginReq true "oauthLoginReq"
 // @Success 200 {object} loginRes
+// @Success 201 {object} loginRes
+// @Failure 400
+// @Failure 401
+// @Failure 500
 // @Router /auth/oauth/apple [post]
 func AppleOauthLogin(c *fiber.Ctx) error {
 	data := new(oauthLoginReq)
@@ -142,6 +162,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 	}
 	dbConn := db.GetDBClient()
 	var findUser *ent.User
+	new := false
 	findUser, err = dbConn.User.Query().Where(user.And(user.OauthID(claims.Sub), user.OauthProvider(0))).Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -158,6 +179,31 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 					"error": "Internal server error",
 				})
 			}
+			// add Default Category
+			categoryObj, err := dbConn.Category.Create().
+				SetName("미분류").
+				SetUserID(userID).
+				Save(context.Background())
+			if err != nil {
+				logger.Error(c, err)
+				return c.Status(500).JSON(fiber.Map{
+					"error": "Internal server error",
+				})
+			}
+
+			// add Default Subject
+			_, err = dbConn.Subject.Create().
+				SetName("미분류").
+				SetColor(0).
+				SetCategory(categoryObj).
+				Save(context.Background())
+			if err != nil {
+				logger.Error(c, err)
+				return c.Status(500).JSON(fiber.Map{
+					"error": "Internal server error",
+				})
+			}
+			new = true
 		} else {
 			logger.Error(c, err)
 			return c.Status(500).JSON(fiber.Map{
@@ -181,7 +227,16 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 
 	// create new access token
 	newAccessToken := crypt.NewJWT(findUser.ID)
-
+	if new {
+		return c.Status(201).JSON(
+			loginRes{
+				UserID:       findUser.ID.String(),
+				Name:         findUser.Name,
+				AccessToken:  newAccessToken,
+				RefreshToken: newRefreshToken.String(),
+			},
+		)
+	}
 	return c.JSON(
 		loginRes{
 			UserID:       findUser.ID.String(),

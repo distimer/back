@@ -74,6 +74,21 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/authctrl.loginRes"
                         }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/authctrl.loginRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -107,6 +122,21 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/authctrl.loginRes"
                         }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/authctrl.loginRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -1321,6 +1351,13 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ent.StudyLog"
                     }
+                },
+                "shared_timer": {
+                    "description": "SharedTimer holds the value of the shared_timer edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Timer"
+                    }
                 }
             }
         },
@@ -1495,6 +1532,70 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ent.StudyLog"
                     }
+                },
+                "timers": {
+                    "description": "Timers holds the value of the timers edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Timer"
+                    }
+                }
+            }
+        },
+        "ent.Timer": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "Content holds the value of the \"content\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the TimerQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.TimerEdges"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "start_at": {
+                    "description": "StartAt holds the value of the \"start_at\" field.",
+                    "type": "string"
+                },
+                "user_id": {
+                    "description": "UserID holds the value of the \"user_id\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.TimerEdges": {
+            "type": "object",
+            "properties": {
+                "shared_group": {
+                    "description": "SharedGroup holds the value of the shared_group edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Group"
+                    }
+                },
+                "subject": {
+                    "description": "Subject holds the value of the subject edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.Subject"
+                        }
+                    ]
+                },
+                "user": {
+                    "description": "User holds the value of the user edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.User"
+                        }
+                    ]
                 }
             }
         },
@@ -1575,6 +1676,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/ent.StudyLog"
                     }
+                },
+                "timers": {
+                    "description": "Timers holds the value of the timers edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/ent.Timer"
+                        }
+                    ]
                 }
             }
         },
