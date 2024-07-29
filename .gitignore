@@ -14,6 +14,3 @@ go.work
 .DS_Store
 
 tmp
-
-docs/swagger.json
-docs/swagger.yaml

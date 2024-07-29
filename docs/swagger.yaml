@@ -1,0 +1,1457 @@
+basePath: /
+definitions:
+  authctrl.loginRes:
+    properties:
+      access_token:
+        type: string
+      name:
+        type: string
+      refresh_token:
+        type: string
+      user_id:
+        type: string
+    type: object
+  authctrl.logoutTokenReq:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  authctrl.oauthLoginReq:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  authctrl.refreshTokenReq:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  authctrl.refreshTokenRes:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  categoryctrl.createCategoryReq:
+    properties:
+      name:
+        example: name between 1 and 20
+        type: string
+    required:
+    - name
+    type: object
+  categoryctrl.createCategoryRes:
+    properties:
+      category:
+        $ref: '#/definitions/ent.Category'
+    type: object
+  categoryctrl.getCategoryListRes:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/ent.Category'
+        type: array
+    type: object
+  ent.Affiliation:
+    properties:
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.AffiliationEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the AffiliationQuery when eager-loading is set.
+      group_id:
+        description: GroupID holds the value of the "group_id" field.
+        type: string
+      joined_at:
+        description: JoinedAt holds the value of the "joined_at" field.
+        type: string
+      nickname:
+        description: Nickname holds the value of the "nickname" field.
+        type: string
+      role:
+        description: Role holds the value of the "role" field.
+        type: integer
+      user_id:
+        description: UserID holds the value of the "user_id" field.
+        type: string
+    type: object
+  ent.AffiliationEdges:
+    properties:
+      group:
+        allOf:
+        - $ref: '#/definitions/ent.Group'
+        description: Group holds the value of the group edge.
+      user:
+        allOf:
+        - $ref: '#/definitions/ent.User'
+        description: User holds the value of the user edge.
+    type: object
+  ent.Category:
+    properties:
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.CategoryEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the CategoryQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+    type: object
+  ent.CategoryEdges:
+    properties:
+      subjects:
+        description: Subjects holds the value of the subjects edge.
+        items:
+          $ref: '#/definitions/ent.Subject'
+        type: array
+      user:
+        allOf:
+        - $ref: '#/definitions/ent.User'
+        description: User holds the value of the user edge.
+    type: object
+  ent.Group:
+    properties:
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      description:
+        description: Description holds the value of the "description" field.
+        type: string
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.GroupEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the GroupQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      invite_policy:
+        description: InvitePolicy holds the value of the "invite_policy" field.
+        type: integer
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      nickname_policy:
+        description: NicknamePolicy holds the value of the "nickname_policy" field.
+        type: string
+      reveal_policy:
+        description: RevealPolicy holds the value of the "reveal_policy" field.
+        type: integer
+    type: object
+  ent.GroupEdges:
+    properties:
+      invite_codes:
+        description: InviteCodes holds the value of the invite_codes edge.
+        items:
+          $ref: '#/definitions/ent.InviteCode'
+        type: array
+      members:
+        description: Members holds the value of the members edge.
+        items:
+          $ref: '#/definitions/ent.User'
+        type: array
+      owner:
+        allOf:
+        - $ref: '#/definitions/ent.User'
+        description: Owner holds the value of the owner edge.
+      shared_study_logs:
+        description: SharedStudyLogs holds the value of the shared_study_logs edge.
+        items:
+          $ref: '#/definitions/ent.StudyLog'
+        type: array
+      shared_timer:
+        description: SharedTimer holds the value of the shared_timer edge.
+        items:
+          $ref: '#/definitions/ent.Timer'
+        type: array
+    type: object
+  ent.InviteCode:
+    properties:
+      code:
+        description: Code holds the value of the "code" field.
+        type: string
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.InviteCodeEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the InviteCodeQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: integer
+      used:
+        description: Used holds the value of the "used" field.
+        type: integer
+    type: object
+  ent.InviteCodeEdges:
+    properties:
+      group:
+        allOf:
+        - $ref: '#/definitions/ent.Group'
+        description: Group holds the value of the group edge.
+    type: object
+  ent.RefreshToken:
+    properties:
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.RefreshTokenEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the RefreshTokenQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+    type: object
+  ent.RefreshTokenEdges:
+    properties:
+      user:
+        allOf:
+        - $ref: '#/definitions/ent.User'
+        description: User holds the value of the user edge.
+    type: object
+  ent.StudyLog:
+    properties:
+      content:
+        description: Content holds the value of the "content" field.
+        type: string
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.StudyLogEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the StudyLogQuery when eager-loading is set.
+      end_at:
+        description: EndAt holds the value of the "end_at" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: string
+      start_at:
+        description: StartAt holds the value of the "start_at" field.
+        type: string
+    type: object
+  ent.StudyLogEdges:
+    properties:
+      shared_group:
+        description: SharedGroup holds the value of the shared_group edge.
+        items:
+          $ref: '#/definitions/ent.Group'
+        type: array
+      subject:
+        allOf:
+        - $ref: '#/definitions/ent.Subject'
+        description: Subject holds the value of the subject edge.
+      user:
+        allOf:
+        - $ref: '#/definitions/ent.User'
+        description: User holds the value of the user edge.
+    type: object
+  ent.Subject:
+    properties:
+      color:
+        description: Color holds the value of the "color" field.
+        type: string
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.SubjectEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the SubjectQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+    type: object
+  ent.SubjectEdges:
+    properties:
+      category:
+        allOf:
+        - $ref: '#/definitions/ent.Category'
+        description: Category holds the value of the category edge.
+      study_logs:
+        description: StudyLogs holds the value of the study_logs edge.
+        items:
+          $ref: '#/definitions/ent.StudyLog'
+        type: array
+      timers:
+        description: Timers holds the value of the timers edge.
+        items:
+          $ref: '#/definitions/ent.Timer'
+        type: array
+    type: object
+  ent.Timer:
+    properties:
+      content:
+        description: Content holds the value of the "content" field.
+        type: string
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.TimerEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the TimerQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      start_at:
+        description: StartAt holds the value of the "start_at" field.
+        type: string
+      user_id:
+        description: UserID holds the value of the "user_id" field.
+        type: string
+    type: object
+  ent.TimerEdges:
+    properties:
+      shared_group:
+        description: SharedGroup holds the value of the shared_group edge.
+        items:
+          $ref: '#/definitions/ent.Group'
+        type: array
+      subject:
+        allOf:
+        - $ref: '#/definitions/ent.Subject'
+        description: Subject holds the value of the subject edge.
+      user:
+        allOf:
+        - $ref: '#/definitions/ent.User'
+        description: User holds the value of the user edge.
+    type: object
+  ent.User:
+    properties:
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      edges:
+        allOf:
+        - $ref: '#/definitions/ent.UserEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the UserQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      oauth_id:
+        description: OauthID holds the value of the "oauth_id" field.
+        type: string
+      oauth_provider:
+        description: OauthProvider holds the value of the "oauth_provider" field.
+        type: integer
+    type: object
+  ent.UserEdges:
+    properties:
+      affiliations:
+        description: Affiliations holds the value of the affiliations edge.
+        items:
+          $ref: '#/definitions/ent.Affiliation'
+        type: array
+      joined_groups:
+        description: JoinedGroups holds the value of the joined_groups edge.
+        items:
+          $ref: '#/definitions/ent.Group'
+        type: array
+      owned_categories:
+        description: OwnedCategories holds the value of the owned_categories edge.
+        items:
+          $ref: '#/definitions/ent.Category'
+        type: array
+      owned_groups:
+        description: OwnedGroups holds the value of the owned_groups edge.
+        items:
+          $ref: '#/definitions/ent.Group'
+        type: array
+      refresh_tokens:
+        description: RefreshTokens holds the value of the refresh_tokens edge.
+        items:
+          $ref: '#/definitions/ent.RefreshToken'
+        type: array
+      study_logs:
+        description: StudyLogs holds the value of the study_logs edge.
+        items:
+          $ref: '#/definitions/ent.StudyLog'
+        type: array
+      timers:
+        allOf:
+        - $ref: '#/definitions/ent.Timer'
+        description: Timers holds the value of the timers edge.
+    type: object
+  groupctrl.createGroupReq:
+    properties:
+      description:
+        example: description between 0 and 100
+        type: string
+      invite_policy:
+        maximum: 2
+        minimum: 0
+        type: integer
+      name:
+        example: name between 3 and 30
+        type: string
+      nickname:
+        example: nickname between 1 and 20
+        type: string
+      nickname_policy:
+        example: nickname_policy between 0 and 50
+        type: string
+      reveal_policy:
+        maximum: 2
+        minimum: 0
+        type: integer
+    required:
+    - invite_policy
+    - name
+    - nickname
+    - reveal_policy
+    type: object
+  groupctrl.getAllGroupMembersRes:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/ent.Affiliation'
+        type: array
+    type: object
+  groupctrl.getJoinedGroupsRes:
+    properties:
+      joined_groups:
+        items:
+          $ref: '#/definitions/ent.Group'
+        type: array
+    type: object
+  groupctrl.joinReq:
+    properties:
+      invite_code:
+        type: string
+    required:
+    - invite_code
+    type: object
+  groupctrl.joinRes:
+    properties:
+      group:
+        $ref: '#/definitions/ent.Group'
+    type: object
+  groupctrl.modifyGroupInfoReq:
+    properties:
+      description:
+        example: description between 0 and 100
+        type: string
+      name:
+        example: name between 3 and 30
+        type: string
+    required:
+    - name
+    type: object
+  groupctrl.modifyGroupInfoRes:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  groupctrl.modifyGroupPolicyReq:
+    properties:
+      invite_policy:
+        maximum: 2
+        minimum: 0
+        type: integer
+      reveal_policy:
+        maximum: 2
+        minimum: 0
+        type: integer
+    required:
+    - invite_policy
+    - reveal_policy
+    type: object
+  groupctrl.modifyGroupPolicyRes:
+    properties:
+      invite_policy:
+        maximum: 2
+        minimum: 0
+        type: integer
+      reveal_policy:
+        maximum: 2
+        minimum: 0
+        type: integer
+    required:
+    - invite_policy
+    - reveal_policy
+    type: object
+  invitectrl.inviteCodeInfoRes:
+    properties:
+      group_description:
+        type: string
+      group_name:
+        type: string
+      group_owner_nickname:
+        type: string
+    type: object
+  invitectrl.inviteGroupRes:
+    properties:
+      code:
+        type: string
+    type: object
+  studylogctrl.createStudyLogReq:
+    properties:
+      content:
+        example: content between 0 and 30
+        type: string
+      end_at:
+        example: "2020-08-28T09:20:26.187+09:00"
+        type: string
+      groups_to_share:
+        example:
+        - group_id
+        items:
+          type: string
+        type: array
+      start_at:
+        example: "2020-08-28T09:20:26.187+09:00"
+        type: string
+      subject_id:
+        example: subject_id
+        type: string
+    required:
+    - content
+    - end_at
+    - groups_to_share
+    - start_at
+    - subject_id
+    type: object
+  studylogctrl.createStudyLogRes:
+    properties:
+      content:
+        type: string
+      end_at:
+        type: string
+      groups_to_share:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      start_at:
+        type: string
+      subject_id:
+        type: string
+    type: object
+  studylogctrl.dailyStudyLog:
+    properties:
+      date:
+        type: string
+      log:
+        items:
+          $ref: '#/definitions/studylogctrl.dailySubjectLog'
+        type: array
+    type: object
+  studylogctrl.dailySubjectLog:
+    properties:
+      study_time:
+        type: integer
+      subject_id:
+        type: string
+    type: object
+  studylogctrl.getStudyLogListRes:
+    properties:
+      studyLogs:
+        items:
+          $ref: '#/definitions/ent.StudyLog'
+        type: array
+    type: object
+  studylogctrl.getStudyLogRes:
+    properties:
+      study_logs:
+        items:
+          $ref: '#/definitions/ent.StudyLog'
+        type: array
+    type: object
+  subjectctrl.createSubjectReq:
+    properties:
+      color:
+        type: string
+      name:
+        example: name between 1 and 20
+        type: string
+    required:
+    - color
+    - name
+    type: object
+  subjectctrl.createSubjectRes:
+    properties:
+      color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  subjectctrl.modifySubjectInfoRequest:
+    properties:
+      color:
+        type: string
+      name:
+        example: name between 1 and 20
+        type: string
+    required:
+    - color
+    - name
+    type: object
+  subjectctrl.modifySubjectInfoResponse:
+    properties:
+      color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  timerctrl.TimerInfo:
+    properties:
+      timer:
+        $ref: '#/definitions/ent.Timer'
+    type: object
+  timerctrl.createTimerReq:
+    properties:
+      content:
+        type: string
+      subject_id:
+        type: string
+    required:
+    - content
+    - subject_id
+    type: object
+  timerctrl.createTimerRes:
+    properties:
+      content:
+        type: string
+      id:
+        type: string
+      start_at:
+        type: string
+      subject_id:
+        type: string
+    type: object
+  userctrl.modifyUserInfoReq:
+    properties:
+      name:
+        example: name between 1 and 20
+        type: string
+    required:
+    - name
+    type: object
+  userctrl.modifyUserInfoRes:
+    properties:
+      name:
+        type: string
+      user_id:
+        type: string
+    type: object
+  userctrl.myUserInfoRes:
+    properties:
+      created_at:
+        type: string
+      name:
+        type: string
+      user_id:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  title: Distimer Swagger API
+  version: "1.0"
+paths:
+  /auth/logout:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: logoutTokenReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/authctrl.logoutTokenReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Logout
+      tags:
+      - Auth
+  /auth/oauth/apple:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: oauthLoginReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/authctrl.oauthLoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authctrl.loginRes'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/authctrl.loginRes'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Apple Oauth Login
+      tags:
+      - Auth
+  /auth/oauth/google:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: oauthLoginReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/authctrl.oauthLoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authctrl.loginRes'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/authctrl.loginRes'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Google Oauth Login
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: refreshTokenReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/authctrl.refreshTokenReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authctrl.refreshTokenRes'
+      summary: Refresh Token
+      tags:
+      - Auth
+  /category:
+    get:
+      consumes:
+      - application/json
+      description: '[EDGE INCLUDED!]Subject list is included in each category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/categoryctrl.getCategoryListRes'
+      security:
+      - Bearer: []
+      summary: Get Category List
+      tags:
+      - Category
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: createCategoryReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/categoryctrl.createCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/categoryctrl.createCategoryRes'
+      security:
+      - Bearer: []
+      summary: Create Category
+      tags:
+      - Category
+  /category/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Delete Category
+      tags:
+      - Category
+  /group:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupctrl.getJoinedGroupsRes'
+      security:
+      - Bearer: []
+      summary: Get All Joined Groups
+      tags:
+      - Group
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: createGroupReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/groupctrl.createGroupReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      security:
+      - Bearer: []
+      summary: Create Group
+      tags:
+      - Group
+  /group/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Delete Group
+      tags:
+      - Group
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: modifyGroupInfoReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/groupctrl.modifyGroupInfoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupctrl.modifyGroupInfoRes'
+      security:
+      - Bearer: []
+      summary: Modify Group Info
+      tags:
+      - Group
+  /group/invite/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      security:
+      - Bearer: []
+      summary: Get Invite Code List
+      tags:
+      - Invite
+  /group/join:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: joinReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/groupctrl.joinReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupctrl.joinRes'
+      security:
+      - Bearer: []
+      summary: Join Group with Invite Code
+      tags:
+      - Group
+  /group/member/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupctrl.getAllGroupMembersRes'
+      security:
+      - Bearer: []
+      summary: Get All Group Members
+      tags:
+      - Group
+  /group/policy/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: modifyGroupPolicyReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/groupctrl.modifyGroupPolicyReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupctrl.modifyGroupPolicyRes'
+      security:
+      - Bearer: []
+      summary: Modify Group Policy
+      tags:
+      - Group
+  /invite/{code}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: invite code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/invitectrl.inviteCodeInfoRes'
+      security:
+      - Bearer: []
+      summary: Get Invite Code Info
+      tags:
+      - Invite
+  /invite/group/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/invitectrl.inviteGroupRes'
+      security:
+      - Bearer: []
+      summary: Invite to Group
+      tags:
+      - Invite
+  /invite/group/{id}/{code}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: invite code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Delete Invite Code
+      tags:
+      - Invite
+  /studylog:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: count
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studylogctrl.getStudyLogListRes'
+      security:
+      - Bearer: []
+      summary: Get All My Study Logs
+      tags:
+      - StudyLog
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: createStudyLogReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/studylogctrl.createStudyLogReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studylogctrl.createStudyLogRes'
+        "400":
+          description: Bad Request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Create Study Log
+      tags:
+      - StudyLog
+  /studylog/statistics/term:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: "2006-01-02"
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: "2006-01-03"
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/studylogctrl.dailyStudyLog'
+            type: array
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get Statistics with Term
+      tags:
+      - StudyLog
+  /studylog/subject/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: count
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studylogctrl.getStudyLogRes'
+      security:
+      - Bearer: []
+      summary: Get Study Log with Subject
+      tags:
+      - StudyLog
+  /subject/{id}:
+    delete:
+      parameters:
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Delete Subject
+      tags:
+      - Subject
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: createSubjectReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/subjectctrl.createSubjectReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/subjectctrl.createSubjectRes'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Create Subject
+      tags:
+      - Subject
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: modifySubjectInfoRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/subjectctrl.modifySubjectInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/subjectctrl.modifySubjectInfoResponse'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Modify Subject Info
+      tags:
+      - Subject
+  /timer:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Delete the timer of the user
+      tags:
+      - Timer
+    get:
+      consumes:
+      - application/json
+      description: '[EDGE INCLUDED!]Subject info is included in timer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/timerctrl.TimerInfo'
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get My Timer Info
+      tags:
+      - Timer
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: createTimerReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/timerctrl.createTimerReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/timerctrl.createTimerRes'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Create Timer
+      tags:
+      - Timer
+  /timer/group/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ent.Timer'
+            type: array
+        "400":
+          description: Bad Request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get Timer by Group
+      tags:
+      - Timer
+  /user:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userctrl.myUserInfoRes'
+      security:
+      - Bearer: []
+      summary: Get My User Info
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: modifyUserInfoReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userctrl.modifyUserInfoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userctrl.modifyUserInfoRes'
+      security:
+      - Bearer: []
+      summary: Modify User Info
+      tags:
+      - User
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -16,10 +16,10 @@ import (
 // @title Distimer Swagger API
 // @version	1.0
 // @host localhost:3000
+// @BasePath  /
 // @securityDefinitions.apikey Bearer
 // @in header
 // @name Authorization
-// @BasePath /
 func main() {
 
 	// Load environment variables
