@@ -71,6 +71,11 @@ func OauthProvider(v int8) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldOauthProvider, v))
 }
 
+// TermsAgreed applies equality check predicate on the "terms_agreed" field. It's identical to TermsAgreedEQ.
+func TermsAgreed(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTermsAgreed, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))
@@ -244,6 +249,16 @@ func OauthProviderLT(v int8) predicate.User {
 // OauthProviderLTE applies the LTE predicate on the "oauth_provider" field.
 func OauthProviderLTE(v int8) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldOauthProvider, v))
+}
+
+// TermsAgreedEQ applies the EQ predicate on the "terms_agreed" field.
+func TermsAgreedEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTermsAgreed, v))
+}
+
+// TermsAgreedNEQ applies the NEQ predicate on the "terms_agreed" field.
+func TermsAgreedNEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldTermsAgreed, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

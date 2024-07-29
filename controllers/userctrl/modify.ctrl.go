@@ -12,11 +12,13 @@ import (
 )
 
 type modifyUserInfoReq struct {
-	Name string `json:"name" validate:"required" example:"name between 1 and 20"`
+	Name        string `json:"name" validate:"required" example:"name between 1 and 20"`
+	TermsAgreed bool   `json:"terms_agreed"`
 }
 type modifyUserInfoRes struct {
-	UserID string `json:"user_id"`
-	Name   string `json:"name"`
+	UserID      string `json:"user_id"`
+	Name        string `json:"name"`
+	TermsAgreed bool   `json:"terms_agreed"`
 }
 
 // @Summary Modify User Info
@@ -44,7 +46,7 @@ func ModifyUserInfo(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 
-	_, err := dbConn.User.UpdateOneID(userID).SetName(data.Name).Save(context.Background())
+	_, err := dbConn.User.UpdateOneID(userID).SetName(data.Name).SetTermsAgreed(data.TermsAgreed).Save(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{

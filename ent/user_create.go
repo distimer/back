@@ -52,6 +52,20 @@ func (uc *UserCreate) SetOauthProvider(i int8) *UserCreate {
 	return uc
 }
 
+// SetTermsAgreed sets the "terms_agreed" field.
+func (uc *UserCreate) SetTermsAgreed(b bool) *UserCreate {
+	uc.mutation.SetTermsAgreed(b)
+	return uc
+}
+
+// SetNillableTermsAgreed sets the "terms_agreed" field if the given value is not nil.
+func (uc *UserCreate) SetNillableTermsAgreed(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetTermsAgreed(*b)
+	}
+	return uc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
@@ -205,6 +219,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultName
 		uc.mutation.SetName(v)
 	}
+	if _, ok := uc.mutation.TermsAgreed(); !ok {
+		v := user.DefaultTermsAgreed
+		uc.mutation.SetTermsAgreed(v)
+	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		v := user.DefaultCreatedAt()
 		uc.mutation.SetCreatedAt(v)
@@ -221,6 +239,9 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.OauthProvider(); !ok {
 		return &ValidationError{Name: "oauth_provider", err: errors.New(`ent: missing required field "User.oauth_provider"`)}
+	}
+	if _, ok := uc.mutation.TermsAgreed(); !ok {
+		return &ValidationError{Name: "terms_agreed", err: errors.New(`ent: missing required field "User.terms_agreed"`)}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
@@ -271,6 +292,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.OauthProvider(); ok {
 		_spec.SetField(user.FieldOauthProvider, field.TypeInt8, value)
 		_node.OauthProvider = value
+	}
+	if value, ok := uc.mutation.TermsAgreed(); ok {
+		_spec.SetField(user.FieldTermsAgreed, field.TypeBool, value)
+		_node.TermsAgreed = value
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

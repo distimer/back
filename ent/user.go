@@ -25,6 +25,8 @@ type User struct {
 	OauthID string `json:"oauth_id,omitempty"`
 	// OauthProvider holds the value of the "oauth_provider" field.
 	OauthProvider int8 `json:"oauth_provider,omitempty"`
+	// TermsAgreed holds the value of the "terms_agreed" field.
+	TermsAgreed bool `json:"terms_agreed,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -124,6 +126,8 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case user.FieldTermsAgreed:
+			values[i] = new(sql.NullBool)
 		case user.FieldOauthProvider:
 			values[i] = new(sql.NullInt64)
 		case user.FieldName, user.FieldOauthID:
@@ -170,6 +174,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field oauth_provider", values[i])
 			} else if value.Valid {
 				u.OauthProvider = int8(value.Int64)
+			}
+		case user.FieldTermsAgreed:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field terms_agreed", values[i])
+			} else if value.Valid {
+				u.TermsAgreed = value.Bool
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -256,6 +266,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("oauth_provider=")
 	builder.WriteString(fmt.Sprintf("%v", u.OauthProvider))
+	builder.WriteString(", ")
+	builder.WriteString("terms_agreed=")
+	builder.WriteString(fmt.Sprintf("%v", u.TermsAgreed))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))

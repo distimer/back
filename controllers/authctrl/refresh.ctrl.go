@@ -51,7 +51,7 @@ func Refresh(c *fiber.Ctx) error {
 		})
 	}
 
-	ownerID, err := refreshTokenObj.QueryUser().OnlyID(context.Background())
+	owner, err := refreshTokenObj.QueryUser().Only(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
@@ -59,7 +59,7 @@ func Refresh(c *fiber.Ctx) error {
 		})
 	}
 
-	newAccessToken := crypt.NewJWT(ownerID)
+	newAccessToken := crypt.NewJWT(owner.ID, owner.TermsAgreed)
 	newRefrshToken := uuid.New()
 
 	err = dbConn.RefreshToken.DeleteOne(refreshTokenObj).Exec(context.Background())
@@ -72,7 +72,7 @@ func Refresh(c *fiber.Ctx) error {
 
 	_, err = dbConn.RefreshToken.Create().
 		SetID(newRefrshToken).
-		SetUserID(ownerID).
+		SetUser(owner).
 		Save(context.Background())
 	if err != nil {
 		logger.Error(c, err)

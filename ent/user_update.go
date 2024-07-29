@@ -82,6 +82,20 @@ func (uu *UserUpdate) AddOauthProvider(i int8) *UserUpdate {
 	return uu
 }
 
+// SetTermsAgreed sets the "terms_agreed" field.
+func (uu *UserUpdate) SetTermsAgreed(b bool) *UserUpdate {
+	uu.mutation.SetTermsAgreed(b)
+	return uu
+}
+
+// SetNillableTermsAgreed sets the "terms_agreed" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableTermsAgreed(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetTermsAgreed(*b)
+	}
+	return uu
+}
+
 // AddJoinedGroupIDs adds the "joined_groups" edge to the Group entity by IDs.
 func (uu *UserUpdate) AddJoinedGroupIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddJoinedGroupIDs(ids...)
@@ -339,6 +353,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.AddedOauthProvider(); ok {
 		_spec.AddField(user.FieldOauthProvider, field.TypeInt8, value)
+	}
+	if value, ok := uu.mutation.TermsAgreed(); ok {
+		_spec.SetField(user.FieldTermsAgreed, field.TypeBool, value)
 	}
 	if uu.mutation.JoinedGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -675,6 +692,20 @@ func (uuo *UserUpdateOne) AddOauthProvider(i int8) *UserUpdateOne {
 	return uuo
 }
 
+// SetTermsAgreed sets the "terms_agreed" field.
+func (uuo *UserUpdateOne) SetTermsAgreed(b bool) *UserUpdateOne {
+	uuo.mutation.SetTermsAgreed(b)
+	return uuo
+}
+
+// SetNillableTermsAgreed sets the "terms_agreed" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableTermsAgreed(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetTermsAgreed(*b)
+	}
+	return uuo
+}
+
 // AddJoinedGroupIDs adds the "joined_groups" edge to the Group entity by IDs.
 func (uuo *UserUpdateOne) AddJoinedGroupIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddJoinedGroupIDs(ids...)
@@ -962,6 +993,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.AddedOauthProvider(); ok {
 		_spec.AddField(user.FieldOauthProvider, field.TypeInt8, value)
+	}
+	if value, ok := uuo.mutation.TermsAgreed(); ok {
+		_spec.SetField(user.FieldTermsAgreed, field.TypeBool, value)
 	}
 	if uuo.mutation.JoinedGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -4963,6 +4963,7 @@ type UserMutation struct {
 	oauth_id                *string
 	oauth_provider          *int8
 	addoauth_provider       *int8
+	terms_agreed            *bool
 	created_at              *time.Time
 	clearedFields           map[string]struct{}
 	joined_groups           map[uuid.UUID]struct{}
@@ -5217,6 +5218,42 @@ func (m *UserMutation) AddedOauthProvider() (r int8, exists bool) {
 func (m *UserMutation) ResetOauthProvider() {
 	m.oauth_provider = nil
 	m.addoauth_provider = nil
+}
+
+// SetTermsAgreed sets the "terms_agreed" field.
+func (m *UserMutation) SetTermsAgreed(b bool) {
+	m.terms_agreed = &b
+}
+
+// TermsAgreed returns the value of the "terms_agreed" field in the mutation.
+func (m *UserMutation) TermsAgreed() (r bool, exists bool) {
+	v := m.terms_agreed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTermsAgreed returns the old "terms_agreed" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTermsAgreed(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTermsAgreed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTermsAgreed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTermsAgreed: %w", err)
+	}
+	return oldValue.TermsAgreed, nil
+}
+
+// ResetTermsAgreed resets all changes to the "terms_agreed" field.
+func (m *UserMutation) ResetTermsAgreed() {
+	m.terms_agreed = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -5598,7 +5635,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -5607,6 +5644,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.oauth_provider != nil {
 		fields = append(fields, user.FieldOauthProvider)
+	}
+	if m.terms_agreed != nil {
+		fields = append(fields, user.FieldTermsAgreed)
 	}
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
@@ -5625,6 +5665,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.OauthID()
 	case user.FieldOauthProvider:
 		return m.OauthProvider()
+	case user.FieldTermsAgreed:
+		return m.TermsAgreed()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -5642,6 +5684,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldOauthID(ctx)
 	case user.FieldOauthProvider:
 		return m.OldOauthProvider(ctx)
+	case user.FieldTermsAgreed:
+		return m.OldTermsAgreed(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -5673,6 +5717,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOauthProvider(v)
+		return nil
+	case user.FieldTermsAgreed:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTermsAgreed(v)
 		return nil
 	case user.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -5753,6 +5804,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldOauthProvider:
 		m.ResetOauthProvider()
+		return nil
+	case user.FieldTermsAgreed:
+		m.ResetTermsAgreed()
 		return nil
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()

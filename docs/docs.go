@@ -1786,6 +1786,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "name between 1 and 20"
+                },
+                "terms_agreed": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1794,6 +1797,9 @@ const docTemplate = `{
             "properties": {
                 "name": {
                     "type": "string"
+                },
+                "terms_agreed": {
+                    "type": "boolean"
                 },
                 "user_id": {
                     "type": "string"
@@ -1808,6 +1814,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "terms_agreed": {
+                    "type": "boolean"
                 },
                 "user_id": {
                     "type": "string"

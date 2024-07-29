@@ -11,9 +11,10 @@ import (
 )
 
 type myUserInfoRes struct {
-	UserID    string `json:"user_id"`
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
+	UserID      string `json:"user_id"`
+	Name        string `json:"name"`
+	TermsAgreed bool   `json:"terms_agreed"`
+	CreatedAt   string `json:"created_at"`
 }
 
 // @Summary Get My User Info
@@ -36,8 +37,9 @@ func GetMyUserInfo(c *fiber.Ctx) error {
 		})
 	}
 	return c.JSON(myUserInfoRes{
-		UserID:    user.ID.String(),
-		Name:      user.Name,
-		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+		UserID:      user.ID.String(),
+		Name:        user.Name,
+		TermsAgreed: user.TermsAgreed,
+		CreatedAt:   user.CreatedAt.Format(time.RFC3339),
 	})
 }

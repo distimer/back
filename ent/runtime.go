@@ -92,8 +92,12 @@ func init() {
 	userDescName := userFields[1].Descriptor()
 	// user.DefaultName holds the default value on creation for the name field.
 	user.DefaultName = userDescName.Default.(string)
+	// userDescTermsAgreed is the schema descriptor for terms_agreed field.
+	userDescTermsAgreed := userFields[4].Descriptor()
+	// user.DefaultTermsAgreed holds the default value on creation for the terms_agreed field.
+	user.DefaultTermsAgreed = userDescTermsAgreed.Default.(bool)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[4].Descriptor()
+	userDescCreatedAt := userFields[5].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 }

@@ -20,6 +20,8 @@ const (
 	FieldOauthID = "oauth_id"
 	// FieldOauthProvider holds the string denoting the oauth_provider field in the database.
 	FieldOauthProvider = "oauth_provider"
+	// FieldTermsAgreed holds the string denoting the terms_agreed field in the database.
+	FieldTermsAgreed = "terms_agreed"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeJoinedGroups holds the string denoting the joined_groups edge name in mutations.
@@ -93,6 +95,7 @@ var Columns = []string{
 	FieldName,
 	FieldOauthID,
 	FieldOauthProvider,
+	FieldTermsAgreed,
 	FieldCreatedAt,
 }
 
@@ -115,6 +118,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultName holds the default value on creation for the "name" field.
 	DefaultName string
+	// DefaultTermsAgreed holds the default value on creation for the "terms_agreed" field.
+	DefaultTermsAgreed bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )
@@ -140,6 +145,11 @@ func ByOauthID(opts ...sql.OrderTermOption) OrderOption {
 // ByOauthProvider orders the results by the oauth_provider field.
 func ByOauthProvider(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOauthProvider, opts...).ToFunc()
+}
+
+// ByTermsAgreed orders the results by the terms_agreed field.
+func ByTermsAgreed(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTermsAgreed, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

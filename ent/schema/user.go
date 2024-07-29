@@ -22,6 +22,7 @@ func (User) Fields() []ent.Field {
 		field.String("name").Default("유저"),
 		field.String("oauth_id"),
 		field.Int8("oauth_provider"),
+		field.Bool("terms_agreed").Default(false),
 		field.Time("created_at").Immutable().Default(time.Now),
 	}
 }

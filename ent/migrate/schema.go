@@ -254,6 +254,7 @@ var (
 		{Name: "name", Type: field.TypeString, Default: "유저"},
 		{Name: "oauth_id", Type: field.TypeString},
 		{Name: "oauth_provider", Type: field.TypeInt8},
+		{Name: "terms_agreed", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 	}
 	// UsersTable holds the schema information for the "users" table.
