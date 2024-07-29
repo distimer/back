@@ -494,6 +494,39 @@ paths:
       summary: Delete Category
       tags:
       - Category
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: createCategoryReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/categoryctrl.createCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/categoryctrl.categoryDTO'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Modify Category
+      tags:
+      - Category
   /group:
     get:
       consumes:
