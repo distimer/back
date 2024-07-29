@@ -6,7 +6,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"pentag.kr/distimer/db"
-	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/dto"
 	"pentag.kr/distimer/utils/logger"
@@ -16,17 +15,13 @@ type createCategoryReq struct {
 	Name string `json:"name" validate:"required" example:"name between 1 and 20"`
 }
 
-type createCategoryRes struct {
-	Category *ent.Category `json:"category"`
-}
-
 // @Summary Create Category
 // @Tags Category
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param request body createCategoryReq true "createCategoryReq"
-// @Success 200 {object} createCategoryRes
+// @Success 200 {object} categoryDTO
 // @Router /category [post]
 func CreateCategory(c *fiber.Ctx) error {
 	data := new(createCategoryReq)
@@ -57,8 +52,9 @@ func CreateCategory(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(
-		createCategoryRes{
-			Category: categoryObj,
+		categoryDTO{
+			ID:   categoryObj.ID.String(),
+			Name: categoryObj.Name,
 		},
 	)
 }

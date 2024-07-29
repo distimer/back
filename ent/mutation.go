@@ -4471,6 +4471,42 @@ func (m *TimerMutation) ResetContent() {
 	m.content = nil
 }
 
+// SetSubjectID sets the "subject_id" field.
+func (m *TimerMutation) SetSubjectID(u uuid.UUID) {
+	m.subject = &u
+}
+
+// SubjectID returns the value of the "subject_id" field in the mutation.
+func (m *TimerMutation) SubjectID() (r uuid.UUID, exists bool) {
+	v := m.subject
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubjectID returns the old "subject_id" field's value of the Timer entity.
+// If the Timer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TimerMutation) OldSubjectID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubjectID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubjectID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubjectID: %w", err)
+	}
+	return oldValue.SubjectID, nil
+}
+
+// ResetSubjectID resets all changes to the "subject_id" field.
+func (m *TimerMutation) ResetSubjectID() {
+	m.subject = nil
+}
+
 // SetUserID sets the "user_id" field.
 func (m *TimerMutation) SetUserID(u uuid.UUID) {
 	m.user = &u
@@ -4534,27 +4570,15 @@ func (m *TimerMutation) ResetUser() {
 	m.cleareduser = false
 }
 
-// SetSubjectID sets the "subject" edge to the Subject entity by id.
-func (m *TimerMutation) SetSubjectID(id uuid.UUID) {
-	m.subject = &id
-}
-
 // ClearSubject clears the "subject" edge to the Subject entity.
 func (m *TimerMutation) ClearSubject() {
 	m.clearedsubject = true
+	m.clearedFields[timer.FieldSubjectID] = struct{}{}
 }
 
 // SubjectCleared reports if the "subject" edge to the Subject entity was cleared.
 func (m *TimerMutation) SubjectCleared() bool {
 	return m.clearedsubject
-}
-
-// SubjectID returns the "subject" edge ID in the mutation.
-func (m *TimerMutation) SubjectID() (id uuid.UUID, exists bool) {
-	if m.subject != nil {
-		return *m.subject, true
-	}
-	return
 }
 
 // SubjectIDs returns the "subject" edge IDs in the mutation.
@@ -4661,12 +4685,15 @@ func (m *TimerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TimerMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.start_at != nil {
 		fields = append(fields, timer.FieldStartAt)
 	}
 	if m.content != nil {
 		fields = append(fields, timer.FieldContent)
+	}
+	if m.subject != nil {
+		fields = append(fields, timer.FieldSubjectID)
 	}
 	if m.user != nil {
 		fields = append(fields, timer.FieldUserID)
@@ -4683,6 +4710,8 @@ func (m *TimerMutation) Field(name string) (ent.Value, bool) {
 		return m.StartAt()
 	case timer.FieldContent:
 		return m.Content()
+	case timer.FieldSubjectID:
+		return m.SubjectID()
 	case timer.FieldUserID:
 		return m.UserID()
 	}
@@ -4698,6 +4727,8 @@ func (m *TimerMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldStartAt(ctx)
 	case timer.FieldContent:
 		return m.OldContent(ctx)
+	case timer.FieldSubjectID:
+		return m.OldSubjectID(ctx)
 	case timer.FieldUserID:
 		return m.OldUserID(ctx)
 	}
@@ -4722,6 +4753,13 @@ func (m *TimerMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetContent(v)
+		return nil
+	case timer.FieldSubjectID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubjectID(v)
 		return nil
 	case timer.FieldUserID:
 		v, ok := value.(uuid.UUID)
@@ -4784,6 +4822,9 @@ func (m *TimerMutation) ResetField(name string) error {
 		return nil
 	case timer.FieldContent:
 		m.ResetContent()
+		return nil
+	case timer.FieldSubjectID:
+		m.ResetSubjectID()
 		return nil
 	case timer.FieldUserID:
 		m.ResetUserID()

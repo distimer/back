@@ -45,7 +45,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "timer" package.
 	TimersInverseTable = "timers"
 	// TimersColumn is the table column denoting the timers relation/edge.
-	TimersColumn = "subject_timers"
+	TimersColumn = "subject_id"
 )
 
 // Columns holds all SQL columns for subject fields.

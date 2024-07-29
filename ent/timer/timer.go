@@ -19,6 +19,8 @@ const (
 	FieldStartAt = "start_at"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
+	// FieldSubjectID holds the string denoting the subject_id field in the database.
+	FieldSubjectID = "subject_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -42,7 +44,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "subject" package.
 	SubjectInverseTable = "subjects"
 	// SubjectColumn is the table column denoting the subject relation/edge.
-	SubjectColumn = "subject_timers"
+	SubjectColumn = "subject_id"
 	// SharedGroupTable is the table that holds the shared_group relation/edge. The primary key declared below.
 	SharedGroupTable = "timer_shared_group"
 	// SharedGroupInverseTable is the table name for the Group entity.
@@ -55,13 +57,8 @@ var Columns = []string{
 	FieldID,
 	FieldStartAt,
 	FieldContent,
+	FieldSubjectID,
 	FieldUserID,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "timers"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"subject_timers",
 }
 
 var (
@@ -74,11 +71,6 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -108,6 +100,11 @@ func ByStartAt(opts ...sql.OrderTermOption) OrderOption {
 // ByContent orders the results by the content field.
 func ByContent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldContent, opts...).ToFunc()
+}
+
+// BySubjectID orders the results by the subject_id field.
+func BySubjectID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSubjectID, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.

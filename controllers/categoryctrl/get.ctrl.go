@@ -11,17 +11,13 @@ import (
 	"pentag.kr/distimer/middlewares"
 )
 
-type getCategoryListRes struct {
-	Categories []*ent.Category `json:"categories"`
-}
-
 // @Summary Get Category List
 // @Tags Category
 // @Description [EDGE INCLUDED!]Subject list is included in each category
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} getCategoryListRes
+// @Success 200 {array} categoryDTO
 // @Router /category [get]
 func GetCategoryList(c *fiber.Ctx) error {
 	userID := middlewares.GetUserIDFromMiddleware(c)
@@ -39,7 +35,13 @@ func GetCategoryList(c *fiber.Ctx) error {
 		categories = []*ent.Category{}
 	}
 
-	return c.JSON(getCategoryListRes{
-		Categories: categories,
-	})
+	result := make([]categoryDTO, len(categories))
+	for i, category := range categories {
+		result[i] = categoryDTO{
+			ID:   category.ID.String(),
+			Name: category.Name,
+		}
+	}
+
+	return c.JSON(result)
 }

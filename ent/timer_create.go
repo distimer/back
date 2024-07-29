@@ -44,6 +44,12 @@ func (tc *TimerCreate) SetContent(s string) *TimerCreate {
 	return tc
 }
 
+// SetSubjectID sets the "subject_id" field.
+func (tc *TimerCreate) SetSubjectID(u uuid.UUID) *TimerCreate {
+	tc.mutation.SetSubjectID(u)
+	return tc
+}
+
 // SetUserID sets the "user_id" field.
 func (tc *TimerCreate) SetUserID(u uuid.UUID) *TimerCreate {
 	tc.mutation.SetUserID(u)
@@ -67,12 +73,6 @@ func (tc *TimerCreate) SetNillableID(u *uuid.UUID) *TimerCreate {
 // SetUser sets the "user" edge to the User entity.
 func (tc *TimerCreate) SetUser(u *User) *TimerCreate {
 	return tc.SetUserID(u.ID)
-}
-
-// SetSubjectID sets the "subject" edge to the Subject entity by ID.
-func (tc *TimerCreate) SetSubjectID(id uuid.UUID) *TimerCreate {
-	tc.mutation.SetSubjectID(id)
-	return tc
 }
 
 // SetSubject sets the "subject" edge to the Subject entity.
@@ -147,6 +147,9 @@ func (tc *TimerCreate) check() error {
 	}
 	if _, ok := tc.mutation.Content(); !ok {
 		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Timer.content"`)}
+	}
+	if _, ok := tc.mutation.SubjectID(); !ok {
+		return &ValidationError{Name: "subject_id", err: errors.New(`ent: missing required field "Timer.subject_id"`)}
 	}
 	if _, ok := tc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Timer.user_id"`)}
@@ -231,7 +234,7 @@ func (tc *TimerCreate) createSpec() (*Timer, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.subject_timers = &nodes[0]
+		_node.SubjectID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.SharedGroupIDs(); len(nodes) > 0 {

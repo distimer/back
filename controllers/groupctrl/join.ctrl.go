@@ -2,6 +2,7 @@ package groupctrl
 
 import (
 	"context"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"pentag.kr/distimer/db"
@@ -17,17 +18,13 @@ type joinReq struct {
 	InviteCode string `json:"invite_code" validate:"required,len=7"`
 }
 
-type joinRes struct {
-	Group *ent.Group `json:"group"`
-}
-
 // @Summary Join Group with Invite Code
 // @Tags Group
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param request body joinReq true "joinReq"
-// @Success 200 {object} joinRes
+// @Success 200 {object} groupDTO
 // @Router /group/join [post]
 func JoinGroup(c *fiber.Ctx) error {
 	data := new(joinReq)
@@ -94,7 +91,15 @@ func JoinGroup(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(joinRes{
-		Group: inviteCodeObj.Edges.Group,
-	})
+	result := groupDTO{
+		ID:             inviteCodeObj.Edges.Group.ID.String(),
+		Name:           inviteCodeObj.Edges.Group.Name,
+		Description:    inviteCodeObj.Edges.Group.Description,
+		NicknamePolicy: inviteCodeObj.Edges.Group.NicknamePolicy,
+		RevealPolicy:   inviteCodeObj.Edges.Group.RevealPolicy,
+		InvitePolicy:   inviteCodeObj.Edges.Group.InvitePolicy,
+		CreateAt:       inviteCodeObj.Edges.Group.CreatedAt.Format(time.RFC3339),
+	}
+
+	return c.JSON(result)
 }

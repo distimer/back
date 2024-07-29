@@ -27,23 +27,13 @@ type createGroupReq struct {
 	InvitePolicy   int8   `json:"invite_policy" validate:"required,min=0,max=2"`
 }
 
-type createGroupRes struct {
-	ID             string `json:"id"`
-	Name           string `json:"name"`
-	Description    string `json:"description"`
-	NicknamePolicy string `json:"nickname_policy"`
-	RevealPolicy   int8   `json:"reveal_policy"`
-	InvitePolicy   int8   `json:"invite_policy"`
-	CreateAt       string `json:"create_at"`
-}
-
 // @Summary Create Group
 // @Tags Group
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body groupctrl.createGroupReq true "createGroupReq"
-// @Success 201
+// @Param request body createGroupReq true "createGroupReq"
+// @Success 201 {object} groupDTO
 // @Router /group [post]
 func CreateGroup(c *fiber.Ctx) error {
 	data := new(createGroupReq)
@@ -116,7 +106,7 @@ func CreateGroup(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(201).JSON(createGroupRes{
+	return c.Status(201).JSON(groupDTO{
 		ID:             newGroupID.String(),
 		Name:           data.Name,
 		Description:    data.Description,

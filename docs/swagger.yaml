@@ -39,6 +39,13 @@ definitions:
       refresh_token:
         type: string
     type: object
+  categoryctrl.categoryDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   categoryctrl.createCategoryReq:
     properties:
       name:
@@ -47,353 +54,18 @@ definitions:
     required:
     - name
     type: object
-  categoryctrl.createCategoryRes:
+  groupctrl.affiliationDTO:
     properties:
-      category:
-        $ref: '#/definitions/ent.Category'
-    type: object
-  categoryctrl.getCategoryListRes:
-    properties:
-      categories:
-        items:
-          $ref: '#/definitions/ent.Category'
-        type: array
-    type: object
-  ent.Affiliation:
-    properties:
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.AffiliationEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the AffiliationQuery when eager-loading is set.
       group_id:
-        description: GroupID holds the value of the "group_id" field.
         type: string
       joined_at:
-        description: JoinedAt holds the value of the "joined_at" field.
         type: string
       nickname:
-        description: Nickname holds the value of the "nickname" field.
         type: string
       role:
-        description: Role holds the value of the "role" field.
         type: integer
       user_id:
-        description: UserID holds the value of the "user_id" field.
         type: string
-    type: object
-  ent.AffiliationEdges:
-    properties:
-      group:
-        allOf:
-        - $ref: '#/definitions/ent.Group'
-        description: Group holds the value of the group edge.
-      user:
-        allOf:
-        - $ref: '#/definitions/ent.User'
-        description: User holds the value of the user edge.
-    type: object
-  ent.Category:
-    properties:
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.CategoryEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the CategoryQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: string
-      name:
-        description: Name holds the value of the "name" field.
-        type: string
-    type: object
-  ent.CategoryEdges:
-    properties:
-      subjects:
-        description: Subjects holds the value of the subjects edge.
-        items:
-          $ref: '#/definitions/ent.Subject'
-        type: array
-      user:
-        allOf:
-        - $ref: '#/definitions/ent.User'
-        description: User holds the value of the user edge.
-    type: object
-  ent.Group:
-    properties:
-      created_at:
-        description: CreatedAt holds the value of the "created_at" field.
-        type: string
-      description:
-        description: Description holds the value of the "description" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.GroupEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the GroupQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: string
-      invite_policy:
-        description: InvitePolicy holds the value of the "invite_policy" field.
-        type: integer
-      name:
-        description: Name holds the value of the "name" field.
-        type: string
-      nickname_policy:
-        description: NicknamePolicy holds the value of the "nickname_policy" field.
-        type: string
-      reveal_policy:
-        description: RevealPolicy holds the value of the "reveal_policy" field.
-        type: integer
-    type: object
-  ent.GroupEdges:
-    properties:
-      invite_codes:
-        description: InviteCodes holds the value of the invite_codes edge.
-        items:
-          $ref: '#/definitions/ent.InviteCode'
-        type: array
-      members:
-        description: Members holds the value of the members edge.
-        items:
-          $ref: '#/definitions/ent.User'
-        type: array
-      owner:
-        allOf:
-        - $ref: '#/definitions/ent.User'
-        description: Owner holds the value of the owner edge.
-      shared_study_logs:
-        description: SharedStudyLogs holds the value of the shared_study_logs edge.
-        items:
-          $ref: '#/definitions/ent.StudyLog'
-        type: array
-      shared_timer:
-        description: SharedTimer holds the value of the shared_timer edge.
-        items:
-          $ref: '#/definitions/ent.Timer'
-        type: array
-    type: object
-  ent.InviteCode:
-    properties:
-      code:
-        description: Code holds the value of the "code" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.InviteCodeEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the InviteCodeQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: integer
-      used:
-        description: Used holds the value of the "used" field.
-        type: integer
-    type: object
-  ent.InviteCodeEdges:
-    properties:
-      group:
-        allOf:
-        - $ref: '#/definitions/ent.Group'
-        description: Group holds the value of the group edge.
-    type: object
-  ent.RefreshToken:
-    properties:
-      created_at:
-        description: CreatedAt holds the value of the "created_at" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.RefreshTokenEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the RefreshTokenQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: string
-    type: object
-  ent.RefreshTokenEdges:
-    properties:
-      user:
-        allOf:
-        - $ref: '#/definitions/ent.User'
-        description: User holds the value of the user edge.
-    type: object
-  ent.StudyLog:
-    properties:
-      content:
-        description: Content holds the value of the "content" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.StudyLogEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the StudyLogQuery when eager-loading is set.
-      end_at:
-        description: EndAt holds the value of the "end_at" field.
-        type: string
-      id:
-        description: ID of the ent.
-        type: string
-      start_at:
-        description: StartAt holds the value of the "start_at" field.
-        type: string
-    type: object
-  ent.StudyLogEdges:
-    properties:
-      shared_group:
-        description: SharedGroup holds the value of the shared_group edge.
-        items:
-          $ref: '#/definitions/ent.Group'
-        type: array
-      subject:
-        allOf:
-        - $ref: '#/definitions/ent.Subject'
-        description: Subject holds the value of the subject edge.
-      user:
-        allOf:
-        - $ref: '#/definitions/ent.User'
-        description: User holds the value of the user edge.
-    type: object
-  ent.Subject:
-    properties:
-      color:
-        description: Color holds the value of the "color" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.SubjectEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the SubjectQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: string
-      name:
-        description: Name holds the value of the "name" field.
-        type: string
-    type: object
-  ent.SubjectEdges:
-    properties:
-      category:
-        allOf:
-        - $ref: '#/definitions/ent.Category'
-        description: Category holds the value of the category edge.
-      study_logs:
-        description: StudyLogs holds the value of the study_logs edge.
-        items:
-          $ref: '#/definitions/ent.StudyLog'
-        type: array
-      timers:
-        description: Timers holds the value of the timers edge.
-        items:
-          $ref: '#/definitions/ent.Timer'
-        type: array
-    type: object
-  ent.Timer:
-    properties:
-      content:
-        description: Content holds the value of the "content" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.TimerEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the TimerQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: string
-      start_at:
-        description: StartAt holds the value of the "start_at" field.
-        type: string
-      user_id:
-        description: UserID holds the value of the "user_id" field.
-        type: string
-    type: object
-  ent.TimerEdges:
-    properties:
-      shared_group:
-        description: SharedGroup holds the value of the shared_group edge.
-        items:
-          $ref: '#/definitions/ent.Group'
-        type: array
-      subject:
-        allOf:
-        - $ref: '#/definitions/ent.Subject'
-        description: Subject holds the value of the subject edge.
-      user:
-        allOf:
-        - $ref: '#/definitions/ent.User'
-        description: User holds the value of the user edge.
-    type: object
-  ent.User:
-    properties:
-      created_at:
-        description: CreatedAt holds the value of the "created_at" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.UserEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the UserQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: string
-      name:
-        description: Name holds the value of the "name" field.
-        type: string
-      oauth_id:
-        description: OauthID holds the value of the "oauth_id" field.
-        type: string
-      oauth_provider:
-        description: OauthProvider holds the value of the "oauth_provider" field.
-        type: integer
-    type: object
-  ent.UserEdges:
-    properties:
-      affiliations:
-        description: Affiliations holds the value of the affiliations edge.
-        items:
-          $ref: '#/definitions/ent.Affiliation'
-        type: array
-      joined_groups:
-        description: JoinedGroups holds the value of the joined_groups edge.
-        items:
-          $ref: '#/definitions/ent.Group'
-        type: array
-      owned_categories:
-        description: OwnedCategories holds the value of the owned_categories edge.
-        items:
-          $ref: '#/definitions/ent.Category'
-        type: array
-      owned_groups:
-        description: OwnedGroups holds the value of the owned_groups edge.
-        items:
-          $ref: '#/definitions/ent.Group'
-        type: array
-      refresh_tokens:
-        description: RefreshTokens holds the value of the refresh_tokens edge.
-        items:
-          $ref: '#/definitions/ent.RefreshToken'
-        type: array
-      study_logs:
-        description: StudyLogs holds the value of the study_logs edge.
-        items:
-          $ref: '#/definitions/ent.StudyLog'
-        type: array
-      timers:
-        allOf:
-        - $ref: '#/definitions/ent.Timer'
-        description: Timers holds the value of the timers edge.
     type: object
   groupctrl.createGroupReq:
     properties:
@@ -423,19 +95,22 @@ definitions:
     - nickname
     - reveal_policy
     type: object
-  groupctrl.getAllGroupMembersRes:
+  groupctrl.groupDTO:
     properties:
-      members:
-        items:
-          $ref: '#/definitions/ent.Affiliation'
-        type: array
-    type: object
-  groupctrl.getJoinedGroupsRes:
-    properties:
-      joined_groups:
-        items:
-          $ref: '#/definitions/ent.Group'
-        type: array
+      create_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      invite_policy:
+        type: integer
+      name:
+        type: string
+      nickname_policy:
+        type: string
+      reveal_policy:
+        type: integer
     type: object
   groupctrl.joinReq:
     properties:
@@ -443,11 +118,6 @@ definitions:
         type: string
     required:
     - invite_code
-    type: object
-  groupctrl.joinRes:
-    properties:
-      group:
-        $ref: '#/definitions/ent.Group'
     type: object
   groupctrl.modifyGroupInfoReq:
     properties:
@@ -538,23 +208,6 @@ definitions:
     - start_at
     - subject_id
     type: object
-  studylogctrl.createStudyLogRes:
-    properties:
-      content:
-        type: string
-      end_at:
-        type: string
-      groups_to_share:
-        items:
-          type: string
-        type: array
-      id:
-        type: string
-      start_at:
-        type: string
-      subject_id:
-        type: string
-    type: object
   studylogctrl.dailyStudyLog:
     properties:
       date:
@@ -571,19 +224,22 @@ definitions:
       subject_id:
         type: string
     type: object
-  studylogctrl.getStudyLogListRes:
+  studylogctrl.myStudyLogDTO:
     properties:
-      studyLogs:
+      content:
+        type: string
+      end_at:
+        type: string
+      groups_to_share:
         items:
-          $ref: '#/definitions/ent.StudyLog'
+          type: string
         type: array
-    type: object
-  studylogctrl.getStudyLogRes:
-    properties:
-      study_logs:
-        items:
-          $ref: '#/definitions/ent.StudyLog'
-        type: array
+      id:
+        type: string
+      start_at:
+        type: string
+      subject_id:
+        type: string
     type: object
   subjectctrl.createSubjectReq:
     properties:
@@ -596,16 +252,7 @@ definitions:
     - color
     - name
     type: object
-  subjectctrl.createSubjectRes:
-    properties:
-      color:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-    type: object
-  subjectctrl.modifySubjectInfoRequest:
+  subjectctrl.modifySubjectInfoReq:
     properties:
       color:
         type: string
@@ -616,7 +263,7 @@ definitions:
     - color
     - name
     type: object
-  subjectctrl.modifySubjectInfoResponse:
+  subjectctrl.subjectDTO:
     properties:
       color:
         type: string
@@ -624,11 +271,6 @@ definitions:
         type: string
       name:
         type: string
-    type: object
-  timerctrl.TimerInfo:
-    properties:
-      timer:
-        $ref: '#/definitions/ent.Timer'
     type: object
   timerctrl.createTimerReq:
     properties:
@@ -640,7 +282,7 @@ definitions:
     - content
     - subject_id
     type: object
-  timerctrl.createTimerRes:
+  timerctrl.timerDTO:
     properties:
       content:
         type: string
@@ -794,7 +436,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/categoryctrl.getCategoryListRes'
+            items:
+              $ref: '#/definitions/categoryctrl.categoryDTO'
+            type: array
       security:
       - Bearer: []
       summary: Get Category List
@@ -816,7 +460,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/categoryctrl.createCategoryRes'
+            $ref: '#/definitions/categoryctrl.categoryDTO'
       security:
       - Bearer: []
       summary: Create Category
@@ -860,7 +504,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/groupctrl.getJoinedGroupsRes'
+            items:
+              $ref: '#/definitions/groupctrl.groupDTO'
+            type: array
       security:
       - Bearer: []
       summary: Get All Joined Groups
@@ -881,6 +527,8 @@ paths:
       responses:
         "201":
           description: Created
+          schema:
+            $ref: '#/definitions/groupctrl.groupDTO'
       security:
       - Bearer: []
       summary: Create Group
@@ -974,7 +622,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/groupctrl.joinRes'
+            $ref: '#/definitions/groupctrl.groupDTO'
       security:
       - Bearer: []
       summary: Join Group with Invite Code
@@ -996,7 +644,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/groupctrl.getAllGroupMembersRes'
+            items:
+              $ref: '#/definitions/groupctrl.affiliationDTO'
+            type: array
       security:
       - Bearer: []
       summary: Get All Group Members
@@ -1120,7 +770,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/studylogctrl.getStudyLogListRes'
+            items:
+              $ref: '#/definitions/studylogctrl.myStudyLogDTO'
+            type: array
       security:
       - Bearer: []
       summary: Get All My Study Logs
@@ -1142,7 +794,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/studylogctrl.createStudyLogRes'
+            $ref: '#/definitions/studylogctrl.myStudyLogDTO'
         "400":
           description: Bad Request
         "403":
@@ -1217,7 +869,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/studylogctrl.getStudyLogRes'
+            items:
+              $ref: '#/definitions/studylogctrl.myStudyLogDTO'
+            type: array
       security:
       - Bearer: []
       summary: Get Study Log with Subject
@@ -1266,7 +920,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/subjectctrl.createSubjectRes'
+            $ref: '#/definitions/subjectctrl.subjectDTO'
         "400":
           description: Bad Request
         "404":
@@ -1287,19 +941,19 @@ paths:
         name: id
         required: true
         type: string
-      - description: modifySubjectInfoRequest
+      - description: modifySubjectInfoReq
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/subjectctrl.modifySubjectInfoRequest'
+          $ref: '#/definitions/subjectctrl.modifySubjectInfoReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/subjectctrl.modifySubjectInfoResponse'
+            $ref: '#/definitions/subjectctrl.subjectDTO'
         "400":
           description: Bad Request
         "404":
@@ -1339,7 +993,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/timerctrl.TimerInfo'
+            $ref: '#/definitions/timerctrl.timerDTO'
         "404":
           description: Not Found
         "500":
@@ -1365,7 +1019,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/timerctrl.createTimerRes'
+            $ref: '#/definitions/timerctrl.timerDTO'
         "400":
           description: Bad Request
         "404":
@@ -1396,7 +1050,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/ent.Timer'
+              $ref: '#/definitions/timerctrl.timerDTO'
             type: array
         "400":
           description: Bad Request

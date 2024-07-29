@@ -571,7 +571,9 @@ func (sq *SubjectQuery) loadTimers(ctx context.Context, query *TimerQuery, nodes
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(timer.FieldSubjectID)
+	}
 	query.Where(predicate.Timer(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(subject.TimersColumn), fks...))
 	}))
@@ -580,13 +582,10 @@ func (sq *SubjectQuery) loadTimers(ctx context.Context, query *TimerQuery, nodes
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.subject_timers
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "subject_timers" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.SubjectID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "subject_timers" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "subject_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

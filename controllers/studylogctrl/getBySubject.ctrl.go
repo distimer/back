@@ -15,10 +15,6 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-type getStudyLogRes struct {
-	StudyLogs []*ent.StudyLog `json:"study_logs"`
-}
-
 // @Summary Get Study Log with Subject
 // @Tags StudyLog
 // @Accept json
@@ -27,7 +23,7 @@ type getStudyLogRes struct {
 // @Param id path string true "Subject ID"
 // @Param count query int true "count"
 // @Param offset query int true "offset"
-// @Success 200 {object} getStudyLogRes
+// @Success 200 {array} myStudyLogDTO
 // @Router /studylog/subject/{id} [get]
 func GetStudyLogWithSubject(c *fiber.Ctx) error {
 	countStr := c.Query("count")
@@ -68,6 +64,7 @@ func GetStudyLogWithSubject(c *fiber.Ctx) error {
 
 	studyLogs, err := dbConn.StudyLog.Query().
 		Where(studylog.And(studylog.HasUserWith(user.ID(userID)), studylog.HasSubjectWith(subject.ID(subjectID)))).
+		WithSharedGroup().
 		Order(ent.Desc("created_at")).
 		Limit(count).
 		Offset(offset).
@@ -82,7 +79,22 @@ func GetStudyLogWithSubject(c *fiber.Ctx) error {
 	if len(studyLogs) == 0 {
 		studyLogs = []*ent.StudyLog{}
 	}
-	return c.JSON(getStudyLogRes{
-		StudyLogs: studyLogs,
-	})
+	result := make([]myStudyLogDTO, len(studyLogs))
+	for i, studyLog := range studyLogs {
+		result[i] = myStudyLogDTO{
+			ID:        studyLog.ID.String(),
+			SubjectID: studyLog.Edges.Subject.ID.String(),
+			StartAt:   studyLog.StartAt.Format("2006-01-02 15:04:05"),
+			EndAt:     studyLog.EndAt.Format("2006-01-02 15:04:05"),
+			Content:   studyLog.Content,
+			GroupsToShare: func() []string {
+				groups := make([]string, len(studyLog.Edges.SharedGroup))
+				for i, group := range studyLog.Edges.SharedGroup {
+					groups[i] = group.ID.String()
+				}
+				return groups
+			}(),
+		}
+	}
+	return c.JSON(result)
 }

@@ -225,7 +225,7 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "start_at", Type: field.TypeTime},
 		{Name: "content", Type: field.TypeString},
-		{Name: "subject_timers", Type: field.TypeUUID},
+		{Name: "subject_id", Type: field.TypeUUID},
 		{Name: "user_id", Type: field.TypeUUID, Unique: true},
 	}
 	// TimersTable holds the schema information for the "timers" table.

@@ -25,22 +25,13 @@ type createStudyLogReq struct {
 	GroupsToShare []string `json:"groups_to_share" validate:"required" example:"group_id"`
 }
 
-type createStudyLogRes struct {
-	ID            string   `json:"id"`
-	SubjectID     string   `json:"subject_id"`
-	StartAt       string   `json:"start_at"`
-	EndAt         string   `json:"end_at"`
-	Content       string   `json:"content"`
-	GroupsToShare []string `json:"groups_to_share"`
-}
-
 // @Summary Create Study Log
 // @Tags StudyLog
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param request body createStudyLogReq true "createStudyLogReq"
-// @Success 200 {object} createStudyLogRes
+// @Success 200 {object} myStudyLogDTO
 // @Failure 400
 // @Failure 403
 // @Failure 404
@@ -178,7 +169,7 @@ func CreateStudyLog(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
-	return c.JSON(createStudyLogRes{
+	return c.JSON(myStudyLogDTO{
 		ID:            uuid.New().String(),
 		SubjectID:     subjectID.String(),
 		StartAt:       startAt.Format(time.RFC3339),

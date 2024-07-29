@@ -17,10 +17,6 @@ const (
 	maxCount = 20
 )
 
-type getStudyLogListRes struct {
-	StudyLogs []*ent.StudyLog `json:"studyLogs"`
-}
-
 // @Summary Get All My Study Logs
 // @Tags StudyLog
 // @Accept json
@@ -28,7 +24,7 @@ type getStudyLogListRes struct {
 // @Security Bearer
 // @Param count query int true "count"
 // @Param offset query int true "offset"
-// @Success 200 {object} getStudyLogListRes
+// @Success 200 {array} myStudyLogDTO
 // @Router /studylog [get]
 func GetAllMyStudyLogs(c *fiber.Ctx) error {
 	userID := middlewares.GetUserIDFromMiddleware(c)
@@ -60,6 +56,7 @@ func GetAllMyStudyLogs(c *fiber.Ctx) error {
 	dbConn := db.GetDBClient()
 	studyLogs, err := dbConn.StudyLog.Query().
 		Where(studylog.HasUserWith(user.ID(userID))).
+		WithSharedGroup().
 		Order(ent.Desc("start_at")).
 		Limit(count).
 		Offset(offset).
@@ -70,7 +67,22 @@ func GetAllMyStudyLogs(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
-	return c.JSON(getStudyLogListRes{
-		StudyLogs: studyLogs,
-	})
+	result := make([]myStudyLogDTO, len(studyLogs))
+	for i, studyLog := range studyLogs {
+		result[i] = myStudyLogDTO{
+			ID:        studyLog.ID.String(),
+			SubjectID: studyLog.Edges.Subject.ID.String(),
+			StartAt:   studyLog.StartAt.Format("2006-01-02 15:04:05"),
+			EndAt:     studyLog.EndAt.Format("2006-01-02 15:04:05"),
+			Content:   studyLog.Content,
+			GroupsToShare: func() []string {
+				groups := make([]string, len(studyLog.Edges.SharedGroup))
+				for i, group := range studyLog.Edges.SharedGroup {
+					groups[i] = group.ID.String()
+				}
+				return groups
+			}(),
+		}
+	}
+	return c.JSON(result)
 }

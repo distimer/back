@@ -2,25 +2,21 @@ package groupctrl
 
 import (
 	"context"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"pentag.kr/distimer/db"
-	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/logger"
 )
-
-type getJoinedGroupsRes struct {
-	Groups []*ent.Group `json:"joined_groups"`
-}
 
 // @Summary Get All Joined Groups
 // @Tags Group
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} getJoinedGroupsRes
+// @Success 200 {array} groupDTO
 // @Router /group [get]
 func GetJoinedGroups(c *fiber.Ctx) error {
 	userID := middlewares.GetUserIDFromMiddleware(c)
@@ -34,8 +30,19 @@ func GetJoinedGroups(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(getJoinedGroupsRes{
-		Groups: groups,
-	})
+	result := make([]groupDTO, len(groups))
+	for i, group := range groups {
+		result[i] = groupDTO{
+			ID:             group.ID.String(),
+			Name:           group.Name,
+			Description:    group.Description,
+			NicknamePolicy: group.NicknamePolicy,
+			RevealPolicy:   group.RevealPolicy,
+			InvitePolicy:   group.InvitePolicy,
+			CreateAt:       group.CreatedAt.Format(time.RFC3339),
+		}
+	}
+
+	return c.JSON(result)
 
 }

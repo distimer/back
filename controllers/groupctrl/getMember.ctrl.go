@@ -2,19 +2,15 @@ package groupctrl
 
 import (
 	"context"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"pentag.kr/distimer/db"
-	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/logger"
 )
-
-type getAllGroupMembersRes struct {
-	Members []*ent.Affiliation `json:"members"`
-}
 
 // @Summary Get All Group Members
 // @Tags Group
@@ -22,7 +18,7 @@ type getAllGroupMembersRes struct {
 // @Produce json
 // @Security Bearer
 // @Param id path string true "group id"
-// @Success 200 {object} getAllGroupMembersRes
+// @Success 200 {array} affiliationDTO
 // @Router /group/member/{id} [get]
 func GetAllGroupMembers(c *fiber.Ctx) error {
 	groupIDStr := c.Params("id")
@@ -55,7 +51,16 @@ func GetAllGroupMembers(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
-	return c.JSON(getAllGroupMembersRes{
-		Members: affiliations,
-	})
+
+	result := make([]affiliationDTO, len(affiliations))
+	for i, affiliation := range affiliations {
+		result[i] = affiliationDTO{
+			UserID:   affiliation.UserID.String(),
+			GroupID:  affiliation.GroupID.String(),
+			Nickname: affiliation.Nickname,
+			Role:     affiliation.Role,
+			JoinedAt: affiliation.JoinedAt.Format(time.RFC3339),
+		}
+	}
+	return c.JSON(result)
 }

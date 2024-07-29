@@ -19,20 +19,13 @@ type createTimerReq struct {
 	Content   string `json:"content" validate:"required"`
 }
 
-type createTimerRes struct {
-	ID        string `json:"id"`
-	SubjectID string `json:"subject_id"`
-	Content   string `json:"content"`
-	StartAt   string `json:"start_at"`
-}
-
 // @Summary Create Timer
 // @Tags Timer
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param request body createTimerReq true "createTimerReq"
-// @Success 200 {object} createTimerRes
+// @Success 200 {object} timerDTO
 // @Failure 400
 // @Failure 404
 // @Failure 409
@@ -94,7 +87,7 @@ func CreateTimer(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(
-		createTimerRes{
+		timerDTO{
 			ID:        timer.ID.String(),
 			SubjectID: subjectID.String(),
 			Content:   timer.Content,

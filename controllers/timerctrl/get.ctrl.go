@@ -2,6 +2,7 @@ package timerctrl
 
 import (
 	"context"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"pentag.kr/distimer/db"
@@ -12,17 +13,13 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-type TimerInfo struct {
-	Timer *ent.Timer `json:"timer"`
-}
-
 // @Summary Get My Timer Info
 // @Description [EDGE INCLUDED!]Subject info is included in timer
 // @Tags Timer
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} TimerInfo
+// @Success 200 {object} timerDTO
 // @Success 404
 // @Failure 500
 // @Router /timer [get]
@@ -43,7 +40,10 @@ func GetMyTimerInfo(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
-	return c.JSON(TimerInfo{
-		Timer: foundTimer,
+	return c.JSON(timerDTO{
+		ID:        foundTimer.ID.String(),
+		SubjectID: foundTimer.SubjectID.String(),
+		Content:   foundTimer.Content,
+		StartAt:   foundTimer.StartAt.Format(time.RFC3339),
 	})
 }

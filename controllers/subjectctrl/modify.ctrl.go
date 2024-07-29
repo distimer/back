@@ -14,15 +14,9 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-type modifySubjectInfoRequest struct {
+type modifySubjectInfoReq struct {
 	Name  string `json:"name" validate:"required" example:"name between 1 and 20"`
 	Color string `json:"color" validate:"required,hexcolor"`
-}
-
-type modifySubjectInfoResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Color string `json:"color"`
 }
 
 // @Summary Modify Subject Info
@@ -31,8 +25,8 @@ type modifySubjectInfoResponse struct {
 // @Produce json
 // @Security Bearer
 // @Param id path string true "Subject ID"
-// @Param request body modifySubjectInfoRequest true "modifySubjectInfoRequest"
-// @Success 200 {object} modifySubjectInfoResponse
+// @Param request body modifySubjectInfoReq true "modifySubjectInfoReq"
+// @Success 200 {object} subjectDTO
 // @Failure 400
 // @Failure 404
 // @Failure 500
@@ -46,7 +40,7 @@ func ModifySubjectInfo(c *fiber.Ctx) error {
 		})
 	}
 
-	data := new(modifySubjectInfoRequest)
+	data := new(modifySubjectInfoReq)
 	if err := dto.Bind(c, data); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err,
@@ -88,7 +82,7 @@ func ModifySubjectInfo(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(modifySubjectInfoResponse{
+	return c.JSON(subjectDTO{
 		ID:    subjectID.String(),
 		Name:  data.Name,
 		Color: data.Color,

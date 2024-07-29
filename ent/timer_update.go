@@ -60,6 +60,20 @@ func (tu *TimerUpdate) SetNillableContent(s *string) *TimerUpdate {
 	return tu
 }
 
+// SetSubjectID sets the "subject_id" field.
+func (tu *TimerUpdate) SetSubjectID(u uuid.UUID) *TimerUpdate {
+	tu.mutation.SetSubjectID(u)
+	return tu
+}
+
+// SetNillableSubjectID sets the "subject_id" field if the given value is not nil.
+func (tu *TimerUpdate) SetNillableSubjectID(u *uuid.UUID) *TimerUpdate {
+	if u != nil {
+		tu.SetSubjectID(*u)
+	}
+	return tu
+}
+
 // SetUserID sets the "user_id" field.
 func (tu *TimerUpdate) SetUserID(u uuid.UUID) *TimerUpdate {
 	tu.mutation.SetUserID(u)
@@ -77,12 +91,6 @@ func (tu *TimerUpdate) SetNillableUserID(u *uuid.UUID) *TimerUpdate {
 // SetUser sets the "user" edge to the User entity.
 func (tu *TimerUpdate) SetUser(u *User) *TimerUpdate {
 	return tu.SetUserID(u.ID)
-}
-
-// SetSubjectID sets the "subject" edge to the Subject entity by ID.
-func (tu *TimerUpdate) SetSubjectID(id uuid.UUID) *TimerUpdate {
-	tu.mutation.SetSubjectID(id)
-	return tu
 }
 
 // SetSubject sets the "subject" edge to the Subject entity.
@@ -350,6 +358,20 @@ func (tuo *TimerUpdateOne) SetNillableContent(s *string) *TimerUpdateOne {
 	return tuo
 }
 
+// SetSubjectID sets the "subject_id" field.
+func (tuo *TimerUpdateOne) SetSubjectID(u uuid.UUID) *TimerUpdateOne {
+	tuo.mutation.SetSubjectID(u)
+	return tuo
+}
+
+// SetNillableSubjectID sets the "subject_id" field if the given value is not nil.
+func (tuo *TimerUpdateOne) SetNillableSubjectID(u *uuid.UUID) *TimerUpdateOne {
+	if u != nil {
+		tuo.SetSubjectID(*u)
+	}
+	return tuo
+}
+
 // SetUserID sets the "user_id" field.
 func (tuo *TimerUpdateOne) SetUserID(u uuid.UUID) *TimerUpdateOne {
 	tuo.mutation.SetUserID(u)
@@ -367,12 +389,6 @@ func (tuo *TimerUpdateOne) SetNillableUserID(u *uuid.UUID) *TimerUpdateOne {
 // SetUser sets the "user" edge to the User entity.
 func (tuo *TimerUpdateOne) SetUser(u *User) *TimerUpdateOne {
 	return tuo.SetUserID(u.ID)
-}
-
-// SetSubjectID sets the "subject" edge to the Subject entity by ID.
-func (tuo *TimerUpdateOne) SetSubjectID(id uuid.UUID) *TimerUpdateOne {
-	tuo.mutation.SetSubjectID(id)
-	return tuo
 }
 
 // SetSubject sets the "subject" edge to the Subject entity.

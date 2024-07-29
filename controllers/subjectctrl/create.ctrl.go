@@ -19,12 +19,6 @@ type createSubjectReq struct {
 	Color string `json:"color" validate:"required,hexcolor"`
 }
 
-type createSubjectRes struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Color string `json:"color"`
-}
-
 // @Summary Create Subject
 // @Tags Subject
 // @Accept json
@@ -32,7 +26,7 @@ type createSubjectRes struct {
 // @Security Bearer
 // @Param id path string true "Category ID"
 // @Param request body createSubjectReq true "createSubjectReq"
-// @Success 200 {object} createSubjectRes
+// @Success 200 {object} subjectDTO
 // @Failure 400
 // @Failure 404
 // @Failure 500
@@ -87,7 +81,7 @@ func CreateSubject(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(
-		createSubjectRes{
+		subjectDTO{
 			ID:    subjectObj.ID.String(),
 			Name:  subjectObj.Name,
 			Color: subjectObj.Color,

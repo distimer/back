@@ -66,6 +66,11 @@ func Content(v string) predicate.Timer {
 	return predicate.Timer(sql.FieldEQ(FieldContent, v))
 }
 
+// SubjectID applies equality check predicate on the "subject_id" field. It's identical to SubjectIDEQ.
+func SubjectID(v uuid.UUID) predicate.Timer {
+	return predicate.Timer(sql.FieldEQ(FieldSubjectID, v))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.Timer {
 	return predicate.Timer(sql.FieldEQ(FieldUserID, v))
@@ -174,6 +179,26 @@ func ContentEqualFold(v string) predicate.Timer {
 // ContentContainsFold applies the ContainsFold predicate on the "content" field.
 func ContentContainsFold(v string) predicate.Timer {
 	return predicate.Timer(sql.FieldContainsFold(FieldContent, v))
+}
+
+// SubjectIDEQ applies the EQ predicate on the "subject_id" field.
+func SubjectIDEQ(v uuid.UUID) predicate.Timer {
+	return predicate.Timer(sql.FieldEQ(FieldSubjectID, v))
+}
+
+// SubjectIDNEQ applies the NEQ predicate on the "subject_id" field.
+func SubjectIDNEQ(v uuid.UUID) predicate.Timer {
+	return predicate.Timer(sql.FieldNEQ(FieldSubjectID, v))
+}
+
+// SubjectIDIn applies the In predicate on the "subject_id" field.
+func SubjectIDIn(vs ...uuid.UUID) predicate.Timer {
+	return predicate.Timer(sql.FieldIn(FieldSubjectID, vs...))
+}
+
+// SubjectIDNotIn applies the NotIn predicate on the "subject_id" field.
+func SubjectIDNotIn(vs ...uuid.UUID) predicate.Timer {
+	return predicate.Timer(sql.FieldNotIn(FieldSubjectID, vs...))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.

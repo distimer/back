@@ -196,7 +196,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/categoryctrl.getCategoryListRes"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/categoryctrl.categoryDTO"
+                            }
                         }
                     }
                 }
@@ -232,7 +235,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/categoryctrl.createCategoryRes"
+                            "$ref": "#/definitions/categoryctrl.categoryDTO"
                         }
                     }
                 }
@@ -304,7 +307,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/groupctrl.getJoinedGroupsRes"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/groupctrl.groupDTO"
+                            }
                         }
                     }
                 }
@@ -338,7 +344,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.groupDTO"
+                        }
                     }
                 }
             }
@@ -414,7 +423,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/groupctrl.joinRes"
+                            "$ref": "#/definitions/groupctrl.groupDTO"
                         }
                     }
                 }
@@ -450,7 +459,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/groupctrl.getAllGroupMembersRes"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/groupctrl.affiliationDTO"
+                            }
                         }
                     }
                 }
@@ -726,7 +738,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/studylogctrl.getStudyLogListRes"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studylogctrl.myStudyLogDTO"
+                            }
                         }
                     }
                 }
@@ -762,7 +777,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/studylogctrl.createStudyLogRes"
+                            "$ref": "#/definitions/studylogctrl.myStudyLogDTO"
                         }
                     },
                     "400": {
@@ -879,7 +894,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/studylogctrl.getStudyLogRes"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studylogctrl.myStudyLogDTO"
+                            }
                         }
                     }
                 }
@@ -911,12 +929,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "modifySubjectInfoRequest",
+                        "description": "modifySubjectInfoReq",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/subjectctrl.modifySubjectInfoRequest"
+                            "$ref": "#/definitions/subjectctrl.modifySubjectInfoReq"
                         }
                     }
                 ],
@@ -924,7 +942,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/subjectctrl.modifySubjectInfoResponse"
+                            "$ref": "#/definitions/subjectctrl.subjectDTO"
                         }
                     },
                     "400": {
@@ -976,7 +994,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/subjectctrl.createSubjectRes"
+                            "$ref": "#/definitions/subjectctrl.subjectDTO"
                         }
                     },
                     "400": {
@@ -1047,7 +1065,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/timerctrl.TimerInfo"
+                            "$ref": "#/definitions/timerctrl.timerDTO"
                         }
                     },
                     "404": {
@@ -1089,7 +1107,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/timerctrl.createTimerRes"
+                            "$ref": "#/definitions/timerctrl.timerDTO"
                         }
                     },
                     "400": {
@@ -1167,7 +1185,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ent.Timer"
+                                "$ref": "#/definitions/timerctrl.timerDTO"
                             }
                         }
                     },
@@ -1312,6 +1330,17 @@ const docTemplate = `{
                 }
             }
         },
+        "categoryctrl.categoryDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "categoryctrl.createCategoryReq": {
             "type": "object",
             "required": [
@@ -1324,525 +1353,23 @@ const docTemplate = `{
                 }
             }
         },
-        "categoryctrl.createCategoryRes": {
+        "groupctrl.affiliationDTO": {
             "type": "object",
             "properties": {
-                "category": {
-                    "$ref": "#/definitions/ent.Category"
-                }
-            }
-        },
-        "categoryctrl.getCategoryListRes": {
-            "type": "object",
-            "properties": {
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Category"
-                    }
-                }
-            }
-        },
-        "ent.Affiliation": {
-            "type": "object",
-            "properties": {
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the AffiliationQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.AffiliationEdges"
-                        }
-                    ]
-                },
                 "group_id": {
-                    "description": "GroupID holds the value of the \"group_id\" field.",
                     "type": "string"
                 },
                 "joined_at": {
-                    "description": "JoinedAt holds the value of the \"joined_at\" field.",
                     "type": "string"
                 },
                 "nickname": {
-                    "description": "Nickname holds the value of the \"nickname\" field.",
                     "type": "string"
                 },
                 "role": {
-                    "description": "Role holds the value of the \"role\" field.",
                     "type": "integer"
                 },
                 "user_id": {
-                    "description": "UserID holds the value of the \"user_id\" field.",
                     "type": "string"
-                }
-            }
-        },
-        "ent.AffiliationEdges": {
-            "type": "object",
-            "properties": {
-                "group": {
-                    "description": "Group holds the value of the group edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Group"
-                        }
-                    ]
-                },
-                "user": {
-                    "description": "User holds the value of the user edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.User"
-                        }
-                    ]
-                }
-            }
-        },
-        "ent.Category": {
-            "type": "object",
-            "properties": {
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the CategoryQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.CategoryEdges"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "Name holds the value of the \"name\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.CategoryEdges": {
-            "type": "object",
-            "properties": {
-                "subjects": {
-                    "description": "Subjects holds the value of the subjects edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Subject"
-                    }
-                },
-                "user": {
-                    "description": "User holds the value of the user edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.User"
-                        }
-                    ]
-                }
-            }
-        },
-        "ent.Group": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
-                    "type": "string"
-                },
-                "description": {
-                    "description": "Description holds the value of the \"description\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the GroupQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.GroupEdges"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "invite_policy": {
-                    "description": "InvitePolicy holds the value of the \"invite_policy\" field.",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name holds the value of the \"name\" field.",
-                    "type": "string"
-                },
-                "nickname_policy": {
-                    "description": "NicknamePolicy holds the value of the \"nickname_policy\" field.",
-                    "type": "string"
-                },
-                "reveal_policy": {
-                    "description": "RevealPolicy holds the value of the \"reveal_policy\" field.",
-                    "type": "integer"
-                }
-            }
-        },
-        "ent.GroupEdges": {
-            "type": "object",
-            "properties": {
-                "invite_codes": {
-                    "description": "InviteCodes holds the value of the invite_codes edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.InviteCode"
-                    }
-                },
-                "members": {
-                    "description": "Members holds the value of the members edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.User"
-                    }
-                },
-                "owner": {
-                    "description": "Owner holds the value of the owner edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.User"
-                        }
-                    ]
-                },
-                "shared_study_logs": {
-                    "description": "SharedStudyLogs holds the value of the shared_study_logs edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.StudyLog"
-                    }
-                },
-                "shared_timer": {
-                    "description": "SharedTimer holds the value of the shared_timer edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Timer"
-                    }
-                }
-            }
-        },
-        "ent.InviteCode": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "description": "Code holds the value of the \"code\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the InviteCodeQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.InviteCodeEdges"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "integer"
-                },
-                "used": {
-                    "description": "Used holds the value of the \"used\" field.",
-                    "type": "integer"
-                }
-            }
-        },
-        "ent.InviteCodeEdges": {
-            "type": "object",
-            "properties": {
-                "group": {
-                    "description": "Group holds the value of the group edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Group"
-                        }
-                    ]
-                }
-            }
-        },
-        "ent.RefreshToken": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the RefreshTokenQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.RefreshTokenEdges"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.RefreshTokenEdges": {
-            "type": "object",
-            "properties": {
-                "user": {
-                    "description": "User holds the value of the user edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.User"
-                        }
-                    ]
-                }
-            }
-        },
-        "ent.StudyLog": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "description": "Content holds the value of the \"content\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the StudyLogQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.StudyLogEdges"
-                        }
-                    ]
-                },
-                "end_at": {
-                    "description": "EndAt holds the value of the \"end_at\" field.",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "start_at": {
-                    "description": "StartAt holds the value of the \"start_at\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.StudyLogEdges": {
-            "type": "object",
-            "properties": {
-                "shared_group": {
-                    "description": "SharedGroup holds the value of the shared_group edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Group"
-                    }
-                },
-                "subject": {
-                    "description": "Subject holds the value of the subject edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Subject"
-                        }
-                    ]
-                },
-                "user": {
-                    "description": "User holds the value of the user edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.User"
-                        }
-                    ]
-                }
-            }
-        },
-        "ent.Subject": {
-            "type": "object",
-            "properties": {
-                "color": {
-                    "description": "Color holds the value of the \"color\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the SubjectQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.SubjectEdges"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "Name holds the value of the \"name\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.SubjectEdges": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "description": "Category holds the value of the category edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Category"
-                        }
-                    ]
-                },
-                "study_logs": {
-                    "description": "StudyLogs holds the value of the study_logs edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.StudyLog"
-                    }
-                },
-                "timers": {
-                    "description": "Timers holds the value of the timers edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Timer"
-                    }
-                }
-            }
-        },
-        "ent.Timer": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "description": "Content holds the value of the \"content\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the TimerQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.TimerEdges"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "start_at": {
-                    "description": "StartAt holds the value of the \"start_at\" field.",
-                    "type": "string"
-                },
-                "user_id": {
-                    "description": "UserID holds the value of the \"user_id\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.TimerEdges": {
-            "type": "object",
-            "properties": {
-                "shared_group": {
-                    "description": "SharedGroup holds the value of the shared_group edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Group"
-                    }
-                },
-                "subject": {
-                    "description": "Subject holds the value of the subject edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Subject"
-                        }
-                    ]
-                },
-                "user": {
-                    "description": "User holds the value of the user edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.User"
-                        }
-                    ]
-                }
-            }
-        },
-        "ent.User": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the UserQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.UserEdges"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "Name holds the value of the \"name\" field.",
-                    "type": "string"
-                },
-                "oauth_id": {
-                    "description": "OauthID holds the value of the \"oauth_id\" field.",
-                    "type": "string"
-                },
-                "oauth_provider": {
-                    "description": "OauthProvider holds the value of the \"oauth_provider\" field.",
-                    "type": "integer"
-                }
-            }
-        },
-        "ent.UserEdges": {
-            "type": "object",
-            "properties": {
-                "affiliations": {
-                    "description": "Affiliations holds the value of the affiliations edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Affiliation"
-                    }
-                },
-                "joined_groups": {
-                    "description": "JoinedGroups holds the value of the joined_groups edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Group"
-                    }
-                },
-                "owned_categories": {
-                    "description": "OwnedCategories holds the value of the owned_categories edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Category"
-                    }
-                },
-                "owned_groups": {
-                    "description": "OwnedGroups holds the value of the owned_groups edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Group"
-                    }
-                },
-                "refresh_tokens": {
-                    "description": "RefreshTokens holds the value of the refresh_tokens edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.RefreshToken"
-                    }
-                },
-                "study_logs": {
-                    "description": "StudyLogs holds the value of the study_logs edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.StudyLog"
-                    }
-                },
-                "timers": {
-                    "description": "Timers holds the value of the timers edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Timer"
-                        }
-                    ]
                 }
             }
         },
@@ -1883,25 +1410,29 @@ const docTemplate = `{
                 }
             }
         },
-        "groupctrl.getAllGroupMembersRes": {
+        "groupctrl.groupDTO": {
             "type": "object",
             "properties": {
-                "members": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Affiliation"
-                    }
-                }
-            }
-        },
-        "groupctrl.getJoinedGroupsRes": {
-            "type": "object",
-            "properties": {
-                "joined_groups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Group"
-                    }
+                "create_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "invite_policy": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nickname_policy": {
+                    "type": "string"
+                },
+                "reveal_policy": {
+                    "type": "integer"
                 }
             }
         },
@@ -1913,14 +1444,6 @@ const docTemplate = `{
             "properties": {
                 "invite_code": {
                     "type": "string"
-                }
-            }
-        },
-        "groupctrl.joinRes": {
-            "type": "object",
-            "properties": {
-                "group": {
-                    "$ref": "#/definitions/ent.Group"
                 }
             }
         },
@@ -2051,32 +1574,6 @@ const docTemplate = `{
                 }
             }
         },
-        "studylogctrl.createStudyLogRes": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "end_at": {
-                    "type": "string"
-                },
-                "groups_to_share": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "id": {
-                    "type": "string"
-                },
-                "start_at": {
-                    "type": "string"
-                },
-                "subject_id": {
-                    "type": "string"
-                }
-            }
-        },
         "studylogctrl.dailyStudyLog": {
             "type": "object",
             "properties": {
@@ -2102,25 +1599,29 @@ const docTemplate = `{
                 }
             }
         },
-        "studylogctrl.getStudyLogListRes": {
+        "studylogctrl.myStudyLogDTO": {
             "type": "object",
             "properties": {
-                "studyLogs": {
+                "content": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "groups_to_share": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ent.StudyLog"
+                        "type": "string"
                     }
-                }
-            }
-        },
-        "studylogctrl.getStudyLogRes": {
-            "type": "object",
-            "properties": {
-                "study_logs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.StudyLog"
-                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "subject_id": {
+                    "type": "string"
                 }
             }
         },
@@ -2140,21 +1641,7 @@ const docTemplate = `{
                 }
             }
         },
-        "subjectctrl.createSubjectRes": {
-            "type": "object",
-            "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "subjectctrl.modifySubjectInfoRequest": {
+        "subjectctrl.modifySubjectInfoReq": {
             "type": "object",
             "required": [
                 "color",
@@ -2170,7 +1657,7 @@ const docTemplate = `{
                 }
             }
         },
-        "subjectctrl.modifySubjectInfoResponse": {
+        "subjectctrl.subjectDTO": {
             "type": "object",
             "properties": {
                 "color": {
@@ -2181,14 +1668,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                }
-            }
-        },
-        "timerctrl.TimerInfo": {
-            "type": "object",
-            "properties": {
-                "timer": {
-                    "$ref": "#/definitions/ent.Timer"
                 }
             }
         },
@@ -2207,7 +1686,7 @@ const docTemplate = `{
                 }
             }
         },
-        "timerctrl.createTimerRes": {
+        "timerctrl.timerDTO": {
             "type": "object",
             "properties": {
                 "content": {

@@ -20,6 +20,7 @@ func (Timer) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).Immutable().Default(uuid.New).Unique(),
 		field.Time("start_at").Default(time.Now),
 		field.String("content"),
+		field.UUID("subject_id", uuid.UUID{}),
 		field.UUID("user_id", uuid.UUID{}).Unique(),
 	}
 }
@@ -35,6 +36,7 @@ func (Timer) Edges() []ent.Edge {
 
 		edge.From("subject", Subject.Type).
 			Ref("timers").
+			Field("subject_id").
 			Unique().
 			Required(),
 

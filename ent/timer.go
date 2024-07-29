@@ -24,13 +24,14 @@ type Timer struct {
 	StartAt time.Time `json:"start_at,omitempty"`
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
+	// SubjectID holds the value of the "subject_id" field.
+	SubjectID uuid.UUID `json:"subject_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TimerQuery when eager-loading is set.
-	Edges          TimerEdges `json:"edges"`
-	subject_timers *uuid.UUID
-	selectValues   sql.SelectValues
+	Edges        TimerEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TimerEdges holds the relations/edges for other nodes in the graph.
@@ -86,10 +87,8 @@ func (*Timer) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case timer.FieldStartAt:
 			values[i] = new(sql.NullTime)
-		case timer.FieldID, timer.FieldUserID:
+		case timer.FieldID, timer.FieldSubjectID, timer.FieldUserID:
 			values[i] = new(uuid.UUID)
-		case timer.ForeignKeys[0]: // subject_timers
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -123,18 +122,17 @@ func (t *Timer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Content = value.String
 			}
+		case timer.FieldSubjectID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field subject_id", values[i])
+			} else if value != nil {
+				t.SubjectID = *value
+			}
 		case timer.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value != nil {
 				t.UserID = *value
-			}
-		case timer.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field subject_timers", values[i])
-			} else if value.Valid {
-				t.subject_timers = new(uuid.UUID)
-				*t.subject_timers = *value.S.(*uuid.UUID)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -192,6 +190,9 @@ func (t *Timer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("content=")
 	builder.WriteString(t.Content)
+	builder.WriteString(", ")
+	builder.WriteString("subject_id=")
+	builder.WriteString(fmt.Sprintf("%v", t.SubjectID))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", t.UserID))

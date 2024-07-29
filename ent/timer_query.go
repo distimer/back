@@ -29,7 +29,6 @@ type TimerQuery struct {
 	withUser        *UserQuery
 	withSubject     *SubjectQuery
 	withSharedGroup *GroupQuery
-	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -443,7 +442,6 @@ func (tq *TimerQuery) prepareQuery(ctx context.Context) error {
 func (tq *TimerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Timer, error) {
 	var (
 		nodes       = []*Timer{}
-		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
 		loadedTypes = [3]bool{
 			tq.withUser != nil,
@@ -451,12 +449,6 @@ func (tq *TimerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Timer,
 			tq.withSharedGroup != nil,
 		}
 	)
-	if tq.withSubject != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, timer.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Timer).scanValues(nil, columns)
 	}
@@ -530,10 +522,7 @@ func (tq *TimerQuery) loadSubject(ctx context.Context, query *SubjectQuery, node
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Timer)
 	for i := range nodes {
-		if nodes[i].subject_timers == nil {
-			continue
-		}
-		fk := *nodes[i].subject_timers
+		fk := nodes[i].SubjectID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -550,7 +539,7 @@ func (tq *TimerQuery) loadSubject(ctx context.Context, query *SubjectQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "subject_timers" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "subject_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -647,6 +636,9 @@ func (tq *TimerQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if tq.withUser != nil {
 			_spec.Node.AddColumnOnce(timer.FieldUserID)
+		}
+		if tq.withSubject != nil {
+			_spec.Node.AddColumnOnce(timer.FieldSubjectID)
 		}
 	}
 	if ps := tq.predicates; len(ps) > 0 {
