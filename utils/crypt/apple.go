@@ -27,13 +27,11 @@ type ApplePublicKeyList struct {
 }
 
 type AppleTokenClaims struct {
-	ISS           string `json:"iss"`
-	AUD           string `json:"aud"`
-	EXP           int64  `json:"exp"`
-	IAT           int64  `json:"iat"`
-	Sub           string `json:"sub"`
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
+	ISS string `json:"iss"`
+	AUD string `json:"aud"`
+	EXP int64  `json:"exp"`
+	IAT int64  `json:"iat"`
+	Sub string `json:"sub"`
 }
 
 func getApplePublicKey() ([]ApplePublicKey, error) {
@@ -95,13 +93,11 @@ func VerifyAppleToken(token string) (*AppleTokenClaims, error) {
 	}
 
 	appleClaims := AppleTokenClaims{
-		ISS:           claims["iss"].(string),
-		AUD:           claims["aud"].(string),
-		EXP:           int64(claims["exp"].(float64)),
-		IAT:           int64(claims["iat"].(float64)),
-		Sub:           claims["sub"].(string),
-		Email:         claims["email"].(string),
-		EmailVerified: claims["email_verified"].(bool),
+		ISS: claims["iss"].(string),
+		AUD: claims["aud"].(string),
+		EXP: int64(claims["exp"].(float64)),
+		IAT: int64(claims["iat"].(float64)),
+		Sub: claims["sub"].(string),
 	}
 	return &appleClaims, nil
 }

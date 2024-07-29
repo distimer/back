@@ -2,6 +2,7 @@ package authctrl
 
 import (
 	"context"
+	"unicode/utf8"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -49,6 +50,10 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 			"error": "Invalid Google Token",
 		})
 	}
+	userName := claims.FamilyName + claims.GivenName
+	if utf8.RuneCountInString(userName) > 20 {
+		userName = truncateToRuneCharacters(userName, 20)
+	}
 
 	dbConn := db.GetDBClient()
 	var findUser *ent.User
@@ -60,6 +65,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 			userID := uuid.New()
 			findUser, err = dbConn.User.Create().
 				SetID(userID).
+				SetName(userName).
 				SetOauthID(claims.SUB).
 				SetOauthProvider(1).
 				Save(context.Background())
@@ -249,4 +255,20 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 			RefreshToken: newRefreshToken.String(),
 		},
 	)
+}
+
+func truncateToRuneCharacters(s string, limit int) string {
+	if limit <= 0 {
+		return ""
+	}
+
+	count := 0
+	for i := range s {
+		if count == limit {
+			return s[:i]
+		}
+		count++
+	}
+
+	return s
 }
