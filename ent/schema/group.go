@@ -37,6 +37,8 @@ func (Group) Edges() []ent.Edge {
 			Unique(),
 		edge.From("shared_study_logs", StudyLog.Type).
 			Ref("shared_group"),
+		edge.From("shared_timer", Timer.Type).
+			Ref("shared_group"),
 		edge.To("invite_codes", InviteCode.Type),
 	}
 }

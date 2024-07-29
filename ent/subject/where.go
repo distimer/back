@@ -60,7 +60,7 @@ func Name(v string) predicate.Subject {
 }
 
 // Color applies equality check predicate on the "color" field. It's identical to ColorEQ.
-func Color(v int32) predicate.Subject {
+func Color(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldEQ(FieldColor, v))
 }
 
@@ -130,43 +130,68 @@ func NameContainsFold(v string) predicate.Subject {
 }
 
 // ColorEQ applies the EQ predicate on the "color" field.
-func ColorEQ(v int32) predicate.Subject {
+func ColorEQ(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldEQ(FieldColor, v))
 }
 
 // ColorNEQ applies the NEQ predicate on the "color" field.
-func ColorNEQ(v int32) predicate.Subject {
+func ColorNEQ(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldNEQ(FieldColor, v))
 }
 
 // ColorIn applies the In predicate on the "color" field.
-func ColorIn(vs ...int32) predicate.Subject {
+func ColorIn(vs ...string) predicate.Subject {
 	return predicate.Subject(sql.FieldIn(FieldColor, vs...))
 }
 
 // ColorNotIn applies the NotIn predicate on the "color" field.
-func ColorNotIn(vs ...int32) predicate.Subject {
+func ColorNotIn(vs ...string) predicate.Subject {
 	return predicate.Subject(sql.FieldNotIn(FieldColor, vs...))
 }
 
 // ColorGT applies the GT predicate on the "color" field.
-func ColorGT(v int32) predicate.Subject {
+func ColorGT(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldGT(FieldColor, v))
 }
 
 // ColorGTE applies the GTE predicate on the "color" field.
-func ColorGTE(v int32) predicate.Subject {
+func ColorGTE(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldGTE(FieldColor, v))
 }
 
 // ColorLT applies the LT predicate on the "color" field.
-func ColorLT(v int32) predicate.Subject {
+func ColorLT(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldLT(FieldColor, v))
 }
 
 // ColorLTE applies the LTE predicate on the "color" field.
-func ColorLTE(v int32) predicate.Subject {
+func ColorLTE(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldLTE(FieldColor, v))
+}
+
+// ColorContains applies the Contains predicate on the "color" field.
+func ColorContains(v string) predicate.Subject {
+	return predicate.Subject(sql.FieldContains(FieldColor, v))
+}
+
+// ColorHasPrefix applies the HasPrefix predicate on the "color" field.
+func ColorHasPrefix(v string) predicate.Subject {
+	return predicate.Subject(sql.FieldHasPrefix(FieldColor, v))
+}
+
+// ColorHasSuffix applies the HasSuffix predicate on the "color" field.
+func ColorHasSuffix(v string) predicate.Subject {
+	return predicate.Subject(sql.FieldHasSuffix(FieldColor, v))
+}
+
+// ColorEqualFold applies the EqualFold predicate on the "color" field.
+func ColorEqualFold(v string) predicate.Subject {
+	return predicate.Subject(sql.FieldEqualFold(FieldColor, v))
+}
+
+// ColorContainsFold applies the ContainsFold predicate on the "color" field.
+func ColorContainsFold(v string) predicate.Subject {
+	return predicate.Subject(sql.FieldContainsFold(FieldColor, v))
 }
 
 // HasCategory applies the HasEdge predicate on the "category" edge.
@@ -207,6 +232,29 @@ func HasStudyLogs() predicate.Subject {
 func HasStudyLogsWith(preds ...predicate.StudyLog) predicate.Subject {
 	return predicate.Subject(func(s *sql.Selector) {
 		step := newStudyLogsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTimers applies the HasEdge predicate on the "timers" edge.
+func HasTimers() predicate.Subject {
+	return predicate.Subject(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TimersTable, TimersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTimersWith applies the HasEdge predicate on the "timers" edge with a given conditions (other predicates).
+func HasTimersWith(preds ...predicate.Timer) predicate.Subject {
+	return predicate.Subject(func(s *sql.Selector) {
+		step := newTimersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

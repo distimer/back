@@ -15,6 +15,7 @@ import (
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -114,6 +115,25 @@ func (uc *UserCreate) AddStudyLogs(s ...*StudyLog) *UserCreate {
 		ids[i] = s[i].ID
 	}
 	return uc.AddStudyLogIDs(ids...)
+}
+
+// SetTimersID sets the "timers" edge to the Timer entity by ID.
+func (uc *UserCreate) SetTimersID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetTimersID(id)
+	return uc
+}
+
+// SetNillableTimersID sets the "timers" edge to the Timer entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableTimersID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetTimersID(*id)
+	}
+	return uc
+}
+
+// SetTimers sets the "timers" edge to the Timer entity.
+func (uc *UserCreate) SetTimers(t *Timer) *UserCreate {
+	return uc.SetTimersID(t.ID)
 }
 
 // AddRefreshTokenIDs adds the "refresh_tokens" edge to the RefreshToken entity by IDs.
@@ -301,6 +321,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.TimersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TimersTable,
+			Columns: []string{user.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

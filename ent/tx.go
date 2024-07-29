@@ -26,6 +26,8 @@ type Tx struct {
 	StudyLog *StudyLogClient
 	// Subject is the client for interacting with the Subject builders.
 	Subject *SubjectClient
+	// Timer is the client for interacting with the Timer builders.
+	Timer *TimerClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -166,6 +168,7 @@ func (tx *Tx) init() {
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)
 	tx.StudyLog = NewStudyLogClient(tx.config)
 	tx.Subject = NewSubjectClient(tx.config)
+	tx.Timer = NewTimerClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

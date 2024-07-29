@@ -21,7 +21,7 @@ type Subject struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Color holds the value of the "color" field.
-	Color int32 `json:"color,omitempty"`
+	Color string `json:"color,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SubjectQuery when eager-loading is set.
 	Edges             SubjectEdges `json:"edges"`
@@ -35,9 +35,11 @@ type SubjectEdges struct {
 	Category *Category `json:"category,omitempty"`
 	// StudyLogs holds the value of the study_logs edge.
 	StudyLogs []*StudyLog `json:"study_logs,omitempty"`
+	// Timers holds the value of the timers edge.
+	Timers []*Timer `json:"timers,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // CategoryOrErr returns the Category value or an error if the edge
@@ -60,14 +62,21 @@ func (e SubjectEdges) StudyLogsOrErr() ([]*StudyLog, error) {
 	return nil, &NotLoadedError{edge: "study_logs"}
 }
 
+// TimersOrErr returns the Timers value or an error if the edge
+// was not loaded in eager-loading.
+func (e SubjectEdges) TimersOrErr() ([]*Timer, error) {
+	if e.loadedTypes[2] {
+		return e.Timers, nil
+	}
+	return nil, &NotLoadedError{edge: "timers"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Subject) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case subject.FieldColor:
-			values[i] = new(sql.NullInt64)
-		case subject.FieldName:
+		case subject.FieldName, subject.FieldColor:
 			values[i] = new(sql.NullString)
 		case subject.FieldID:
 			values[i] = new(uuid.UUID)
@@ -101,10 +110,10 @@ func (s *Subject) assignValues(columns []string, values []any) error {
 				s.Name = value.String
 			}
 		case subject.FieldColor:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field color", values[i])
 			} else if value.Valid {
-				s.Color = int32(value.Int64)
+				s.Color = value.String
 			}
 		case subject.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -136,6 +145,11 @@ func (s *Subject) QueryStudyLogs() *StudyLogQuery {
 	return NewSubjectClient(s.config).QueryStudyLogs(s)
 }
 
+// QueryTimers queries the "timers" edge of the Subject entity.
+func (s *Subject) QueryTimers() *TimerQuery {
+	return NewSubjectClient(s.config).QueryTimers(s)
+}
+
 // Update returns a builder for updating this Subject.
 // Note that you need to call Subject.Unwrap() before calling this method if this Subject
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -163,7 +177,7 @@ func (s *Subject) String() string {
 	builder.WriteString(s.Name)
 	builder.WriteString(", ")
 	builder.WriteString("color=")
-	builder.WriteString(fmt.Sprintf("%v", s.Color))
+	builder.WriteString(s.Color)
 	builder.WriteByte(')')
 	return builder.String()
 }

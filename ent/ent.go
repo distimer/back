@@ -19,6 +19,7 @@ import (
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -87,6 +88,7 @@ func checkColumn(table, column string) error {
 			refreshtoken.Table: refreshtoken.ValidColumn,
 			studylog.Table:     studylog.ValidColumn,
 			subject.Table:      subject.ValidColumn,
+			timer.Table:        timer.ValidColumn,
 			user.Table:         user.ValidColumn,
 		})
 	})

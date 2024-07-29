@@ -470,6 +470,29 @@ func HasSharedStudyLogsWith(preds ...predicate.StudyLog) predicate.Group {
 	})
 }
 
+// HasSharedTimer applies the HasEdge predicate on the "shared_timer" edge.
+func HasSharedTimer() predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, SharedTimerTable, SharedTimerPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSharedTimerWith applies the HasEdge predicate on the "shared_timer" edge with a given conditions (other predicates).
+func HasSharedTimerWith(preds ...predicate.Timer) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := newSharedTimerStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasInviteCodes applies the HasEdge predicate on the "invite_codes" edge.
 func HasInviteCodes() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {

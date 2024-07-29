@@ -83,7 +83,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 			// add Default Subject
 			_, err = dbConn.Subject.Create().
 				SetName("미분류").
-				SetColor(0).
+				SetColor("000000").
 				SetCategory(categoryObj).
 				Save(context.Background())
 			if err != nil {
@@ -194,7 +194,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 			// add Default Subject
 			_, err = dbConn.Subject.Create().
 				SetName("미분류").
-				SetColor(0).
+				SetColor("000000").
 				SetCategory(categoryObj).
 				Save(context.Background())
 			if err != nil {

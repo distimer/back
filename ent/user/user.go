@@ -28,6 +28,8 @@ const (
 	EdgeOwnedGroups = "owned_groups"
 	// EdgeStudyLogs holds the string denoting the study_logs edge name in mutations.
 	EdgeStudyLogs = "study_logs"
+	// EdgeTimers holds the string denoting the timers edge name in mutations.
+	EdgeTimers = "timers"
 	// EdgeRefreshTokens holds the string denoting the refresh_tokens edge name in mutations.
 	EdgeRefreshTokens = "refresh_tokens"
 	// EdgeOwnedCategories holds the string denoting the owned_categories edge name in mutations.
@@ -55,6 +57,13 @@ const (
 	StudyLogsInverseTable = "study_logs"
 	// StudyLogsColumn is the table column denoting the study_logs relation/edge.
 	StudyLogsColumn = "user_study_logs"
+	// TimersTable is the table that holds the timers relation/edge.
+	TimersTable = "timers"
+	// TimersInverseTable is the table name for the Timer entity.
+	// It exists in this package in order to avoid circular dependency with the "timer" package.
+	TimersInverseTable = "timers"
+	// TimersColumn is the table column denoting the timers relation/edge.
+	TimersColumn = "user_id"
 	// RefreshTokensTable is the table that holds the refresh_tokens relation/edge.
 	RefreshTokensTable = "refresh_tokens"
 	// RefreshTokensInverseTable is the table name for the RefreshToken entity.
@@ -180,6 +189,13 @@ func ByStudyLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByTimersField orders the results by timers field.
+func ByTimersField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimersStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByRefreshTokensCount orders the results by refresh_tokens count.
 func ByRefreshTokensCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -240,6 +256,13 @@ func newStudyLogsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(StudyLogsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, StudyLogsTable, StudyLogsColumn),
+	)
+}
+func newTimersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, TimersTable, TimersColumn),
 	)
 }
 func newRefreshTokensStep() *sqlgraph.Step {

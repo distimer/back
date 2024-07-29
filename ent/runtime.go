@@ -12,6 +12,7 @@ import (
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/schema"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -61,6 +62,16 @@ func init() {
 	studylogDescID := studylogFields[0].Descriptor()
 	// studylog.DefaultID holds the default value on creation for the id field.
 	studylog.DefaultID = studylogDescID.Default.(func() uuid.UUID)
+	timerFields := schema.Timer{}.Fields()
+	_ = timerFields
+	// timerDescStartAt is the schema descriptor for start_at field.
+	timerDescStartAt := timerFields[1].Descriptor()
+	// timer.DefaultStartAt holds the default value on creation for the start_at field.
+	timer.DefaultStartAt = timerDescStartAt.Default.(func() time.Time)
+	// timerDescID is the schema descriptor for id field.
+	timerDescID := timerFields[0].Descriptor()
+	// timer.DefaultID holds the default value on creation for the id field.
+	timer.DefaultID = timerDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

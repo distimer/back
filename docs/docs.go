@@ -1027,6 +1027,88 @@ const docTemplate = `{
                 }
             }
         },
+        "/timer": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "[EDGE INCLUDED!]Subject info is included in timer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Timer"
+                ],
+                "summary": "Get My Timer Info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/timerctrl.TimerInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Timer"
+                ],
+                "summary": "Create Timer",
+                "parameters": [
+                    {
+                        "description": "createTimerReq",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/timerctrl.createTimerReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/timerctrl.createTimerRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "security": [
@@ -1495,7 +1577,7 @@ const docTemplate = `{
             "properties": {
                 "color": {
                     "description": "Color holds the value of the \"color\" field.",
-                    "type": "integer"
+                    "type": "string"
                 },
                 "edges": {
                     "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the SubjectQuery when eager-loading is set.",
@@ -1973,9 +2055,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "color": {
-                    "type": "integer",
-                    "maximum": 16777215,
-                    "minimum": 0
+                    "type": "string"
                 },
                 "name": {
                     "type": "string",
@@ -1987,7 +2067,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "color": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -2005,9 +2085,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "color": {
-                    "type": "integer",
-                    "maximum": 16777215,
-                    "minimum": 0
+                    "type": "string"
                 },
                 "name": {
                     "type": "string",
@@ -2019,12 +2097,52 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "color": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "timerctrl.TimerInfo": {
+            "type": "object",
+            "properties": {
+                "timer": {
+                    "$ref": "#/definitions/ent.Timer"
+                }
+            }
+        },
+        "timerctrl.createTimerReq": {
+            "type": "object",
+            "required": [
+                "content",
+                "subject_id"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "subject_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "timerctrl.createTimerRes": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
+                },
+                "subject_id": {
                     "type": "string"
                 }
             }

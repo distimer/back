@@ -18,6 +18,7 @@ import (
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -31,6 +32,7 @@ type UserQuery struct {
 	withJoinedGroups    *GroupQuery
 	withOwnedGroups     *GroupQuery
 	withStudyLogs       *StudyLogQuery
+	withTimers          *TimerQuery
 	withRefreshTokens   *RefreshTokenQuery
 	withOwnedCategories *CategoryQuery
 	withAffiliations    *AffiliationQuery
@@ -129,6 +131,28 @@ func (uq *UserQuery) QueryStudyLogs() *StudyLogQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(studylog.Table, studylog.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.StudyLogsTable, user.StudyLogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTimers chains the current query on the "timers" edge.
+func (uq *UserQuery) QueryTimers() *TimerQuery {
+	query := (&TimerClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(timer.Table, timer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.TimersTable, user.TimersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -397,6 +421,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withJoinedGroups:    uq.withJoinedGroups.Clone(),
 		withOwnedGroups:     uq.withOwnedGroups.Clone(),
 		withStudyLogs:       uq.withStudyLogs.Clone(),
+		withTimers:          uq.withTimers.Clone(),
 		withRefreshTokens:   uq.withRefreshTokens.Clone(),
 		withOwnedCategories: uq.withOwnedCategories.Clone(),
 		withAffiliations:    uq.withAffiliations.Clone(),
@@ -436,6 +461,17 @@ func (uq *UserQuery) WithStudyLogs(opts ...func(*StudyLogQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withStudyLogs = query
+	return uq
+}
+
+// WithTimers tells the query-builder to eager-load the nodes that are connected to
+// the "timers" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithTimers(opts ...func(*TimerQuery)) *UserQuery {
+	query := (&TimerClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withTimers = query
 	return uq
 }
 
@@ -550,10 +586,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			uq.withJoinedGroups != nil,
 			uq.withOwnedGroups != nil,
 			uq.withStudyLogs != nil,
+			uq.withTimers != nil,
 			uq.withRefreshTokens != nil,
 			uq.withOwnedCategories != nil,
 			uq.withAffiliations != nil,
@@ -595,6 +632,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadStudyLogs(ctx, query, nodes,
 			func(n *User) { n.Edges.StudyLogs = []*StudyLog{} },
 			func(n *User, e *StudyLog) { n.Edges.StudyLogs = append(n.Edges.StudyLogs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withTimers; query != nil {
+		if err := uq.loadTimers(ctx, query, nodes, nil,
+			func(n *User, e *Timer) { n.Edges.Timers = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -740,6 +783,34 @@ func (uq *UserQuery) loadStudyLogs(ctx context.Context, query *StudyLogQuery, no
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_study_logs" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadTimers(ctx context.Context, query *TimerQuery, nodes []*User, init func(*User), assign func(*User, *Timer)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(timer.FieldUserID)
+	}
+	query.Where(predicate.Timer(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.TimersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -14,4 +14,5 @@ func EnrollRouter(app *fiber.App) {
 	initSubjectRouter(apiRouter)
 	initStudylogRouter(apiRouter)
 	initInviteRouter(apiRouter)
+	initTimerRouter(apiRouter)
 }

@@ -16,6 +16,7 @@ import (
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -126,6 +127,25 @@ func (uu *UserUpdate) AddStudyLogs(s ...*StudyLog) *UserUpdate {
 	return uu.AddStudyLogIDs(ids...)
 }
 
+// SetTimersID sets the "timers" edge to the Timer entity by ID.
+func (uu *UserUpdate) SetTimersID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetTimersID(id)
+	return uu
+}
+
+// SetNillableTimersID sets the "timers" edge to the Timer entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableTimersID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetTimersID(*id)
+	}
+	return uu
+}
+
+// SetTimers sets the "timers" edge to the Timer entity.
+func (uu *UserUpdate) SetTimers(t *Timer) *UserUpdate {
+	return uu.SetTimersID(t.ID)
+}
+
 // AddRefreshTokenIDs adds the "refresh_tokens" edge to the RefreshToken entity by IDs.
 func (uu *UserUpdate) AddRefreshTokenIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddRefreshTokenIDs(ids...)
@@ -222,6 +242,12 @@ func (uu *UserUpdate) RemoveStudyLogs(s ...*StudyLog) *UserUpdate {
 		ids[i] = s[i].ID
 	}
 	return uu.RemoveStudyLogIDs(ids...)
+}
+
+// ClearTimers clears the "timers" edge to the Timer entity.
+func (uu *UserUpdate) ClearTimers() *UserUpdate {
+	uu.mutation.ClearTimers()
+	return uu
 }
 
 // ClearRefreshTokens clears all "refresh_tokens" edges to the RefreshToken entity.
@@ -461,6 +487,35 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.TimersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TimersTable,
+			Columns: []string{user.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.TimersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TimersTable,
+			Columns: []string{user.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if uu.mutation.RefreshTokensCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -665,6 +720,25 @@ func (uuo *UserUpdateOne) AddStudyLogs(s ...*StudyLog) *UserUpdateOne {
 	return uuo.AddStudyLogIDs(ids...)
 }
 
+// SetTimersID sets the "timers" edge to the Timer entity by ID.
+func (uuo *UserUpdateOne) SetTimersID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetTimersID(id)
+	return uuo
+}
+
+// SetNillableTimersID sets the "timers" edge to the Timer entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableTimersID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetTimersID(*id)
+	}
+	return uuo
+}
+
+// SetTimers sets the "timers" edge to the Timer entity.
+func (uuo *UserUpdateOne) SetTimers(t *Timer) *UserUpdateOne {
+	return uuo.SetTimersID(t.ID)
+}
+
 // AddRefreshTokenIDs adds the "refresh_tokens" edge to the RefreshToken entity by IDs.
 func (uuo *UserUpdateOne) AddRefreshTokenIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddRefreshTokenIDs(ids...)
@@ -761,6 +835,12 @@ func (uuo *UserUpdateOne) RemoveStudyLogs(s ...*StudyLog) *UserUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return uuo.RemoveStudyLogIDs(ids...)
+}
+
+// ClearTimers clears the "timers" edge to the Timer entity.
+func (uuo *UserUpdateOne) ClearTimers() *UserUpdateOne {
+	uuo.mutation.ClearTimers()
+	return uuo
 }
 
 // ClearRefreshTokens clears all "refresh_tokens" edges to the RefreshToken entity.
@@ -1023,6 +1103,35 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.TimersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TimersTable,
+			Columns: []string{user.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.TimersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TimersTable,
+			Columns: []string{user.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

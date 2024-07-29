@@ -33,6 +33,8 @@ const (
 	EdgeOwner = "owner"
 	// EdgeSharedStudyLogs holds the string denoting the shared_study_logs edge name in mutations.
 	EdgeSharedStudyLogs = "shared_study_logs"
+	// EdgeSharedTimer holds the string denoting the shared_timer edge name in mutations.
+	EdgeSharedTimer = "shared_timer"
 	// EdgeInviteCodes holds the string denoting the invite_codes edge name in mutations.
 	EdgeInviteCodes = "invite_codes"
 	// Table holds the table name of the group in the database.
@@ -54,6 +56,11 @@ const (
 	// SharedStudyLogsInverseTable is the table name for the StudyLog entity.
 	// It exists in this package in order to avoid circular dependency with the "studylog" package.
 	SharedStudyLogsInverseTable = "study_logs"
+	// SharedTimerTable is the table that holds the shared_timer relation/edge. The primary key declared below.
+	SharedTimerTable = "timer_shared_group"
+	// SharedTimerInverseTable is the table name for the Timer entity.
+	// It exists in this package in order to avoid circular dependency with the "timer" package.
+	SharedTimerInverseTable = "timers"
 	// InviteCodesTable is the table that holds the invite_codes relation/edge.
 	InviteCodesTable = "invite_codes"
 	// InviteCodesInverseTable is the table name for the InviteCode entity.
@@ -87,6 +94,9 @@ var (
 	// SharedStudyLogsPrimaryKey and SharedStudyLogsColumn2 are the table columns denoting the
 	// primary key for the shared_study_logs relation (M2M).
 	SharedStudyLogsPrimaryKey = []string{"study_log_id", "group_id"}
+	// SharedTimerPrimaryKey and SharedTimerColumn2 are the table columns denoting the
+	// primary key for the shared_timer relation (M2M).
+	SharedTimerPrimaryKey = []string{"timer_id", "group_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -188,6 +198,20 @@ func BySharedStudyLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// BySharedTimerCount orders the results by shared_timer count.
+func BySharedTimerCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSharedTimerStep(), opts...)
+	}
+}
+
+// BySharedTimer orders the results by shared_timer terms.
+func BySharedTimer(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSharedTimerStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByInviteCodesCount orders the results by invite_codes count.
 func ByInviteCodesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -220,6 +244,13 @@ func newSharedStudyLogsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SharedStudyLogsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, SharedStudyLogsTable, SharedStudyLogsPrimaryKey...),
+	)
+}
+func newSharedTimerStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SharedTimerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, SharedTimerTable, SharedTimerPrimaryKey...),
 	)
 }
 func newInviteCodesStep() *sqlgraph.Step {

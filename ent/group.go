@@ -46,11 +46,13 @@ type GroupEdges struct {
 	Owner *User `json:"owner,omitempty"`
 	// SharedStudyLogs holds the value of the shared_study_logs edge.
 	SharedStudyLogs []*StudyLog `json:"shared_study_logs,omitempty"`
+	// SharedTimer holds the value of the shared_timer edge.
+	SharedTimer []*Timer `json:"shared_timer,omitempty"`
 	// InviteCodes holds the value of the invite_codes edge.
 	InviteCodes []*InviteCode `json:"invite_codes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // MembersOrErr returns the Members value or an error if the edge
@@ -82,10 +84,19 @@ func (e GroupEdges) SharedStudyLogsOrErr() ([]*StudyLog, error) {
 	return nil, &NotLoadedError{edge: "shared_study_logs"}
 }
 
+// SharedTimerOrErr returns the SharedTimer value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupEdges) SharedTimerOrErr() ([]*Timer, error) {
+	if e.loadedTypes[3] {
+		return e.SharedTimer, nil
+	}
+	return nil, &NotLoadedError{edge: "shared_timer"}
+}
+
 // InviteCodesOrErr returns the InviteCodes value or an error if the edge
 // was not loaded in eager-loading.
 func (e GroupEdges) InviteCodesOrErr() ([]*InviteCode, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.InviteCodes, nil
 	}
 	return nil, &NotLoadedError{edge: "invite_codes"}
@@ -196,6 +207,11 @@ func (gr *Group) QueryOwner() *UserQuery {
 // QuerySharedStudyLogs queries the "shared_study_logs" edge of the Group entity.
 func (gr *Group) QuerySharedStudyLogs() *StudyLogQuery {
 	return NewGroupClient(gr.config).QuerySharedStudyLogs(gr)
+}
+
+// QuerySharedTimer queries the "shared_timer" edge of the Group entity.
+func (gr *Group) QuerySharedTimer() *TimerQuery {
+	return NewGroupClient(gr.config).QuerySharedTimer(gr)
 }
 
 // QueryInviteCodes queries the "invite_codes" edge of the Group entity.

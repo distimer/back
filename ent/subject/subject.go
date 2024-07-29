@@ -20,6 +20,8 @@ const (
 	EdgeCategory = "category"
 	// EdgeStudyLogs holds the string denoting the study_logs edge name in mutations.
 	EdgeStudyLogs = "study_logs"
+	// EdgeTimers holds the string denoting the timers edge name in mutations.
+	EdgeTimers = "timers"
 	// Table holds the table name of the subject in the database.
 	Table = "subjects"
 	// CategoryTable is the table that holds the category relation/edge.
@@ -36,6 +38,13 @@ const (
 	StudyLogsInverseTable = "study_logs"
 	// StudyLogsColumn is the table column denoting the study_logs relation/edge.
 	StudyLogsColumn = "subject_study_logs"
+	// TimersTable is the table that holds the timers relation/edge.
+	TimersTable = "timers"
+	// TimersInverseTable is the table name for the Timer entity.
+	// It exists in this package in order to avoid circular dependency with the "timer" package.
+	TimersInverseTable = "timers"
+	// TimersColumn is the table column denoting the timers relation/edge.
+	TimersColumn = "subject_timers"
 )
 
 // Columns holds all SQL columns for subject fields.
@@ -104,6 +113,20 @@ func ByStudyLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newStudyLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByTimersCount orders the results by timers count.
+func ByTimersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimersStep(), opts...)
+	}
+}
+
+// ByTimers orders the results by timers terms.
+func ByTimers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newCategoryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -116,5 +139,12 @@ func newStudyLogsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(StudyLogsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, StudyLogsTable, StudyLogsColumn),
+	)
+}
+func newTimersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimersTable, TimersColumn),
 	)
 }

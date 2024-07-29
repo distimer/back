@@ -14,6 +14,7 @@ import (
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -137,6 +138,21 @@ func (gc *GroupCreate) AddSharedStudyLogs(s ...*StudyLog) *GroupCreate {
 		ids[i] = s[i].ID
 	}
 	return gc.AddSharedStudyLogIDs(ids...)
+}
+
+// AddSharedTimerIDs adds the "shared_timer" edge to the Timer entity by IDs.
+func (gc *GroupCreate) AddSharedTimerIDs(ids ...uuid.UUID) *GroupCreate {
+	gc.mutation.AddSharedTimerIDs(ids...)
+	return gc
+}
+
+// AddSharedTimer adds the "shared_timer" edges to the Timer entity.
+func (gc *GroupCreate) AddSharedTimer(t ...*Timer) *GroupCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gc.AddSharedTimerIDs(ids...)
 }
 
 // AddInviteCodeIDs adds the "invite_codes" edge to the InviteCode entity by IDs.
@@ -331,6 +347,22 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.SharedTimerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.SharedTimerTable,
+			Columns: group.SharedTimerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -40,6 +41,8 @@ type UserEdges struct {
 	OwnedGroups []*Group `json:"owned_groups,omitempty"`
 	// StudyLogs holds the value of the study_logs edge.
 	StudyLogs []*StudyLog `json:"study_logs,omitempty"`
+	// Timers holds the value of the timers edge.
+	Timers *Timer `json:"timers,omitempty"`
 	// RefreshTokens holds the value of the refresh_tokens edge.
 	RefreshTokens []*RefreshToken `json:"refresh_tokens,omitempty"`
 	// OwnedCategories holds the value of the owned_categories edge.
@@ -48,7 +51,7 @@ type UserEdges struct {
 	Affiliations []*Affiliation `json:"affiliations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // JoinedGroupsOrErr returns the JoinedGroups value or an error if the edge
@@ -78,10 +81,21 @@ func (e UserEdges) StudyLogsOrErr() ([]*StudyLog, error) {
 	return nil, &NotLoadedError{edge: "study_logs"}
 }
 
+// TimersOrErr returns the Timers value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) TimersOrErr() (*Timer, error) {
+	if e.Timers != nil {
+		return e.Timers, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: timer.Label}
+	}
+	return nil, &NotLoadedError{edge: "timers"}
+}
+
 // RefreshTokensOrErr returns the RefreshTokens value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RefreshTokensOrErr() ([]*RefreshToken, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.RefreshTokens, nil
 	}
 	return nil, &NotLoadedError{edge: "refresh_tokens"}
@@ -90,7 +104,7 @@ func (e UserEdges) RefreshTokensOrErr() ([]*RefreshToken, error) {
 // OwnedCategoriesOrErr returns the OwnedCategories value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) OwnedCategoriesOrErr() ([]*Category, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.OwnedCategories, nil
 	}
 	return nil, &NotLoadedError{edge: "owned_categories"}
@@ -99,7 +113,7 @@ func (e UserEdges) OwnedCategoriesOrErr() ([]*Category, error) {
 // AffiliationsOrErr returns the Affiliations value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) AffiliationsOrErr() ([]*Affiliation, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.Affiliations, nil
 	}
 	return nil, &NotLoadedError{edge: "affiliations"}
@@ -189,6 +203,11 @@ func (u *User) QueryOwnedGroups() *GroupQuery {
 // QueryStudyLogs queries the "study_logs" edge of the User entity.
 func (u *User) QueryStudyLogs() *StudyLogQuery {
 	return NewUserClient(u.config).QueryStudyLogs(u)
+}
+
+// QueryTimers queries the "timers" edge of the User entity.
+func (u *User) QueryTimers() *TimerQuery {
+	return NewUserClient(u.config).QueryTimers(u)
 }
 
 // QueryRefreshTokens queries the "refresh_tokens" edge of the User entity.

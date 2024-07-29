@@ -23,6 +23,7 @@ import (
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -45,6 +46,8 @@ type Client struct {
 	StudyLog *StudyLogClient
 	// Subject is the client for interacting with the Subject builders.
 	Subject *SubjectClient
+	// Timer is the client for interacting with the Timer builders.
+	Timer *TimerClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -65,6 +68,7 @@ func (c *Client) init() {
 	c.RefreshToken = NewRefreshTokenClient(c.config)
 	c.StudyLog = NewStudyLogClient(c.config)
 	c.Subject = NewSubjectClient(c.config)
+	c.Timer = NewTimerClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -165,6 +169,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		RefreshToken: NewRefreshTokenClient(cfg),
 		StudyLog:     NewStudyLogClient(cfg),
 		Subject:      NewSubjectClient(cfg),
+		Timer:        NewTimerClient(cfg),
 		User:         NewUserClient(cfg),
 	}, nil
 }
@@ -192,6 +197,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		RefreshToken: NewRefreshTokenClient(cfg),
 		StudyLog:     NewStudyLogClient(cfg),
 		Subject:      NewSubjectClient(cfg),
+		Timer:        NewTimerClient(cfg),
 		User:         NewUserClient(cfg),
 	}, nil
 }
@@ -223,7 +229,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Affiliation, c.Category, c.Group, c.InviteCode, c.RefreshToken, c.StudyLog,
-		c.Subject, c.User,
+		c.Subject, c.Timer, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -234,7 +240,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Affiliation, c.Category, c.Group, c.InviteCode, c.RefreshToken, c.StudyLog,
-		c.Subject, c.User,
+		c.Subject, c.Timer, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -257,6 +263,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.StudyLog.mutate(ctx, m)
 	case *SubjectMutation:
 		return c.Subject.mutate(ctx, m)
+	case *TimerMutation:
+		return c.Timer.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -694,6 +702,22 @@ func (c *GroupClient) QuerySharedStudyLogs(gr *Group) *StudyLogQuery {
 			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(studylog.Table, studylog.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, group.SharedStudyLogsTable, group.SharedStudyLogsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySharedTimer queries the shared_timer edge of a Group.
+func (c *GroupClient) QuerySharedTimer(gr *Group) *TimerQuery {
+	query := (&TimerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(timer.Table, timer.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.SharedTimerTable, group.SharedTimerPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -1361,6 +1385,22 @@ func (c *SubjectClient) QueryStudyLogs(s *Subject) *StudyLogQuery {
 	return query
 }
 
+// QueryTimers queries the timers edge of a Subject.
+func (c *SubjectClient) QueryTimers(s *Subject) *TimerQuery {
+	query := (&TimerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subject.Table, subject.FieldID, id),
+			sqlgraph.To(timer.Table, timer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, subject.TimersTable, subject.TimersColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SubjectClient) Hooks() []Hook {
 	return c.hooks.Subject
@@ -1383,6 +1423,187 @@ func (c *SubjectClient) mutate(ctx context.Context, m *SubjectMutation) (Value, 
 		return (&SubjectDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Subject mutation op: %q", m.Op())
+	}
+}
+
+// TimerClient is a client for the Timer schema.
+type TimerClient struct {
+	config
+}
+
+// NewTimerClient returns a client for the Timer from the given config.
+func NewTimerClient(c config) *TimerClient {
+	return &TimerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `timer.Hooks(f(g(h())))`.
+func (c *TimerClient) Use(hooks ...Hook) {
+	c.hooks.Timer = append(c.hooks.Timer, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `timer.Intercept(f(g(h())))`.
+func (c *TimerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Timer = append(c.inters.Timer, interceptors...)
+}
+
+// Create returns a builder for creating a Timer entity.
+func (c *TimerClient) Create() *TimerCreate {
+	mutation := newTimerMutation(c.config, OpCreate)
+	return &TimerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Timer entities.
+func (c *TimerClient) CreateBulk(builders ...*TimerCreate) *TimerCreateBulk {
+	return &TimerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TimerClient) MapCreateBulk(slice any, setFunc func(*TimerCreate, int)) *TimerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TimerCreateBulk{err: fmt.Errorf("calling to TimerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TimerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TimerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Timer.
+func (c *TimerClient) Update() *TimerUpdate {
+	mutation := newTimerMutation(c.config, OpUpdate)
+	return &TimerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TimerClient) UpdateOne(t *Timer) *TimerUpdateOne {
+	mutation := newTimerMutation(c.config, OpUpdateOne, withTimer(t))
+	return &TimerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TimerClient) UpdateOneID(id uuid.UUID) *TimerUpdateOne {
+	mutation := newTimerMutation(c.config, OpUpdateOne, withTimerID(id))
+	return &TimerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Timer.
+func (c *TimerClient) Delete() *TimerDelete {
+	mutation := newTimerMutation(c.config, OpDelete)
+	return &TimerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TimerClient) DeleteOne(t *Timer) *TimerDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TimerClient) DeleteOneID(id uuid.UUID) *TimerDeleteOne {
+	builder := c.Delete().Where(timer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TimerDeleteOne{builder}
+}
+
+// Query returns a query builder for Timer.
+func (c *TimerClient) Query() *TimerQuery {
+	return &TimerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTimer},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Timer entity by its id.
+func (c *TimerClient) Get(ctx context.Context, id uuid.UUID) (*Timer, error) {
+	return c.Query().Where(timer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TimerClient) GetX(ctx context.Context, id uuid.UUID) *Timer {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Timer.
+func (c *TimerClient) QueryUser(t *Timer) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timer.Table, timer.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, timer.UserTable, timer.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySubject queries the subject edge of a Timer.
+func (c *TimerClient) QuerySubject(t *Timer) *SubjectQuery {
+	query := (&SubjectClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timer.Table, timer.FieldID, id),
+			sqlgraph.To(subject.Table, subject.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timer.SubjectTable, timer.SubjectColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySharedGroup queries the shared_group edge of a Timer.
+func (c *TimerClient) QuerySharedGroup(t *Timer) *GroupQuery {
+	query := (&GroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timer.Table, timer.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, timer.SharedGroupTable, timer.SharedGroupPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TimerClient) Hooks() []Hook {
+	return c.hooks.Timer
+}
+
+// Interceptors returns the client interceptors.
+func (c *TimerClient) Interceptors() []Interceptor {
+	return c.inters.Timer
+}
+
+func (c *TimerClient) mutate(ctx context.Context, m *TimerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TimerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TimerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TimerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TimerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Timer mutation op: %q", m.Op())
 	}
 }
 
@@ -1542,6 +1763,22 @@ func (c *UserClient) QueryStudyLogs(u *User) *StudyLogQuery {
 	return query
 }
 
+// QueryTimers queries the timers edge of a User.
+func (c *UserClient) QueryTimers(u *User) *TimerQuery {
+	query := (&TimerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(timer.Table, timer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.TimersTable, user.TimersColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryRefreshTokens queries the refresh_tokens edge of a User.
 func (c *UserClient) QueryRefreshTokens(u *User) *RefreshTokenQuery {
 	query := (&RefreshTokenClient{config: c.config}).Query()
@@ -1619,10 +1856,10 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		Affiliation, Category, Group, InviteCode, RefreshToken, StudyLog, Subject,
-		User []ent.Hook
+		Timer, User []ent.Hook
 	}
 	inters struct {
 		Affiliation, Category, Group, InviteCode, RefreshToken, StudyLog, Subject,
-		User []ent.Interceptor
+		Timer, User []ent.Interceptor
 	}
 )

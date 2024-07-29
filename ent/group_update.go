@@ -15,6 +15,7 @@ import (
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -156,6 +157,21 @@ func (gu *GroupUpdate) AddSharedStudyLogs(s ...*StudyLog) *GroupUpdate {
 	return gu.AddSharedStudyLogIDs(ids...)
 }
 
+// AddSharedTimerIDs adds the "shared_timer" edge to the Timer entity by IDs.
+func (gu *GroupUpdate) AddSharedTimerIDs(ids ...uuid.UUID) *GroupUpdate {
+	gu.mutation.AddSharedTimerIDs(ids...)
+	return gu
+}
+
+// AddSharedTimer adds the "shared_timer" edges to the Timer entity.
+func (gu *GroupUpdate) AddSharedTimer(t ...*Timer) *GroupUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gu.AddSharedTimerIDs(ids...)
+}
+
 // AddInviteCodeIDs adds the "invite_codes" edge to the InviteCode entity by IDs.
 func (gu *GroupUpdate) AddInviteCodeIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddInviteCodeIDs(ids...)
@@ -222,6 +238,27 @@ func (gu *GroupUpdate) RemoveSharedStudyLogs(s ...*StudyLog) *GroupUpdate {
 		ids[i] = s[i].ID
 	}
 	return gu.RemoveSharedStudyLogIDs(ids...)
+}
+
+// ClearSharedTimer clears all "shared_timer" edges to the Timer entity.
+func (gu *GroupUpdate) ClearSharedTimer() *GroupUpdate {
+	gu.mutation.ClearSharedTimer()
+	return gu
+}
+
+// RemoveSharedTimerIDs removes the "shared_timer" edge to Timer entities by IDs.
+func (gu *GroupUpdate) RemoveSharedTimerIDs(ids ...uuid.UUID) *GroupUpdate {
+	gu.mutation.RemoveSharedTimerIDs(ids...)
+	return gu
+}
+
+// RemoveSharedTimer removes "shared_timer" edges to Timer entities.
+func (gu *GroupUpdate) RemoveSharedTimer(t ...*Timer) *GroupUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gu.RemoveSharedTimerIDs(ids...)
 }
 
 // ClearInviteCodes clears all "invite_codes" edges to the InviteCode entity.
@@ -432,6 +469,51 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if gu.mutation.SharedTimerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.SharedTimerTable,
+			Columns: group.SharedTimerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedSharedTimerIDs(); len(nodes) > 0 && !gu.mutation.SharedTimerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.SharedTimerTable,
+			Columns: group.SharedTimerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.SharedTimerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.SharedTimerTable,
+			Columns: group.SharedTimerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if gu.mutation.InviteCodesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -622,6 +704,21 @@ func (guo *GroupUpdateOne) AddSharedStudyLogs(s ...*StudyLog) *GroupUpdateOne {
 	return guo.AddSharedStudyLogIDs(ids...)
 }
 
+// AddSharedTimerIDs adds the "shared_timer" edge to the Timer entity by IDs.
+func (guo *GroupUpdateOne) AddSharedTimerIDs(ids ...uuid.UUID) *GroupUpdateOne {
+	guo.mutation.AddSharedTimerIDs(ids...)
+	return guo
+}
+
+// AddSharedTimer adds the "shared_timer" edges to the Timer entity.
+func (guo *GroupUpdateOne) AddSharedTimer(t ...*Timer) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return guo.AddSharedTimerIDs(ids...)
+}
+
 // AddInviteCodeIDs adds the "invite_codes" edge to the InviteCode entity by IDs.
 func (guo *GroupUpdateOne) AddInviteCodeIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.AddInviteCodeIDs(ids...)
@@ -688,6 +785,27 @@ func (guo *GroupUpdateOne) RemoveSharedStudyLogs(s ...*StudyLog) *GroupUpdateOne
 		ids[i] = s[i].ID
 	}
 	return guo.RemoveSharedStudyLogIDs(ids...)
+}
+
+// ClearSharedTimer clears all "shared_timer" edges to the Timer entity.
+func (guo *GroupUpdateOne) ClearSharedTimer() *GroupUpdateOne {
+	guo.mutation.ClearSharedTimer()
+	return guo
+}
+
+// RemoveSharedTimerIDs removes the "shared_timer" edge to Timer entities by IDs.
+func (guo *GroupUpdateOne) RemoveSharedTimerIDs(ids ...uuid.UUID) *GroupUpdateOne {
+	guo.mutation.RemoveSharedTimerIDs(ids...)
+	return guo
+}
+
+// RemoveSharedTimer removes "shared_timer" edges to Timer entities.
+func (guo *GroupUpdateOne) RemoveSharedTimer(t ...*Timer) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return guo.RemoveSharedTimerIDs(ids...)
 }
 
 // ClearInviteCodes clears all "invite_codes" edges to the InviteCode entity.
@@ -921,6 +1039,51 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if guo.mutation.SharedTimerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.SharedTimerTable,
+			Columns: group.SharedTimerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedSharedTimerIDs(); len(nodes) > 0 && !guo.mutation.SharedTimerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.SharedTimerTable,
+			Columns: group.SharedTimerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.SharedTimerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.SharedTimerTable,
+			Columns: group.SharedTimerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

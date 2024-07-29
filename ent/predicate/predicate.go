@@ -27,5 +27,8 @@ type StudyLog func(*sql.Selector)
 // Subject is the predicate function for subject builders.
 type Subject func(*sql.Selector)
 
+// Timer is the predicate function for timer builders.
+type Timer func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

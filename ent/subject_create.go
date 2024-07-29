@@ -13,6 +13,7 @@ import (
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
+	"pentag.kr/distimer/ent/timer"
 )
 
 // SubjectCreate is the builder for creating a Subject entity.
@@ -29,8 +30,8 @@ func (sc *SubjectCreate) SetName(s string) *SubjectCreate {
 }
 
 // SetColor sets the "color" field.
-func (sc *SubjectCreate) SetColor(i int32) *SubjectCreate {
-	sc.mutation.SetColor(i)
+func (sc *SubjectCreate) SetColor(s string) *SubjectCreate {
+	sc.mutation.SetColor(s)
 	return sc
 }
 
@@ -64,6 +65,21 @@ func (sc *SubjectCreate) AddStudyLogs(s ...*StudyLog) *SubjectCreate {
 		ids[i] = s[i].ID
 	}
 	return sc.AddStudyLogIDs(ids...)
+}
+
+// AddTimerIDs adds the "timers" edge to the Timer entity by IDs.
+func (sc *SubjectCreate) AddTimerIDs(ids ...uuid.UUID) *SubjectCreate {
+	sc.mutation.AddTimerIDs(ids...)
+	return sc
+}
+
+// AddTimers adds the "timers" edges to the Timer entity.
+func (sc *SubjectCreate) AddTimers(t ...*Timer) *SubjectCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return sc.AddTimerIDs(ids...)
 }
 
 // Mutation returns the SubjectMutation object of the builder.
@@ -149,7 +165,7 @@ func (sc *SubjectCreate) createSpec() (*Subject, *sqlgraph.CreateSpec) {
 		_node.Name = value
 	}
 	if value, ok := sc.mutation.Color(); ok {
-		_spec.SetField(subject.FieldColor, field.TypeInt32, value)
+		_spec.SetField(subject.FieldColor, field.TypeString, value)
 		_node.Color = value
 	}
 	if nodes := sc.mutation.CategoryIDs(); len(nodes) > 0 {
@@ -178,6 +194,22 @@ func (sc *SubjectCreate) createSpec() (*Subject, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sc.mutation.TimersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   subject.TimersTable,
+			Columns: []string{subject.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

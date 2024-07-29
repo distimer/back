@@ -16,6 +16,7 @@ import (
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
+	"pentag.kr/distimer/ent/timer"
 )
 
 // SubjectQuery is the builder for querying Subject entities.
@@ -27,6 +28,7 @@ type SubjectQuery struct {
 	predicates    []predicate.Subject
 	withCategory  *CategoryQuery
 	withStudyLogs *StudyLogQuery
+	withTimers    *TimerQuery
 	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -101,6 +103,28 @@ func (sq *SubjectQuery) QueryStudyLogs() *StudyLogQuery {
 			sqlgraph.From(subject.Table, subject.FieldID, selector),
 			sqlgraph.To(studylog.Table, studylog.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, subject.StudyLogsTable, subject.StudyLogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTimers chains the current query on the "timers" edge.
+func (sq *SubjectQuery) QueryTimers() *TimerQuery {
+	query := (&TimerClient{config: sq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subject.Table, subject.FieldID, selector),
+			sqlgraph.To(timer.Table, timer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, subject.TimersTable, subject.TimersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -302,6 +326,7 @@ func (sq *SubjectQuery) Clone() *SubjectQuery {
 		predicates:    append([]predicate.Subject{}, sq.predicates...),
 		withCategory:  sq.withCategory.Clone(),
 		withStudyLogs: sq.withStudyLogs.Clone(),
+		withTimers:    sq.withTimers.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
@@ -327,6 +352,17 @@ func (sq *SubjectQuery) WithStudyLogs(opts ...func(*StudyLogQuery)) *SubjectQuer
 		opt(query)
 	}
 	sq.withStudyLogs = query
+	return sq
+}
+
+// WithTimers tells the query-builder to eager-load the nodes that are connected to
+// the "timers" edge. The optional arguments are used to configure the query builder of the edge.
+func (sq *SubjectQuery) WithTimers(opts ...func(*TimerQuery)) *SubjectQuery {
+	query := (&TimerClient{config: sq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withTimers = query
 	return sq
 }
 
@@ -409,9 +445,10 @@ func (sq *SubjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Subj
 		nodes       = []*Subject{}
 		withFKs     = sq.withFKs
 		_spec       = sq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			sq.withCategory != nil,
 			sq.withStudyLogs != nil,
+			sq.withTimers != nil,
 		}
 	)
 	if sq.withCategory != nil {
@@ -448,6 +485,13 @@ func (sq *SubjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Subj
 		if err := sq.loadStudyLogs(ctx, query, nodes,
 			func(n *Subject) { n.Edges.StudyLogs = []*StudyLog{} },
 			func(n *Subject, e *StudyLog) { n.Edges.StudyLogs = append(n.Edges.StudyLogs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := sq.withTimers; query != nil {
+		if err := sq.loadTimers(ctx, query, nodes,
+			func(n *Subject) { n.Edges.Timers = []*Timer{} },
+			func(n *Subject, e *Timer) { n.Edges.Timers = append(n.Edges.Timers, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -512,6 +556,37 @@ func (sq *SubjectQuery) loadStudyLogs(ctx context.Context, query *StudyLogQuery,
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "subject_study_logs" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (sq *SubjectQuery) loadTimers(ctx context.Context, query *TimerQuery, nodes []*Subject, init func(*Subject), assign func(*Subject, *Timer)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Subject)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Timer(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(subject.TimersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.subject_timers
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "subject_timers" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "subject_timers" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

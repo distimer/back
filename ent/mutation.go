@@ -20,6 +20,7 @@ import (
 	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -39,6 +40,7 @@ const (
 	TypeRefreshToken = "RefreshToken"
 	TypeStudyLog     = "StudyLog"
 	TypeSubject      = "Subject"
+	TypeTimer        = "Timer"
 	TypeUser         = "User"
 )
 
@@ -1069,6 +1071,9 @@ type GroupMutation struct {
 	shared_study_logs        map[uuid.UUID]struct{}
 	removedshared_study_logs map[uuid.UUID]struct{}
 	clearedshared_study_logs bool
+	shared_timer             map[uuid.UUID]struct{}
+	removedshared_timer      map[uuid.UUID]struct{}
+	clearedshared_timer      bool
 	invite_codes             map[int]struct{}
 	removedinvite_codes      map[int]struct{}
 	clearedinvite_codes      bool
@@ -1584,6 +1589,60 @@ func (m *GroupMutation) ResetSharedStudyLogs() {
 	m.removedshared_study_logs = nil
 }
 
+// AddSharedTimerIDs adds the "shared_timer" edge to the Timer entity by ids.
+func (m *GroupMutation) AddSharedTimerIDs(ids ...uuid.UUID) {
+	if m.shared_timer == nil {
+		m.shared_timer = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.shared_timer[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSharedTimer clears the "shared_timer" edge to the Timer entity.
+func (m *GroupMutation) ClearSharedTimer() {
+	m.clearedshared_timer = true
+}
+
+// SharedTimerCleared reports if the "shared_timer" edge to the Timer entity was cleared.
+func (m *GroupMutation) SharedTimerCleared() bool {
+	return m.clearedshared_timer
+}
+
+// RemoveSharedTimerIDs removes the "shared_timer" edge to the Timer entity by IDs.
+func (m *GroupMutation) RemoveSharedTimerIDs(ids ...uuid.UUID) {
+	if m.removedshared_timer == nil {
+		m.removedshared_timer = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.shared_timer, ids[i])
+		m.removedshared_timer[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSharedTimer returns the removed IDs of the "shared_timer" edge to the Timer entity.
+func (m *GroupMutation) RemovedSharedTimerIDs() (ids []uuid.UUID) {
+	for id := range m.removedshared_timer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SharedTimerIDs returns the "shared_timer" edge IDs in the mutation.
+func (m *GroupMutation) SharedTimerIDs() (ids []uuid.UUID) {
+	for id := range m.shared_timer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSharedTimer resets all changes to the "shared_timer" edge.
+func (m *GroupMutation) ResetSharedTimer() {
+	m.shared_timer = nil
+	m.clearedshared_timer = false
+	m.removedshared_timer = nil
+}
+
 // AddInviteCodeIDs adds the "invite_codes" edge to the InviteCode entity by ids.
 func (m *GroupMutation) AddInviteCodeIDs(ids ...int) {
 	if m.invite_codes == nil {
@@ -1883,7 +1942,7 @@ func (m *GroupMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GroupMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.members != nil {
 		edges = append(edges, group.EdgeMembers)
 	}
@@ -1892,6 +1951,9 @@ func (m *GroupMutation) AddedEdges() []string {
 	}
 	if m.shared_study_logs != nil {
 		edges = append(edges, group.EdgeSharedStudyLogs)
+	}
+	if m.shared_timer != nil {
+		edges = append(edges, group.EdgeSharedTimer)
 	}
 	if m.invite_codes != nil {
 		edges = append(edges, group.EdgeInviteCodes)
@@ -1919,6 +1981,12 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case group.EdgeSharedTimer:
+		ids := make([]ent.Value, 0, len(m.shared_timer))
+		for id := range m.shared_timer {
+			ids = append(ids, id)
+		}
+		return ids
 	case group.EdgeInviteCodes:
 		ids := make([]ent.Value, 0, len(m.invite_codes))
 		for id := range m.invite_codes {
@@ -1931,12 +1999,15 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GroupMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedmembers != nil {
 		edges = append(edges, group.EdgeMembers)
 	}
 	if m.removedshared_study_logs != nil {
 		edges = append(edges, group.EdgeSharedStudyLogs)
+	}
+	if m.removedshared_timer != nil {
+		edges = append(edges, group.EdgeSharedTimer)
 	}
 	if m.removedinvite_codes != nil {
 		edges = append(edges, group.EdgeInviteCodes)
@@ -1960,6 +2031,12 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case group.EdgeSharedTimer:
+		ids := make([]ent.Value, 0, len(m.removedshared_timer))
+		for id := range m.removedshared_timer {
+			ids = append(ids, id)
+		}
+		return ids
 	case group.EdgeInviteCodes:
 		ids := make([]ent.Value, 0, len(m.removedinvite_codes))
 		for id := range m.removedinvite_codes {
@@ -1972,7 +2049,7 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GroupMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedmembers {
 		edges = append(edges, group.EdgeMembers)
 	}
@@ -1981,6 +2058,9 @@ func (m *GroupMutation) ClearedEdges() []string {
 	}
 	if m.clearedshared_study_logs {
 		edges = append(edges, group.EdgeSharedStudyLogs)
+	}
+	if m.clearedshared_timer {
+		edges = append(edges, group.EdgeSharedTimer)
 	}
 	if m.clearedinvite_codes {
 		edges = append(edges, group.EdgeInviteCodes)
@@ -1998,6 +2078,8 @@ func (m *GroupMutation) EdgeCleared(name string) bool {
 		return m.clearedowner
 	case group.EdgeSharedStudyLogs:
 		return m.clearedshared_study_logs
+	case group.EdgeSharedTimer:
+		return m.clearedshared_timer
 	case group.EdgeInviteCodes:
 		return m.clearedinvite_codes
 	}
@@ -2027,6 +2109,9 @@ func (m *GroupMutation) ResetEdge(name string) error {
 		return nil
 	case group.EdgeSharedStudyLogs:
 		m.ResetSharedStudyLogs()
+		return nil
+	case group.EdgeSharedTimer:
+		m.ResetSharedTimer()
 		return nil
 	case group.EdgeInviteCodes:
 		m.ResetInviteCodes()
@@ -3575,14 +3660,16 @@ type SubjectMutation struct {
 	typ               string
 	id                *uuid.UUID
 	name              *string
-	color             *int32
-	addcolor          *int32
+	color             *string
 	clearedFields     map[string]struct{}
 	category          *uuid.UUID
 	clearedcategory   bool
 	study_logs        map[uuid.UUID]struct{}
 	removedstudy_logs map[uuid.UUID]struct{}
 	clearedstudy_logs bool
+	timers            map[uuid.UUID]struct{}
+	removedtimers     map[uuid.UUID]struct{}
+	clearedtimers     bool
 	done              bool
 	oldValue          func(context.Context) (*Subject, error)
 	predicates        []predicate.Subject
@@ -3729,13 +3816,12 @@ func (m *SubjectMutation) ResetName() {
 }
 
 // SetColor sets the "color" field.
-func (m *SubjectMutation) SetColor(i int32) {
-	m.color = &i
-	m.addcolor = nil
+func (m *SubjectMutation) SetColor(s string) {
+	m.color = &s
 }
 
 // Color returns the value of the "color" field in the mutation.
-func (m *SubjectMutation) Color() (r int32, exists bool) {
+func (m *SubjectMutation) Color() (r string, exists bool) {
 	v := m.color
 	if v == nil {
 		return
@@ -3746,7 +3832,7 @@ func (m *SubjectMutation) Color() (r int32, exists bool) {
 // OldColor returns the old "color" field's value of the Subject entity.
 // If the Subject object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SubjectMutation) OldColor(ctx context.Context) (v int32, err error) {
+func (m *SubjectMutation) OldColor(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldColor is only allowed on UpdateOne operations")
 	}
@@ -3760,28 +3846,9 @@ func (m *SubjectMutation) OldColor(ctx context.Context) (v int32, err error) {
 	return oldValue.Color, nil
 }
 
-// AddColor adds i to the "color" field.
-func (m *SubjectMutation) AddColor(i int32) {
-	if m.addcolor != nil {
-		*m.addcolor += i
-	} else {
-		m.addcolor = &i
-	}
-}
-
-// AddedColor returns the value that was added to the "color" field in this mutation.
-func (m *SubjectMutation) AddedColor() (r int32, exists bool) {
-	v := m.addcolor
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetColor resets all changes to the "color" field.
 func (m *SubjectMutation) ResetColor() {
 	m.color = nil
-	m.addcolor = nil
 }
 
 // SetCategoryID sets the "category" edge to the Category entity by id.
@@ -3877,6 +3944,60 @@ func (m *SubjectMutation) ResetStudyLogs() {
 	m.removedstudy_logs = nil
 }
 
+// AddTimerIDs adds the "timers" edge to the Timer entity by ids.
+func (m *SubjectMutation) AddTimerIDs(ids ...uuid.UUID) {
+	if m.timers == nil {
+		m.timers = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.timers[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTimers clears the "timers" edge to the Timer entity.
+func (m *SubjectMutation) ClearTimers() {
+	m.clearedtimers = true
+}
+
+// TimersCleared reports if the "timers" edge to the Timer entity was cleared.
+func (m *SubjectMutation) TimersCleared() bool {
+	return m.clearedtimers
+}
+
+// RemoveTimerIDs removes the "timers" edge to the Timer entity by IDs.
+func (m *SubjectMutation) RemoveTimerIDs(ids ...uuid.UUID) {
+	if m.removedtimers == nil {
+		m.removedtimers = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.timers, ids[i])
+		m.removedtimers[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTimers returns the removed IDs of the "timers" edge to the Timer entity.
+func (m *SubjectMutation) RemovedTimersIDs() (ids []uuid.UUID) {
+	for id := range m.removedtimers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TimersIDs returns the "timers" edge IDs in the mutation.
+func (m *SubjectMutation) TimersIDs() (ids []uuid.UUID) {
+	for id := range m.timers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTimers resets all changes to the "timers" edge.
+func (m *SubjectMutation) ResetTimers() {
+	m.timers = nil
+	m.clearedtimers = false
+	m.removedtimers = nil
+}
+
 // Where appends a list predicates to the SubjectMutation builder.
 func (m *SubjectMutation) Where(ps ...predicate.Subject) {
 	m.predicates = append(m.predicates, ps...)
@@ -3960,7 +4081,7 @@ func (m *SubjectMutation) SetField(name string, value ent.Value) error {
 		m.SetName(v)
 		return nil
 	case subject.FieldColor:
-		v, ok := value.(int32)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3973,21 +4094,13 @@ func (m *SubjectMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SubjectMutation) AddedFields() []string {
-	var fields []string
-	if m.addcolor != nil {
-		fields = append(fields, subject.FieldColor)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SubjectMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case subject.FieldColor:
-		return m.AddedColor()
-	}
 	return nil, false
 }
 
@@ -3996,13 +4109,6 @@ func (m *SubjectMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *SubjectMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case subject.FieldColor:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddColor(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Subject numeric field %s", name)
 }
@@ -4042,12 +4148,15 @@ func (m *SubjectMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SubjectMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.category != nil {
 		edges = append(edges, subject.EdgeCategory)
 	}
 	if m.study_logs != nil {
 		edges = append(edges, subject.EdgeStudyLogs)
+	}
+	if m.timers != nil {
+		edges = append(edges, subject.EdgeTimers)
 	}
 	return edges
 }
@@ -4066,15 +4175,24 @@ func (m *SubjectMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case subject.EdgeTimers:
+		ids := make([]ent.Value, 0, len(m.timers))
+		for id := range m.timers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SubjectMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedstudy_logs != nil {
 		edges = append(edges, subject.EdgeStudyLogs)
+	}
+	if m.removedtimers != nil {
+		edges = append(edges, subject.EdgeTimers)
 	}
 	return edges
 }
@@ -4089,18 +4207,27 @@ func (m *SubjectMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case subject.EdgeTimers:
+		ids := make([]ent.Value, 0, len(m.removedtimers))
+		for id := range m.removedtimers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SubjectMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedcategory {
 		edges = append(edges, subject.EdgeCategory)
 	}
 	if m.clearedstudy_logs {
 		edges = append(edges, subject.EdgeStudyLogs)
+	}
+	if m.clearedtimers {
+		edges = append(edges, subject.EdgeTimers)
 	}
 	return edges
 }
@@ -4113,6 +4240,8 @@ func (m *SubjectMutation) EdgeCleared(name string) bool {
 		return m.clearedcategory
 	case subject.EdgeStudyLogs:
 		return m.clearedstudy_logs
+	case subject.EdgeTimers:
+		return m.clearedtimers
 	}
 	return false
 }
@@ -4138,8 +4267,649 @@ func (m *SubjectMutation) ResetEdge(name string) error {
 	case subject.EdgeStudyLogs:
 		m.ResetStudyLogs()
 		return nil
+	case subject.EdgeTimers:
+		m.ResetTimers()
+		return nil
 	}
 	return fmt.Errorf("unknown Subject edge %s", name)
+}
+
+// TimerMutation represents an operation that mutates the Timer nodes in the graph.
+type TimerMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	start_at            *time.Time
+	content             *string
+	clearedFields       map[string]struct{}
+	user                *uuid.UUID
+	cleareduser         bool
+	subject             *uuid.UUID
+	clearedsubject      bool
+	shared_group        map[uuid.UUID]struct{}
+	removedshared_group map[uuid.UUID]struct{}
+	clearedshared_group bool
+	done                bool
+	oldValue            func(context.Context) (*Timer, error)
+	predicates          []predicate.Timer
+}
+
+var _ ent.Mutation = (*TimerMutation)(nil)
+
+// timerOption allows management of the mutation configuration using functional options.
+type timerOption func(*TimerMutation)
+
+// newTimerMutation creates new mutation for the Timer entity.
+func newTimerMutation(c config, op Op, opts ...timerOption) *TimerMutation {
+	m := &TimerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTimer,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTimerID sets the ID field of the mutation.
+func withTimerID(id uuid.UUID) timerOption {
+	return func(m *TimerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Timer
+		)
+		m.oldValue = func(ctx context.Context) (*Timer, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Timer.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTimer sets the old Timer of the mutation.
+func withTimer(node *Timer) timerOption {
+	return func(m *TimerMutation) {
+		m.oldValue = func(context.Context) (*Timer, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TimerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TimerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Timer entities.
+func (m *TimerMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TimerMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TimerMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Timer.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetStartAt sets the "start_at" field.
+func (m *TimerMutation) SetStartAt(t time.Time) {
+	m.start_at = &t
+}
+
+// StartAt returns the value of the "start_at" field in the mutation.
+func (m *TimerMutation) StartAt() (r time.Time, exists bool) {
+	v := m.start_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartAt returns the old "start_at" field's value of the Timer entity.
+// If the Timer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TimerMutation) OldStartAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartAt: %w", err)
+	}
+	return oldValue.StartAt, nil
+}
+
+// ResetStartAt resets all changes to the "start_at" field.
+func (m *TimerMutation) ResetStartAt() {
+	m.start_at = nil
+}
+
+// SetContent sets the "content" field.
+func (m *TimerMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *TimerMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the Timer entity.
+// If the Timer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TimerMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *TimerMutation) ResetContent() {
+	m.content = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *TimerMutation) SetUserID(u uuid.UUID) {
+	m.user = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *TimerMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Timer entity.
+// If the Timer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TimerMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *TimerMutation) ResetUserID() {
+	m.user = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *TimerMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[timer.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *TimerMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *TimerMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *TimerMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// SetSubjectID sets the "subject" edge to the Subject entity by id.
+func (m *TimerMutation) SetSubjectID(id uuid.UUID) {
+	m.subject = &id
+}
+
+// ClearSubject clears the "subject" edge to the Subject entity.
+func (m *TimerMutation) ClearSubject() {
+	m.clearedsubject = true
+}
+
+// SubjectCleared reports if the "subject" edge to the Subject entity was cleared.
+func (m *TimerMutation) SubjectCleared() bool {
+	return m.clearedsubject
+}
+
+// SubjectID returns the "subject" edge ID in the mutation.
+func (m *TimerMutation) SubjectID() (id uuid.UUID, exists bool) {
+	if m.subject != nil {
+		return *m.subject, true
+	}
+	return
+}
+
+// SubjectIDs returns the "subject" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SubjectID instead. It exists only for internal usage by the builders.
+func (m *TimerMutation) SubjectIDs() (ids []uuid.UUID) {
+	if id := m.subject; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSubject resets all changes to the "subject" edge.
+func (m *TimerMutation) ResetSubject() {
+	m.subject = nil
+	m.clearedsubject = false
+}
+
+// AddSharedGroupIDs adds the "shared_group" edge to the Group entity by ids.
+func (m *TimerMutation) AddSharedGroupIDs(ids ...uuid.UUID) {
+	if m.shared_group == nil {
+		m.shared_group = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.shared_group[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSharedGroup clears the "shared_group" edge to the Group entity.
+func (m *TimerMutation) ClearSharedGroup() {
+	m.clearedshared_group = true
+}
+
+// SharedGroupCleared reports if the "shared_group" edge to the Group entity was cleared.
+func (m *TimerMutation) SharedGroupCleared() bool {
+	return m.clearedshared_group
+}
+
+// RemoveSharedGroupIDs removes the "shared_group" edge to the Group entity by IDs.
+func (m *TimerMutation) RemoveSharedGroupIDs(ids ...uuid.UUID) {
+	if m.removedshared_group == nil {
+		m.removedshared_group = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.shared_group, ids[i])
+		m.removedshared_group[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSharedGroup returns the removed IDs of the "shared_group" edge to the Group entity.
+func (m *TimerMutation) RemovedSharedGroupIDs() (ids []uuid.UUID) {
+	for id := range m.removedshared_group {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SharedGroupIDs returns the "shared_group" edge IDs in the mutation.
+func (m *TimerMutation) SharedGroupIDs() (ids []uuid.UUID) {
+	for id := range m.shared_group {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSharedGroup resets all changes to the "shared_group" edge.
+func (m *TimerMutation) ResetSharedGroup() {
+	m.shared_group = nil
+	m.clearedshared_group = false
+	m.removedshared_group = nil
+}
+
+// Where appends a list predicates to the TimerMutation builder.
+func (m *TimerMutation) Where(ps ...predicate.Timer) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TimerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TimerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Timer, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TimerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TimerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Timer).
+func (m *TimerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TimerMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.start_at != nil {
+		fields = append(fields, timer.FieldStartAt)
+	}
+	if m.content != nil {
+		fields = append(fields, timer.FieldContent)
+	}
+	if m.user != nil {
+		fields = append(fields, timer.FieldUserID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TimerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case timer.FieldStartAt:
+		return m.StartAt()
+	case timer.FieldContent:
+		return m.Content()
+	case timer.FieldUserID:
+		return m.UserID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TimerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case timer.FieldStartAt:
+		return m.OldStartAt(ctx)
+	case timer.FieldContent:
+		return m.OldContent(ctx)
+	case timer.FieldUserID:
+		return m.OldUserID(ctx)
+	}
+	return nil, fmt.Errorf("unknown Timer field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TimerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case timer.FieldStartAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartAt(v)
+		return nil
+	case timer.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	case timer.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Timer field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TimerMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TimerMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TimerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Timer numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TimerMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TimerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TimerMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Timer nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TimerMutation) ResetField(name string) error {
+	switch name {
+	case timer.FieldStartAt:
+		m.ResetStartAt()
+		return nil
+	case timer.FieldContent:
+		m.ResetContent()
+		return nil
+	case timer.FieldUserID:
+		m.ResetUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown Timer field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TimerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.user != nil {
+		edges = append(edges, timer.EdgeUser)
+	}
+	if m.subject != nil {
+		edges = append(edges, timer.EdgeSubject)
+	}
+	if m.shared_group != nil {
+		edges = append(edges, timer.EdgeSharedGroup)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TimerMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case timer.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case timer.EdgeSubject:
+		if id := m.subject; id != nil {
+			return []ent.Value{*id}
+		}
+	case timer.EdgeSharedGroup:
+		ids := make([]ent.Value, 0, len(m.shared_group))
+		for id := range m.shared_group {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TimerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedshared_group != nil {
+		edges = append(edges, timer.EdgeSharedGroup)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TimerMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case timer.EdgeSharedGroup:
+		ids := make([]ent.Value, 0, len(m.removedshared_group))
+		for id := range m.removedshared_group {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TimerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.cleareduser {
+		edges = append(edges, timer.EdgeUser)
+	}
+	if m.clearedsubject {
+		edges = append(edges, timer.EdgeSubject)
+	}
+	if m.clearedshared_group {
+		edges = append(edges, timer.EdgeSharedGroup)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TimerMutation) EdgeCleared(name string) bool {
+	switch name {
+	case timer.EdgeUser:
+		return m.cleareduser
+	case timer.EdgeSubject:
+		return m.clearedsubject
+	case timer.EdgeSharedGroup:
+		return m.clearedshared_group
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TimerMutation) ClearEdge(name string) error {
+	switch name {
+	case timer.EdgeUser:
+		m.ClearUser()
+		return nil
+	case timer.EdgeSubject:
+		m.ClearSubject()
+		return nil
+	}
+	return fmt.Errorf("unknown Timer unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TimerMutation) ResetEdge(name string) error {
+	switch name {
+	case timer.EdgeUser:
+		m.ResetUser()
+		return nil
+	case timer.EdgeSubject:
+		m.ResetSubject()
+		return nil
+	case timer.EdgeSharedGroup:
+		m.ResetSharedGroup()
+		return nil
+	}
+	return fmt.Errorf("unknown Timer edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
@@ -4163,6 +4933,8 @@ type UserMutation struct {
 	study_logs              map[uuid.UUID]struct{}
 	removedstudy_logs       map[uuid.UUID]struct{}
 	clearedstudy_logs       bool
+	timers                  *uuid.UUID
+	clearedtimers           bool
 	refresh_tokens          map[uuid.UUID]struct{}
 	removedrefresh_tokens   map[uuid.UUID]struct{}
 	clearedrefresh_tokens   bool
@@ -4604,6 +5376,45 @@ func (m *UserMutation) ResetStudyLogs() {
 	m.removedstudy_logs = nil
 }
 
+// SetTimersID sets the "timers" edge to the Timer entity by id.
+func (m *UserMutation) SetTimersID(id uuid.UUID) {
+	m.timers = &id
+}
+
+// ClearTimers clears the "timers" edge to the Timer entity.
+func (m *UserMutation) ClearTimers() {
+	m.clearedtimers = true
+}
+
+// TimersCleared reports if the "timers" edge to the Timer entity was cleared.
+func (m *UserMutation) TimersCleared() bool {
+	return m.clearedtimers
+}
+
+// TimersID returns the "timers" edge ID in the mutation.
+func (m *UserMutation) TimersID() (id uuid.UUID, exists bool) {
+	if m.timers != nil {
+		return *m.timers, true
+	}
+	return
+}
+
+// TimersIDs returns the "timers" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TimersID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) TimersIDs() (ids []uuid.UUID) {
+	if id := m.timers; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTimers resets all changes to the "timers" edge.
+func (m *UserMutation) ResetTimers() {
+	m.timers = nil
+	m.clearedtimers = false
+}
+
 // AddRefreshTokenIDs adds the "refresh_tokens" edge to the RefreshToken entity by ids.
 func (m *UserMutation) AddRefreshTokenIDs(ids ...uuid.UUID) {
 	if m.refresh_tokens == nil {
@@ -4911,7 +5722,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.joined_groups != nil {
 		edges = append(edges, user.EdgeJoinedGroups)
 	}
@@ -4920,6 +5731,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.study_logs != nil {
 		edges = append(edges, user.EdgeStudyLogs)
+	}
+	if m.timers != nil {
+		edges = append(edges, user.EdgeTimers)
 	}
 	if m.refresh_tokens != nil {
 		edges = append(edges, user.EdgeRefreshTokens)
@@ -4952,6 +5766,10 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeTimers:
+		if id := m.timers; id != nil {
+			return []ent.Value{*id}
+		}
 	case user.EdgeRefreshTokens:
 		ids := make([]ent.Value, 0, len(m.refresh_tokens))
 		for id := range m.refresh_tokens {
@@ -4970,7 +5788,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.removedjoined_groups != nil {
 		edges = append(edges, user.EdgeJoinedGroups)
 	}
@@ -5029,7 +5847,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.clearedjoined_groups {
 		edges = append(edges, user.EdgeJoinedGroups)
 	}
@@ -5038,6 +5856,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedstudy_logs {
 		edges = append(edges, user.EdgeStudyLogs)
+	}
+	if m.clearedtimers {
+		edges = append(edges, user.EdgeTimers)
 	}
 	if m.clearedrefresh_tokens {
 		edges = append(edges, user.EdgeRefreshTokens)
@@ -5058,6 +5879,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedowned_groups
 	case user.EdgeStudyLogs:
 		return m.clearedstudy_logs
+	case user.EdgeTimers:
+		return m.clearedtimers
 	case user.EdgeRefreshTokens:
 		return m.clearedrefresh_tokens
 	case user.EdgeOwnedCategories:
@@ -5070,6 +5893,9 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
+	case user.EdgeTimers:
+		m.ClearTimers()
+		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
@@ -5086,6 +5912,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeStudyLogs:
 		m.ResetStudyLogs()
+		return nil
+	case user.EdgeTimers:
+		m.ResetTimers()
 		return nil
 	case user.EdgeRefreshTokens:
 		m.ResetRefreshTokens()

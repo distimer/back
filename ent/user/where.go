@@ -355,6 +355,29 @@ func HasStudyLogsWith(preds ...predicate.StudyLog) predicate.User {
 	})
 }
 
+// HasTimers applies the HasEdge predicate on the "timers" edge.
+func HasTimers() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, TimersTable, TimersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTimersWith applies the HasEdge predicate on the "timers" edge with a given conditions (other predicates).
+func HasTimersWith(preds ...predicate.Timer) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newTimersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasRefreshTokens applies the HasEdge predicate on the "refresh_tokens" edge.
 func HasRefreshTokens() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

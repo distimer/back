@@ -18,7 +18,7 @@ func (Subject) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}),
 		field.String("name"),
-		field.Int32("color"),
+		field.String("color"),
 	}
 }
 
@@ -30,6 +30,7 @@ func (Subject) Edges() []ent.Edge {
 			Unique().
 			Required(),
 		edge.To("study_logs", StudyLog.Type),
+		edge.To("timers", Timer.Type),
 	}
 }
 

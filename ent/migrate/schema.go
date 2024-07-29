@@ -196,7 +196,7 @@ var (
 	SubjectsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString},
-		{Name: "color", Type: field.TypeInt32},
+		{Name: "color", Type: field.TypeString},
 		{Name: "category_subjects", Type: field.TypeUUID},
 	}
 	// SubjectsTable holds the schema information for the "subjects" table.
@@ -217,6 +217,34 @@ var (
 				Name:    "subject_category_subjects",
 				Unique:  false,
 				Columns: []*schema.Column{SubjectsColumns[3]},
+			},
+		},
+	}
+	// TimersColumns holds the columns for the "timers" table.
+	TimersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "start_at", Type: field.TypeTime},
+		{Name: "content", Type: field.TypeString},
+		{Name: "subject_timers", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID, Unique: true},
+	}
+	// TimersTable holds the schema information for the "timers" table.
+	TimersTable = &schema.Table{
+		Name:       "timers",
+		Columns:    TimersColumns,
+		PrimaryKey: []*schema.Column{TimersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "timers_subjects_timers",
+				Columns:    []*schema.Column{TimersColumns[3]},
+				RefColumns: []*schema.Column{SubjectsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "timers_users_timers",
+				Columns:    []*schema.Column{TimersColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -266,6 +294,31 @@ var (
 			},
 		},
 	}
+	// TimerSharedGroupColumns holds the columns for the "timer_shared_group" table.
+	TimerSharedGroupColumns = []*schema.Column{
+		{Name: "timer_id", Type: field.TypeUUID},
+		{Name: "group_id", Type: field.TypeUUID},
+	}
+	// TimerSharedGroupTable holds the schema information for the "timer_shared_group" table.
+	TimerSharedGroupTable = &schema.Table{
+		Name:       "timer_shared_group",
+		Columns:    TimerSharedGroupColumns,
+		PrimaryKey: []*schema.Column{TimerSharedGroupColumns[0], TimerSharedGroupColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "timer_shared_group_timer_id",
+				Columns:    []*schema.Column{TimerSharedGroupColumns[0]},
+				RefColumns: []*schema.Column{TimersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "timer_shared_group_group_id",
+				Columns:    []*schema.Column{TimerSharedGroupColumns[1]},
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AffiliationsTable,
@@ -275,8 +328,10 @@ var (
 		RefreshTokensTable,
 		StudyLogsTable,
 		SubjectsTable,
+		TimersTable,
 		UsersTable,
 		StudyLogSharedGroupTable,
+		TimerSharedGroupTable,
 	}
 )
 
@@ -290,6 +345,10 @@ func init() {
 	StudyLogsTable.ForeignKeys[0].RefTable = SubjectsTable
 	StudyLogsTable.ForeignKeys[1].RefTable = UsersTable
 	SubjectsTable.ForeignKeys[0].RefTable = CategoriesTable
+	TimersTable.ForeignKeys[0].RefTable = SubjectsTable
+	TimersTable.ForeignKeys[1].RefTable = UsersTable
 	StudyLogSharedGroupTable.ForeignKeys[0].RefTable = StudyLogsTable
 	StudyLogSharedGroupTable.ForeignKeys[1].RefTable = GroupsTable
+	TimerSharedGroupTable.ForeignKeys[0].RefTable = TimersTable
+	TimerSharedGroupTable.ForeignKeys[1].RefTable = GroupsTable
 }

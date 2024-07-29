@@ -16,13 +16,13 @@ import (
 
 type modifySubjectInfoRequest struct {
 	Name  string `json:"name" validate:"required" example:"name between 1 and 20"`
-	Color int32  `json:"color" validate:"required,min=0,max=16777215"`
+	Color string `json:"color" validate:"required,len=6"`
 }
 
 type modifySubjectInfoResponse struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
-	Color int32  `json:"color"`
+	Color string `json:"color"`
 }
 
 // @Summary Modify Subject Info

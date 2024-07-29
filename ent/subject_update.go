@@ -15,6 +15,7 @@ import (
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
+	"pentag.kr/distimer/ent/timer"
 )
 
 // SubjectUpdate is the builder for updating Subject entities.
@@ -45,23 +46,16 @@ func (su *SubjectUpdate) SetNillableName(s *string) *SubjectUpdate {
 }
 
 // SetColor sets the "color" field.
-func (su *SubjectUpdate) SetColor(i int32) *SubjectUpdate {
-	su.mutation.ResetColor()
-	su.mutation.SetColor(i)
+func (su *SubjectUpdate) SetColor(s string) *SubjectUpdate {
+	su.mutation.SetColor(s)
 	return su
 }
 
 // SetNillableColor sets the "color" field if the given value is not nil.
-func (su *SubjectUpdate) SetNillableColor(i *int32) *SubjectUpdate {
-	if i != nil {
-		su.SetColor(*i)
+func (su *SubjectUpdate) SetNillableColor(s *string) *SubjectUpdate {
+	if s != nil {
+		su.SetColor(*s)
 	}
-	return su
-}
-
-// AddColor adds i to the "color" field.
-func (su *SubjectUpdate) AddColor(i int32) *SubjectUpdate {
-	su.mutation.AddColor(i)
 	return su
 }
 
@@ -89,6 +83,21 @@ func (su *SubjectUpdate) AddStudyLogs(s ...*StudyLog) *SubjectUpdate {
 		ids[i] = s[i].ID
 	}
 	return su.AddStudyLogIDs(ids...)
+}
+
+// AddTimerIDs adds the "timers" edge to the Timer entity by IDs.
+func (su *SubjectUpdate) AddTimerIDs(ids ...uuid.UUID) *SubjectUpdate {
+	su.mutation.AddTimerIDs(ids...)
+	return su
+}
+
+// AddTimers adds the "timers" edges to the Timer entity.
+func (su *SubjectUpdate) AddTimers(t ...*Timer) *SubjectUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return su.AddTimerIDs(ids...)
 }
 
 // Mutation returns the SubjectMutation object of the builder.
@@ -121,6 +130,27 @@ func (su *SubjectUpdate) RemoveStudyLogs(s ...*StudyLog) *SubjectUpdate {
 		ids[i] = s[i].ID
 	}
 	return su.RemoveStudyLogIDs(ids...)
+}
+
+// ClearTimers clears all "timers" edges to the Timer entity.
+func (su *SubjectUpdate) ClearTimers() *SubjectUpdate {
+	su.mutation.ClearTimers()
+	return su
+}
+
+// RemoveTimerIDs removes the "timers" edge to Timer entities by IDs.
+func (su *SubjectUpdate) RemoveTimerIDs(ids ...uuid.UUID) *SubjectUpdate {
+	su.mutation.RemoveTimerIDs(ids...)
+	return su
+}
+
+// RemoveTimers removes "timers" edges to Timer entities.
+func (su *SubjectUpdate) RemoveTimers(t ...*Timer) *SubjectUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return su.RemoveTimerIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -174,10 +204,7 @@ func (su *SubjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(subject.FieldName, field.TypeString, value)
 	}
 	if value, ok := su.mutation.Color(); ok {
-		_spec.SetField(subject.FieldColor, field.TypeInt32, value)
-	}
-	if value, ok := su.mutation.AddedColor(); ok {
-		_spec.AddField(subject.FieldColor, field.TypeInt32, value)
+		_spec.SetField(subject.FieldColor, field.TypeString, value)
 	}
 	if su.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -253,6 +280,51 @@ func (su *SubjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if su.mutation.TimersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   subject.TimersTable,
+			Columns: []string{subject.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.RemovedTimersIDs(); len(nodes) > 0 && !su.mutation.TimersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   subject.TimersTable,
+			Columns: []string{subject.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.TimersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   subject.TimersTable,
+			Columns: []string{subject.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{subject.Label}
@@ -288,23 +360,16 @@ func (suo *SubjectUpdateOne) SetNillableName(s *string) *SubjectUpdateOne {
 }
 
 // SetColor sets the "color" field.
-func (suo *SubjectUpdateOne) SetColor(i int32) *SubjectUpdateOne {
-	suo.mutation.ResetColor()
-	suo.mutation.SetColor(i)
+func (suo *SubjectUpdateOne) SetColor(s string) *SubjectUpdateOne {
+	suo.mutation.SetColor(s)
 	return suo
 }
 
 // SetNillableColor sets the "color" field if the given value is not nil.
-func (suo *SubjectUpdateOne) SetNillableColor(i *int32) *SubjectUpdateOne {
-	if i != nil {
-		suo.SetColor(*i)
+func (suo *SubjectUpdateOne) SetNillableColor(s *string) *SubjectUpdateOne {
+	if s != nil {
+		suo.SetColor(*s)
 	}
-	return suo
-}
-
-// AddColor adds i to the "color" field.
-func (suo *SubjectUpdateOne) AddColor(i int32) *SubjectUpdateOne {
-	suo.mutation.AddColor(i)
 	return suo
 }
 
@@ -332,6 +397,21 @@ func (suo *SubjectUpdateOne) AddStudyLogs(s ...*StudyLog) *SubjectUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return suo.AddStudyLogIDs(ids...)
+}
+
+// AddTimerIDs adds the "timers" edge to the Timer entity by IDs.
+func (suo *SubjectUpdateOne) AddTimerIDs(ids ...uuid.UUID) *SubjectUpdateOne {
+	suo.mutation.AddTimerIDs(ids...)
+	return suo
+}
+
+// AddTimers adds the "timers" edges to the Timer entity.
+func (suo *SubjectUpdateOne) AddTimers(t ...*Timer) *SubjectUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return suo.AddTimerIDs(ids...)
 }
 
 // Mutation returns the SubjectMutation object of the builder.
@@ -364,6 +444,27 @@ func (suo *SubjectUpdateOne) RemoveStudyLogs(s ...*StudyLog) *SubjectUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return suo.RemoveStudyLogIDs(ids...)
+}
+
+// ClearTimers clears all "timers" edges to the Timer entity.
+func (suo *SubjectUpdateOne) ClearTimers() *SubjectUpdateOne {
+	suo.mutation.ClearTimers()
+	return suo
+}
+
+// RemoveTimerIDs removes the "timers" edge to Timer entities by IDs.
+func (suo *SubjectUpdateOne) RemoveTimerIDs(ids ...uuid.UUID) *SubjectUpdateOne {
+	suo.mutation.RemoveTimerIDs(ids...)
+	return suo
+}
+
+// RemoveTimers removes "timers" edges to Timer entities.
+func (suo *SubjectUpdateOne) RemoveTimers(t ...*Timer) *SubjectUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return suo.RemoveTimerIDs(ids...)
 }
 
 // Where appends a list predicates to the SubjectUpdate builder.
@@ -447,10 +548,7 @@ func (suo *SubjectUpdateOne) sqlSave(ctx context.Context) (_node *Subject, err e
 		_spec.SetField(subject.FieldName, field.TypeString, value)
 	}
 	if value, ok := suo.mutation.Color(); ok {
-		_spec.SetField(subject.FieldColor, field.TypeInt32, value)
-	}
-	if value, ok := suo.mutation.AddedColor(); ok {
-		_spec.AddField(subject.FieldColor, field.TypeInt32, value)
+		_spec.SetField(subject.FieldColor, field.TypeString, value)
 	}
 	if suo.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -519,6 +617,51 @@ func (suo *SubjectUpdateOne) sqlSave(ctx context.Context) (_node *Subject, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(studylog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if suo.mutation.TimersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   subject.TimersTable,
+			Columns: []string{subject.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.RemovedTimersIDs(); len(nodes) > 0 && !suo.mutation.TimersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   subject.TimersTable,
+			Columns: []string{subject.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.TimersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   subject.TimersTable,
+			Columns: []string{subject.TimersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timer.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

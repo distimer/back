@@ -16,6 +16,7 @@ import (
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/predicate"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
 )
 
@@ -29,6 +30,7 @@ type GroupQuery struct {
 	withMembers         *UserQuery
 	withOwner           *UserQuery
 	withSharedStudyLogs *StudyLogQuery
+	withSharedTimer     *TimerQuery
 	withInviteCodes     *InviteCodeQuery
 	withFKs             bool
 	// intermediate query (i.e. traversal path).
@@ -126,6 +128,28 @@ func (gq *GroupQuery) QuerySharedStudyLogs() *StudyLogQuery {
 			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(studylog.Table, studylog.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, group.SharedStudyLogsTable, group.SharedStudyLogsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySharedTimer chains the current query on the "shared_timer" edge.
+func (gq *GroupQuery) QuerySharedTimer() *TimerQuery {
+	query := (&TimerClient{config: gq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(timer.Table, timer.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.SharedTimerTable, group.SharedTimerPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -350,6 +374,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		withMembers:         gq.withMembers.Clone(),
 		withOwner:           gq.withOwner.Clone(),
 		withSharedStudyLogs: gq.withSharedStudyLogs.Clone(),
+		withSharedTimer:     gq.withSharedTimer.Clone(),
 		withInviteCodes:     gq.withInviteCodes.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
@@ -387,6 +412,17 @@ func (gq *GroupQuery) WithSharedStudyLogs(opts ...func(*StudyLogQuery)) *GroupQu
 		opt(query)
 	}
 	gq.withSharedStudyLogs = query
+	return gq
+}
+
+// WithSharedTimer tells the query-builder to eager-load the nodes that are connected to
+// the "shared_timer" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithSharedTimer(opts ...func(*TimerQuery)) *GroupQuery {
+	query := (&TimerClient{config: gq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withSharedTimer = query
 	return gq
 }
 
@@ -480,10 +516,11 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 		nodes       = []*Group{}
 		withFKs     = gq.withFKs
 		_spec       = gq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			gq.withMembers != nil,
 			gq.withOwner != nil,
 			gq.withSharedStudyLogs != nil,
+			gq.withSharedTimer != nil,
 			gq.withInviteCodes != nil,
 		}
 	)
@@ -528,6 +565,13 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 		if err := gq.loadSharedStudyLogs(ctx, query, nodes,
 			func(n *Group) { n.Edges.SharedStudyLogs = []*StudyLog{} },
 			func(n *Group, e *StudyLog) { n.Edges.SharedStudyLogs = append(n.Edges.SharedStudyLogs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := gq.withSharedTimer; query != nil {
+		if err := gq.loadSharedTimer(ctx, query, nodes,
+			func(n *Group) { n.Edges.SharedTimer = []*Timer{} },
+			func(n *Group, e *Timer) { n.Edges.SharedTimer = append(n.Edges.SharedTimer, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -688,6 +732,67 @@ func (gq *GroupQuery) loadSharedStudyLogs(ctx context.Context, query *StudyLogQu
 		nodes, ok := nids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected "shared_study_logs" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (gq *GroupQuery) loadSharedTimer(ctx context.Context, query *TimerQuery, nodes []*Group, init func(*Group), assign func(*Group, *Timer)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[uuid.UUID]*Group)
+	nids := make(map[uuid.UUID]map[*Group]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(group.SharedTimerTable)
+		s.Join(joinT).On(s.C(timer.FieldID), joinT.C(group.SharedTimerPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(group.SharedTimerPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(group.SharedTimerPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(uuid.UUID)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Group]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Timer](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "shared_timer" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)
