@@ -1926,6 +1926,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "oauth_provider": {
+                    "type": "integer"
+                },
                 "terms_agreed": {
                     "type": "boolean"
                 },

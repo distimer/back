@@ -12,12 +12,7 @@ func NewJWT(userID uuid.UUID, termsAgreed bool) string {
 	claims := jwt.MapClaims{}
 	claims["user_id"] = userID.String()
 	claims["exp"] = time.Now().Add(time.Second * time.Duration(configs.Env.JWTExpire)).Unix()
-	claims["terms_agreed"] = func() string {
-		if termsAgreed {
-			return "true"
-		}
-		return "false"
-	}()
+	claims["terms_agreed"] = termsAgreed
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, _ := token.SignedString([]byte(configs.Env.JWTSecret))
 	return tokenString
