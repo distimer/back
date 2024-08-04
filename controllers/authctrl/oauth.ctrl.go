@@ -123,7 +123,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 	}
 
 	// create new access token
-	newAccessToken := crypt.NewJWT(findUser.ID, false)
+	newAccessToken := crypt.NewJWT(findUser.ID, findUser.TermsAgreed)
 
 	if new {
 		return c.Status(201).JSON(
@@ -236,7 +236,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 	}
 
 	// create new access token
-	newAccessToken := crypt.NewJWT(findUser.ID, false)
+	newAccessToken := crypt.NewJWT(findUser.ID, findUser.TermsAgreed)
 	if new {
 		return c.Status(201).JSON(
 			loginRes{
