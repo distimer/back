@@ -1905,6 +1905,11 @@ const docTemplate = `{
         },
         "userctrl.modifyUserInfoRes": {
             "type": "object",
+            "required": [
+                "name",
+                "terms_agreed",
+                "user_id"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1919,6 +1924,13 @@ const docTemplate = `{
         },
         "userctrl.myUserInfoRes": {
             "type": "object",
+            "required": [
+                "created_at",
+                "name",
+                "oauth_provider",
+                "terms_agreed",
+                "user_id"
+            ],
             "properties": {
                 "created_at": {
                     "type": "string"

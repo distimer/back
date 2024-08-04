@@ -11,11 +11,11 @@ import (
 )
 
 type myUserInfoRes struct {
-	UserID        string `json:"user_id"`
-	Name          string `json:"name"`
-	TermsAgreed   bool   `json:"terms_agreed"`
-	CreatedAt     string `json:"created_at"`
-	OauthProvider int8   `json:"oauth_provider"`
+	UserID        string `json:"user_id" validate:"required"`
+	Name          string `json:"name" validate:"required"`
+	TermsAgreed   bool   `json:"terms_agreed" validate:"required"`
+	CreatedAt     string `json:"created_at" validate:"required"`
+	OauthProvider int8   `json:"oauth_provider" validate:"required"`
 }
 
 // @Summary Get My User Info

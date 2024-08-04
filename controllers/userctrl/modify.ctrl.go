@@ -16,9 +16,9 @@ type modifyUserInfoReq struct {
 	TermsAgreed bool   `json:"terms_agreed"`
 }
 type modifyUserInfoRes struct {
-	UserID      string `json:"user_id"`
-	Name        string `json:"name"`
-	TermsAgreed bool   `json:"terms_agreed"`
+	UserID      string `json:"user_id" validate:"required"`
+	Name        string `json:"name" validate:"required"`
+	TermsAgreed bool   `json:"terms_agreed" validate:"required"`
 }
 
 // @Summary Modify User Info

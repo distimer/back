@@ -397,6 +397,10 @@ definitions:
         type: boolean
       user_id:
         type: string
+    required:
+    - name
+    - terms_agreed
+    - user_id
     type: object
   userctrl.myUserInfoRes:
     properties:
@@ -410,6 +414,12 @@ definitions:
         type: boolean
       user_id:
         type: string
+    required:
+    - created_at
+    - name
+    - oauth_provider
+    - terms_agreed
+    - user_id
     type: object
 host: localhost:3000
 info:
