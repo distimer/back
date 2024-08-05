@@ -19,6 +19,7 @@ func (Subject) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
 		field.String("name"),
 		field.String("color"),
+		field.Int8("order").Default(-1),
 	}
 }
 

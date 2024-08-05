@@ -59,6 +59,11 @@ func Name(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldName, v))
 }
 
+// Order applies equality check predicate on the "order" field. It's identical to OrderEQ.
+func Order(v int8) predicate.Category {
+	return predicate.Category(sql.FieldEQ(FieldOrder, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldName, v))
@@ -122,6 +127,46 @@ func NameEqualFold(v string) predicate.Category {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Category {
 	return predicate.Category(sql.FieldContainsFold(FieldName, v))
+}
+
+// OrderEQ applies the EQ predicate on the "order" field.
+func OrderEQ(v int8) predicate.Category {
+	return predicate.Category(sql.FieldEQ(FieldOrder, v))
+}
+
+// OrderNEQ applies the NEQ predicate on the "order" field.
+func OrderNEQ(v int8) predicate.Category {
+	return predicate.Category(sql.FieldNEQ(FieldOrder, v))
+}
+
+// OrderIn applies the In predicate on the "order" field.
+func OrderIn(vs ...int8) predicate.Category {
+	return predicate.Category(sql.FieldIn(FieldOrder, vs...))
+}
+
+// OrderNotIn applies the NotIn predicate on the "order" field.
+func OrderNotIn(vs ...int8) predicate.Category {
+	return predicate.Category(sql.FieldNotIn(FieldOrder, vs...))
+}
+
+// OrderGT applies the GT predicate on the "order" field.
+func OrderGT(v int8) predicate.Category {
+	return predicate.Category(sql.FieldGT(FieldOrder, v))
+}
+
+// OrderGTE applies the GTE predicate on the "order" field.
+func OrderGTE(v int8) predicate.Category {
+	return predicate.Category(sql.FieldGTE(FieldOrder, v))
+}
+
+// OrderLT applies the LT predicate on the "order" field.
+func OrderLT(v int8) predicate.Category {
+	return predicate.Category(sql.FieldLT(FieldOrder, v))
+}
+
+// OrderLTE applies the LTE predicate on the "order" field.
+func OrderLTE(v int8) predicate.Category {
+	return predicate.Category(sql.FieldLTE(FieldOrder, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

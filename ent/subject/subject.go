@@ -17,6 +17,8 @@ const (
 	FieldName = "name"
 	// FieldColor holds the string denoting the color field in the database.
 	FieldColor = "color"
+	// FieldOrder holds the string denoting the order field in the database.
+	FieldOrder = "order"
 	// EdgeCategory holds the string denoting the category edge name in mutations.
 	EdgeCategory = "category"
 	// EdgeStudyLogs holds the string denoting the study_logs edge name in mutations.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldColor,
+	FieldOrder,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "subjects"
@@ -77,6 +80,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultOrder holds the default value on creation for the "order" field.
+	DefaultOrder int8
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -97,6 +102,11 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByColor orders the results by the color field.
 func ByColor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldColor, opts...).ToFunc()
+}
+
+// ByOrder orders the results by the order field.
+func ByOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrder, opts...).ToFunc()
 }
 
 // ByCategoryField orders the results by category field.

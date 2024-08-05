@@ -20,6 +20,8 @@ type Category struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Order holds the value of the "order" field.
+	Order int8 `json:"order,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CategoryQuery when eager-loading is set.
 	Edges                 CategoryEdges `json:"edges"`
@@ -63,6 +65,8 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case category.FieldOrder:
+			values[i] = new(sql.NullInt64)
 		case category.FieldName:
 			values[i] = new(sql.NullString)
 		case category.FieldID:
@@ -95,6 +99,12 @@ func (c *Category) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				c.Name = value.String
+			}
+		case category.FieldOrder:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order", values[i])
+			} else if value.Valid {
+				c.Order = int8(value.Int64)
 			}
 		case category.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -151,6 +161,9 @@ func (c *Category) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("name=")
 	builder.WriteString(c.Name)
+	builder.WriteString(", ")
+	builder.WriteString("order=")
+	builder.WriteString(fmt.Sprintf("%v", c.Order))
 	builder.WriteByte(')')
 	return builder.String()
 }

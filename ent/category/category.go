@@ -15,6 +15,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldOrder holds the string denoting the order field in the database.
+	FieldOrder = "order"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeSubjects holds the string denoting the subjects edge name in mutations.
@@ -41,6 +43,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldOrder,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "categories"
@@ -65,6 +68,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultOrder holds the default value on creation for the "order" field.
+	DefaultOrder int8
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -80,6 +85,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByOrder orders the results by the order field.
+func ByOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrder, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

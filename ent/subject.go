@@ -22,6 +22,8 @@ type Subject struct {
 	Name string `json:"name,omitempty"`
 	// Color holds the value of the "color" field.
 	Color string `json:"color,omitempty"`
+	// Order holds the value of the "order" field.
+	Order int8 `json:"order,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SubjectQuery when eager-loading is set.
 	Edges             SubjectEdges `json:"edges"`
@@ -76,6 +78,8 @@ func (*Subject) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case subject.FieldOrder:
+			values[i] = new(sql.NullInt64)
 		case subject.FieldName, subject.FieldColor:
 			values[i] = new(sql.NullString)
 		case subject.FieldID:
@@ -114,6 +118,12 @@ func (s *Subject) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field color", values[i])
 			} else if value.Valid {
 				s.Color = value.String
+			}
+		case subject.FieldOrder:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order", values[i])
+			} else if value.Valid {
+				s.Order = int8(value.Int64)
 			}
 		case subject.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -178,6 +188,9 @@ func (s *Subject) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("color=")
 	builder.WriteString(s.Color)
+	builder.WriteString(", ")
+	builder.WriteString("order=")
+	builder.WriteString(fmt.Sprintf("%v", s.Order))
 	builder.WriteByte(')')
 	return builder.String()
 }

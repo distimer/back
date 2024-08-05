@@ -59,6 +59,27 @@ func (su *SubjectUpdate) SetNillableColor(s *string) *SubjectUpdate {
 	return su
 }
 
+// SetOrder sets the "order" field.
+func (su *SubjectUpdate) SetOrder(i int8) *SubjectUpdate {
+	su.mutation.ResetOrder()
+	su.mutation.SetOrder(i)
+	return su
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (su *SubjectUpdate) SetNillableOrder(i *int8) *SubjectUpdate {
+	if i != nil {
+		su.SetOrder(*i)
+	}
+	return su
+}
+
+// AddOrder adds i to the "order" field.
+func (su *SubjectUpdate) AddOrder(i int8) *SubjectUpdate {
+	su.mutation.AddOrder(i)
+	return su
+}
+
 // SetCategoryID sets the "category" edge to the Category entity by ID.
 func (su *SubjectUpdate) SetCategoryID(id uuid.UUID) *SubjectUpdate {
 	su.mutation.SetCategoryID(id)
@@ -205,6 +226,12 @@ func (su *SubjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.Color(); ok {
 		_spec.SetField(subject.FieldColor, field.TypeString, value)
+	}
+	if value, ok := su.mutation.Order(); ok {
+		_spec.SetField(subject.FieldOrder, field.TypeInt8, value)
+	}
+	if value, ok := su.mutation.AddedOrder(); ok {
+		_spec.AddField(subject.FieldOrder, field.TypeInt8, value)
 	}
 	if su.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -370,6 +397,27 @@ func (suo *SubjectUpdateOne) SetNillableColor(s *string) *SubjectUpdateOne {
 	if s != nil {
 		suo.SetColor(*s)
 	}
+	return suo
+}
+
+// SetOrder sets the "order" field.
+func (suo *SubjectUpdateOne) SetOrder(i int8) *SubjectUpdateOne {
+	suo.mutation.ResetOrder()
+	suo.mutation.SetOrder(i)
+	return suo
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (suo *SubjectUpdateOne) SetNillableOrder(i *int8) *SubjectUpdateOne {
+	if i != nil {
+		suo.SetOrder(*i)
+	}
+	return suo
+}
+
+// AddOrder adds i to the "order" field.
+func (suo *SubjectUpdateOne) AddOrder(i int8) *SubjectUpdateOne {
+	suo.mutation.AddOrder(i)
 	return suo
 }
 
@@ -549,6 +597,12 @@ func (suo *SubjectUpdateOne) sqlSave(ctx context.Context) (_node *Subject, err e
 	}
 	if value, ok := suo.mutation.Color(); ok {
 		_spec.SetField(subject.FieldColor, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.Order(); ok {
+		_spec.SetField(subject.FieldOrder, field.TypeInt8, value)
+	}
+	if value, ok := suo.mutation.AddedOrder(); ok {
+		_spec.AddField(subject.FieldOrder, field.TypeInt8, value)
 	}
 	if suo.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -64,6 +64,11 @@ func Color(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldEQ(FieldColor, v))
 }
 
+// Order applies equality check predicate on the "order" field. It's identical to OrderEQ.
+func Order(v int8) predicate.Subject {
+	return predicate.Subject(sql.FieldEQ(FieldOrder, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldEQ(FieldName, v))
@@ -192,6 +197,46 @@ func ColorEqualFold(v string) predicate.Subject {
 // ColorContainsFold applies the ContainsFold predicate on the "color" field.
 func ColorContainsFold(v string) predicate.Subject {
 	return predicate.Subject(sql.FieldContainsFold(FieldColor, v))
+}
+
+// OrderEQ applies the EQ predicate on the "order" field.
+func OrderEQ(v int8) predicate.Subject {
+	return predicate.Subject(sql.FieldEQ(FieldOrder, v))
+}
+
+// OrderNEQ applies the NEQ predicate on the "order" field.
+func OrderNEQ(v int8) predicate.Subject {
+	return predicate.Subject(sql.FieldNEQ(FieldOrder, v))
+}
+
+// OrderIn applies the In predicate on the "order" field.
+func OrderIn(vs ...int8) predicate.Subject {
+	return predicate.Subject(sql.FieldIn(FieldOrder, vs...))
+}
+
+// OrderNotIn applies the NotIn predicate on the "order" field.
+func OrderNotIn(vs ...int8) predicate.Subject {
+	return predicate.Subject(sql.FieldNotIn(FieldOrder, vs...))
+}
+
+// OrderGT applies the GT predicate on the "order" field.
+func OrderGT(v int8) predicate.Subject {
+	return predicate.Subject(sql.FieldGT(FieldOrder, v))
+}
+
+// OrderGTE applies the GTE predicate on the "order" field.
+func OrderGTE(v int8) predicate.Subject {
+	return predicate.Subject(sql.FieldGTE(FieldOrder, v))
+}
+
+// OrderLT applies the LT predicate on the "order" field.
+func OrderLT(v int8) predicate.Subject {
+	return predicate.Subject(sql.FieldLT(FieldOrder, v))
+}
+
+// OrderLTE applies the LTE predicate on the "order" field.
+func OrderLTE(v int8) predicate.Subject {
+	return predicate.Subject(sql.FieldLTE(FieldOrder, v))
 }
 
 // HasCategory applies the HasEdge predicate on the "category" edge.

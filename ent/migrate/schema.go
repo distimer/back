@@ -52,6 +52,7 @@ var (
 	CategoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "order", Type: field.TypeInt8, Default: -1},
 		{Name: "user_owned_categories", Type: field.TypeUUID},
 	}
 	// CategoriesTable holds the schema information for the "categories" table.
@@ -62,7 +63,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "categories_users_owned_categories",
-				Columns:    []*schema.Column{CategoriesColumns[2]},
+				Columns:    []*schema.Column{CategoriesColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -71,7 +72,7 @@ var (
 			{
 				Name:    "category_user_owned_categories",
 				Unique:  false,
-				Columns: []*schema.Column{CategoriesColumns[2]},
+				Columns: []*schema.Column{CategoriesColumns[3]},
 			},
 		},
 	}
@@ -197,6 +198,7 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "color", Type: field.TypeString},
+		{Name: "order", Type: field.TypeInt8, Default: -1},
 		{Name: "category_subjects", Type: field.TypeUUID},
 	}
 	// SubjectsTable holds the schema information for the "subjects" table.
@@ -207,7 +209,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "subjects_categories_subjects",
-				Columns:    []*schema.Column{SubjectsColumns[3]},
+				Columns:    []*schema.Column{SubjectsColumns[4]},
 				RefColumns: []*schema.Column{CategoriesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -216,7 +218,7 @@ var (
 			{
 				Name:    "subject_category_subjects",
 				Unique:  false,
-				Columns: []*schema.Column{SubjectsColumns[3]},
+				Columns: []*schema.Column{SubjectsColumns[4]},
 			},
 		},
 	}

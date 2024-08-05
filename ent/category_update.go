@@ -44,6 +44,27 @@ func (cu *CategoryUpdate) SetNillableName(s *string) *CategoryUpdate {
 	return cu
 }
 
+// SetOrder sets the "order" field.
+func (cu *CategoryUpdate) SetOrder(i int8) *CategoryUpdate {
+	cu.mutation.ResetOrder()
+	cu.mutation.SetOrder(i)
+	return cu
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (cu *CategoryUpdate) SetNillableOrder(i *int8) *CategoryUpdate {
+	if i != nil {
+		cu.SetOrder(*i)
+	}
+	return cu
+}
+
+// AddOrder adds i to the "order" field.
+func (cu *CategoryUpdate) AddOrder(i int8) *CategoryUpdate {
+	cu.mutation.AddOrder(i)
+	return cu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (cu *CategoryUpdate) SetUserID(id uuid.UUID) *CategoryUpdate {
 	cu.mutation.SetUserID(id)
@@ -152,6 +173,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.Order(); ok {
+		_spec.SetField(category.FieldOrder, field.TypeInt8, value)
+	}
+	if value, ok := cu.mutation.AddedOrder(); ok {
+		_spec.AddField(category.FieldOrder, field.TypeInt8, value)
+	}
 	if cu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -257,6 +284,27 @@ func (cuo *CategoryUpdateOne) SetNillableName(s *string) *CategoryUpdateOne {
 	if s != nil {
 		cuo.SetName(*s)
 	}
+	return cuo
+}
+
+// SetOrder sets the "order" field.
+func (cuo *CategoryUpdateOne) SetOrder(i int8) *CategoryUpdateOne {
+	cuo.mutation.ResetOrder()
+	cuo.mutation.SetOrder(i)
+	return cuo
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (cuo *CategoryUpdateOne) SetNillableOrder(i *int8) *CategoryUpdateOne {
+	if i != nil {
+		cuo.SetOrder(*i)
+	}
+	return cuo
+}
+
+// AddOrder adds i to the "order" field.
+func (cuo *CategoryUpdateOne) AddOrder(i int8) *CategoryUpdateOne {
+	cuo.mutation.AddOrder(i)
 	return cuo
 }
 
@@ -397,6 +445,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 	}
 	if value, ok := cuo.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.Order(); ok {
+		_spec.SetField(category.FieldOrder, field.TypeInt8, value)
+	}
+	if value, ok := cuo.mutation.AddedOrder(); ok {
+		_spec.AddField(category.FieldOrder, field.TypeInt8, value)
 	}
 	if cuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

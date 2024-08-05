@@ -30,6 +30,10 @@ func init() {
 	affiliation.DefaultJoinedAt = affiliationDescJoinedAt.Default.(func() time.Time)
 	categoryFields := schema.Category{}.Fields()
 	_ = categoryFields
+	// categoryDescOrder is the schema descriptor for order field.
+	categoryDescOrder := categoryFields[2].Descriptor()
+	// category.DefaultOrder holds the default value on creation for the order field.
+	category.DefaultOrder = categoryDescOrder.Default.(int8)
 	// categoryDescID is the schema descriptor for id field.
 	categoryDescID := categoryFields[0].Descriptor()
 	// category.DefaultID holds the default value on creation for the id field.
@@ -72,6 +76,10 @@ func init() {
 	studylog.DefaultID = studylogDescID.Default.(func() uuid.UUID)
 	subjectFields := schema.Subject{}.Fields()
 	_ = subjectFields
+	// subjectDescOrder is the schema descriptor for order field.
+	subjectDescOrder := subjectFields[3].Descriptor()
+	// subject.DefaultOrder holds the default value on creation for the order field.
+	subject.DefaultOrder = subjectDescOrder.Default.(int8)
 	// subjectDescID is the schema descriptor for id field.
 	subjectDescID := subjectFields[0].Descriptor()
 	// subject.DefaultID holds the default value on creation for the id field.

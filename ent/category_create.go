@@ -28,6 +28,20 @@ func (cc *CategoryCreate) SetName(s string) *CategoryCreate {
 	return cc
 }
 
+// SetOrder sets the "order" field.
+func (cc *CategoryCreate) SetOrder(i int8) *CategoryCreate {
+	cc.mutation.SetOrder(i)
+	return cc
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (cc *CategoryCreate) SetNillableOrder(i *int8) *CategoryCreate {
+	if i != nil {
+		cc.SetOrder(*i)
+	}
+	return cc
+}
+
 // SetID sets the "id" field.
 func (cc *CategoryCreate) SetID(u uuid.UUID) *CategoryCreate {
 	cc.mutation.SetID(u)
@@ -103,6 +117,10 @@ func (cc *CategoryCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cc *CategoryCreate) defaults() {
+	if _, ok := cc.mutation.Order(); !ok {
+		v := category.DefaultOrder
+		cc.mutation.SetOrder(v)
+	}
 	if _, ok := cc.mutation.ID(); !ok {
 		v := category.DefaultID()
 		cc.mutation.SetID(v)
@@ -113,6 +131,9 @@ func (cc *CategoryCreate) defaults() {
 func (cc *CategoryCreate) check() error {
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Category.name"`)}
+	}
+	if _, ok := cc.mutation.Order(); !ok {
+		return &ValidationError{Name: "order", err: errors.New(`ent: missing required field "Category.order"`)}
 	}
 	if _, ok := cc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Category.user"`)}
@@ -155,6 +176,10 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := cc.mutation.Order(); ok {
+		_spec.SetField(category.FieldOrder, field.TypeInt8, value)
+		_node.Order = value
 	}
 	if nodes := cc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

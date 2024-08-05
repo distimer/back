@@ -571,6 +571,8 @@ type CategoryMutation struct {
 	typ             string
 	id              *uuid.UUID
 	name            *string
+	_order          *int8
+	add_order       *int8
 	clearedFields   map[string]struct{}
 	user            *uuid.UUID
 	cleareduser     bool
@@ -722,6 +724,62 @@ func (m *CategoryMutation) ResetName() {
 	m.name = nil
 }
 
+// SetOrder sets the "order" field.
+func (m *CategoryMutation) SetOrder(i int8) {
+	m._order = &i
+	m.add_order = nil
+}
+
+// Order returns the value of the "order" field in the mutation.
+func (m *CategoryMutation) Order() (r int8, exists bool) {
+	v := m._order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrder returns the old "order" field's value of the Category entity.
+// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CategoryMutation) OldOrder(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrder: %w", err)
+	}
+	return oldValue.Order, nil
+}
+
+// AddOrder adds i to the "order" field.
+func (m *CategoryMutation) AddOrder(i int8) {
+	if m.add_order != nil {
+		*m.add_order += i
+	} else {
+		m.add_order = &i
+	}
+}
+
+// AddedOrder returns the value that was added to the "order" field in this mutation.
+func (m *CategoryMutation) AddedOrder() (r int8, exists bool) {
+	v := m.add_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOrder resets all changes to the "order" field.
+func (m *CategoryMutation) ResetOrder() {
+	m._order = nil
+	m.add_order = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *CategoryMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
@@ -849,9 +907,12 @@ func (m *CategoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CategoryMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.name != nil {
 		fields = append(fields, category.FieldName)
+	}
+	if m._order != nil {
+		fields = append(fields, category.FieldOrder)
 	}
 	return fields
 }
@@ -863,6 +924,8 @@ func (m *CategoryMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case category.FieldName:
 		return m.Name()
+	case category.FieldOrder:
+		return m.Order()
 	}
 	return nil, false
 }
@@ -874,6 +937,8 @@ func (m *CategoryMutation) OldField(ctx context.Context, name string) (ent.Value
 	switch name {
 	case category.FieldName:
 		return m.OldName(ctx)
+	case category.FieldOrder:
+		return m.OldOrder(ctx)
 	}
 	return nil, fmt.Errorf("unknown Category field %s", name)
 }
@@ -890,6 +955,13 @@ func (m *CategoryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case category.FieldOrder:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrder(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Category field %s", name)
 }
@@ -897,13 +969,21 @@ func (m *CategoryMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CategoryMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.add_order != nil {
+		fields = append(fields, category.FieldOrder)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CategoryMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case category.FieldOrder:
+		return m.AddedOrder()
+	}
 	return nil, false
 }
 
@@ -912,6 +992,13 @@ func (m *CategoryMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CategoryMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case category.FieldOrder:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrder(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Category numeric field %s", name)
 }
@@ -941,6 +1028,9 @@ func (m *CategoryMutation) ResetField(name string) error {
 	switch name {
 	case category.FieldName:
 		m.ResetName()
+		return nil
+	case category.FieldOrder:
+		m.ResetOrder()
 		return nil
 	}
 	return fmt.Errorf("unknown Category field %s", name)
@@ -3661,6 +3751,8 @@ type SubjectMutation struct {
 	id                *uuid.UUID
 	name              *string
 	color             *string
+	_order            *int8
+	add_order         *int8
 	clearedFields     map[string]struct{}
 	category          *uuid.UUID
 	clearedcategory   bool
@@ -3851,6 +3943,62 @@ func (m *SubjectMutation) ResetColor() {
 	m.color = nil
 }
 
+// SetOrder sets the "order" field.
+func (m *SubjectMutation) SetOrder(i int8) {
+	m._order = &i
+	m.add_order = nil
+}
+
+// Order returns the value of the "order" field in the mutation.
+func (m *SubjectMutation) Order() (r int8, exists bool) {
+	v := m._order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrder returns the old "order" field's value of the Subject entity.
+// If the Subject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubjectMutation) OldOrder(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrder: %w", err)
+	}
+	return oldValue.Order, nil
+}
+
+// AddOrder adds i to the "order" field.
+func (m *SubjectMutation) AddOrder(i int8) {
+	if m.add_order != nil {
+		*m.add_order += i
+	} else {
+		m.add_order = &i
+	}
+}
+
+// AddedOrder returns the value that was added to the "order" field in this mutation.
+func (m *SubjectMutation) AddedOrder() (r int8, exists bool) {
+	v := m.add_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOrder resets all changes to the "order" field.
+func (m *SubjectMutation) ResetOrder() {
+	m._order = nil
+	m.add_order = nil
+}
+
 // SetCategoryID sets the "category" edge to the Category entity by id.
 func (m *SubjectMutation) SetCategoryID(id uuid.UUID) {
 	m.category = &id
@@ -4032,12 +4180,15 @@ func (m *SubjectMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SubjectMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, subject.FieldName)
 	}
 	if m.color != nil {
 		fields = append(fields, subject.FieldColor)
+	}
+	if m._order != nil {
+		fields = append(fields, subject.FieldOrder)
 	}
 	return fields
 }
@@ -4051,6 +4202,8 @@ func (m *SubjectMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case subject.FieldColor:
 		return m.Color()
+	case subject.FieldOrder:
+		return m.Order()
 	}
 	return nil, false
 }
@@ -4064,6 +4217,8 @@ func (m *SubjectMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldName(ctx)
 	case subject.FieldColor:
 		return m.OldColor(ctx)
+	case subject.FieldOrder:
+		return m.OldOrder(ctx)
 	}
 	return nil, fmt.Errorf("unknown Subject field %s", name)
 }
@@ -4087,6 +4242,13 @@ func (m *SubjectMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetColor(v)
 		return nil
+	case subject.FieldOrder:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrder(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Subject field %s", name)
 }
@@ -4094,13 +4256,21 @@ func (m *SubjectMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SubjectMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.add_order != nil {
+		fields = append(fields, subject.FieldOrder)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SubjectMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case subject.FieldOrder:
+		return m.AddedOrder()
+	}
 	return nil, false
 }
 
@@ -4109,6 +4279,13 @@ func (m *SubjectMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *SubjectMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case subject.FieldOrder:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrder(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Subject numeric field %s", name)
 }
@@ -4141,6 +4318,9 @@ func (m *SubjectMutation) ResetField(name string) error {
 		return nil
 	case subject.FieldColor:
 		m.ResetColor()
+		return nil
+	case subject.FieldOrder:
+		m.ResetOrder()
 		return nil
 	}
 	return fmt.Errorf("unknown Subject field %s", name)

@@ -35,6 +35,20 @@ func (sc *SubjectCreate) SetColor(s string) *SubjectCreate {
 	return sc
 }
 
+// SetOrder sets the "order" field.
+func (sc *SubjectCreate) SetOrder(i int8) *SubjectCreate {
+	sc.mutation.SetOrder(i)
+	return sc
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (sc *SubjectCreate) SetNillableOrder(i *int8) *SubjectCreate {
+	if i != nil {
+		sc.SetOrder(*i)
+	}
+	return sc
+}
+
 // SetID sets the "id" field.
 func (sc *SubjectCreate) SetID(u uuid.UUID) *SubjectCreate {
 	sc.mutation.SetID(u)
@@ -125,6 +139,10 @@ func (sc *SubjectCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (sc *SubjectCreate) defaults() {
+	if _, ok := sc.mutation.Order(); !ok {
+		v := subject.DefaultOrder
+		sc.mutation.SetOrder(v)
+	}
 	if _, ok := sc.mutation.ID(); !ok {
 		v := subject.DefaultID()
 		sc.mutation.SetID(v)
@@ -138,6 +156,9 @@ func (sc *SubjectCreate) check() error {
 	}
 	if _, ok := sc.mutation.Color(); !ok {
 		return &ValidationError{Name: "color", err: errors.New(`ent: missing required field "Subject.color"`)}
+	}
+	if _, ok := sc.mutation.Order(); !ok {
+		return &ValidationError{Name: "order", err: errors.New(`ent: missing required field "Subject.order"`)}
 	}
 	if _, ok := sc.mutation.CategoryID(); !ok {
 		return &ValidationError{Name: "category", err: errors.New(`ent: missing required edge "Subject.category"`)}
@@ -184,6 +205,10 @@ func (sc *SubjectCreate) createSpec() (*Subject, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Color(); ok {
 		_spec.SetField(subject.FieldColor, field.TypeString, value)
 		_node.Color = value
+	}
+	if value, ok := sc.mutation.Order(); ok {
+		_spec.SetField(subject.FieldOrder, field.TypeInt8, value)
+		_node.Order = value
 	}
 	if nodes := sc.mutation.CategoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
+	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/dto"
@@ -15,8 +16,9 @@ import (
 )
 
 type modifySubjectInfoReq struct {
-	Name  string `json:"name" validate:"required" example:"name between 1 and 20"`
-	Color string `json:"color" validate:"required,hexcolor"`
+	Name       string `json:"name" validate:"required" example:"name between 1 and 20"`
+	Color      string `json:"color" validate:"required,hexcolor"`
+	CategoryID string `json:"category_id" validate:"required,uuid"`
 }
 
 // @Summary Modify Subject Info
@@ -52,6 +54,8 @@ func ModifySubjectInfo(c *fiber.Ctx) error {
 		})
 	}
 
+	newCategoryID := uuid.MustParse(data.CategoryID)
+
 	userID := middlewares.GetUserIDFromMiddleware(c)
 
 	dbConn := db.GetDBClient()
@@ -75,7 +79,22 @@ func ModifySubjectInfo(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err = subjectObj.Update().SetName(data.Name).SetColor(data.Color).Save(context.Background())
+	if subjectObj.Edges.Category.ID != newCategoryID {
+		// Check if the user is the owner of the new category
+		categoryObj, err := dbConn.Category.Query().Where(category.ID(newCategoryID)).WithUser().Only(context.Background())
+		if err != nil {
+			logger.Error(c, err)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Internal server error",
+			})
+		} else if categoryObj.Edges.User.ID != userID {
+			return c.Status(403).JSON(fiber.Map{
+				"error": "You are not the owner of the category",
+			})
+		}
+	}
+
+	_, err = subjectObj.Update().SetName(data.Name).SetColor(data.Color).SetCategoryID(newCategoryID).Save(context.Background())
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",

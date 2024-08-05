@@ -18,6 +18,7 @@ func (Category) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
 		field.String("name"),
+		field.Int8("order").Default(-1),
 	}
 }
 
