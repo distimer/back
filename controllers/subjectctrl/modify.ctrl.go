@@ -73,9 +73,16 @@ func ModifySubjectInfo(c *fiber.Ctx) error {
 		})
 
 	}
-	if subjectObj.Edges.Category.Edges.User.ID != userID {
+	userObj, err := subjectObj.Edges.Category.QueryUser().Only(context.Background())
+	if err != nil {
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+	if userObj.ID != userID {
 		return c.Status(404).JSON(fiber.Map{
-			"error": "Subject not found",
+			"error": "You are not the owner of the subject",
 		})
 	}
 

@@ -57,11 +57,16 @@ func DeleteSubject(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
-
-	// Check if the user is the owner of the category
-	if categoryObj.Edges.User.ID != userID {
-		return c.Status(403).JSON(fiber.Map{
-			"error": "You are not the owner of the subject",
+	userObj, err := subjectObj.Edges.Category.QueryUser().Only(context.Background())
+	if err != nil {
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+	if userObj.ID != userID {
+		return c.Status(404).JSON(fiber.Map{
+			"error": "Subject not found",
 		})
 	} else if categoryObj.Name == "미분류" {
 		return c.Status(403).JSON(fiber.Map{
