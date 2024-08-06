@@ -41,6 +41,10 @@ func CreateCategory(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "Name length should be between 1 and 20",
 		})
+	} else if data.Name == "미분류" {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Cannot add category with default name",
+		})
 	}
 
 	userID := middlewares.GetUserIDFromMiddleware(c)

@@ -54,6 +54,11 @@ func DeleteCategory(c *fiber.Ctx) error {
 			"error": "Category has subjects",
 		})
 	}
+	if categoryObj.Name == "미분류" {
+		return c.Status(409).JSON(fiber.Map{
+			"error": "Cannot delete default category",
+		})
+	}
 
 	err = dbConn.Category.DeleteOne(categoryObj).Exec(context.Background())
 	if err != nil {

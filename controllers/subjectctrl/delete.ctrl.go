@@ -2,13 +2,16 @@ package subjectctrl
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
+	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
+	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/logger"
 )
@@ -57,7 +60,7 @@ func DeleteSubject(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
-	userObj, err := subjectObj.Edges.Category.QueryUser().Only(context.Background())
+	userObj, err := categoryObj.QueryUser().Only(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
@@ -74,15 +77,23 @@ func DeleteSubject(c *fiber.Ctx) error {
 		})
 	}
 
-	defaultSubject, err := dbConn.Subject.Query().Where(subject.Name("미분류")).Only(context.Background())
+	defaultCategory, err := dbConn.Category.Query().
+		Where(category.And(category.Name("미분류"), category.HasUserWith(user.ID(userID)))).
+		WithSubjects().
+		Only(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
+	} else if len(defaultCategory.Edges.Subjects) != 1 {
+		logger.Error(c, errors.New("default category should have exactly one subject"))
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
 	}
 
-	err = dbConn.StudyLog.Update().Where(studylog.HasSubjectWith(subject.ID(subjectID))).SetSubject(defaultSubject).Exec(context.Background())
+	err = dbConn.StudyLog.Update().Where(studylog.HasSubjectWith(subject.ID(subjectID))).SetSubject(defaultCategory.Edges.Subjects[0]).Exec(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{

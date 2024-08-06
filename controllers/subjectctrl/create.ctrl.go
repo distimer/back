@@ -53,6 +53,10 @@ func CreateSubject(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "Name length should be between 1 and 20",
 		})
+	} else if data.Name == "미분류" {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Cannot add subject with default name",
+		})
 	}
 
 	userID := middlewares.GetUserIDFromMiddleware(c)
@@ -73,6 +77,10 @@ func CreateSubject(c *fiber.Ctx) error {
 	} else if len(categoryObj.Edges.Subjects) >= configs.FreePlanSubjectPerCategoryLimit {
 		return c.Status(409).JSON(fiber.Map{
 			"error": "Subject limit exceeded",
+		})
+	} else if categoryObj.Name == "미분류" {
+		return c.Status(409).JSON(fiber.Map{
+			"error": "Cannot add subject to default category",
 		})
 	}
 
