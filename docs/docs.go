@@ -912,6 +912,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/studylog/statistics/date": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get statistics of study logs with date",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "2006-01-02",
+                        "name": "date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studylogctrl.dailySubjectLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/studylog/statistics/term": {
             "get": {
                 "security": [
@@ -1869,6 +1914,9 @@ const docTemplate = `{
         "studylogctrl.dailySubjectLog": {
             "type": "object",
             "properties": {
+                "category_id": {
+                    "type": "string"
+                },
                 "study_time": {
                     "type": "integer"
                 },

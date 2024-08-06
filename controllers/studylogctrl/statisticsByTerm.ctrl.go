@@ -8,6 +8,8 @@ import (
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/user"
+	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/logger"
 )
 
@@ -16,8 +18,9 @@ const (
 )
 
 type dailySubjectLog struct {
-	SubjectID string `json:"subject_id"`
-	StudyTime int    `json:"study_time"`
+	SubjectID  string `json:"subject_id"`
+	CategoryID string `json:"category_id"`
+	StudyTime  int    `json:"study_time"`
 }
 
 type dailyStudyLog struct {
@@ -58,21 +61,41 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 		})
 	}
 	// term date
-	termDate := int(endDate.Sub(startDate).Hours() / 24)
+	termDate := int(endDate.Sub(startDate).Hours()/24) + 1
 	if termDate > maxTermDateRange {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "The term date range should be less than 31 days",
 		})
 	}
 
+	userID := middlewares.GetUserIDFromMiddleware(c)
 	dbConn := db.GetDBClient()
 
-	studylogs, err := dbConn.StudyLog.Query().Where(studylog.And(studylog.StartAtLTE(endDate), studylog.EndAtGTE(startDate))).Order(ent.Asc("start_at")).WithSubject().All(context.Background())
+	studylogs, err := dbConn.StudyLog.Query().
+		Where(
+			studylog.And(
+				studylog.HasUserWith(user.ID(userID)),
+				studylog.And(
+					studylog.StartAtLT(endDate.AddDate(0, 0, 1)),
+					studylog.EndAtGT(startDate),
+				)),
+		).Order(ent.Asc("start_at")).WithSubject().All(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
+	}
+
+	// inject category edge
+	for _, log := range studylogs {
+		log.Edges.Subject.Edges.Category, err = log.Edges.Subject.QueryCategory().Only(context.Background())
+		if err != nil {
+			logger.Error(c, err)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Internal server error",
+			})
+		}
 	}
 
 	// Calculate the total study time
@@ -82,7 +105,6 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 	dateCounter := 0
 	logCounter := 0
 	date := startDate
-
 	for dateCounter < termDate {
 
 		firstLog := studylogs[logCounter]
@@ -92,8 +114,9 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 			dailyStudyLogs[dateCounter].Log = append(
 				dailyStudyLogs[dateCounter].Log,
 				dailySubjectLog{
-					SubjectID: firstLog.Edges.Subject.ID.String(),
-					StudyTime: int(firstLog.EndAt.Sub(date).Seconds()),
+					SubjectID:  firstLog.Edges.Subject.ID.String(),
+					CategoryID: firstLog.Edges.Subject.Edges.Category.ID.String(),
+					StudyTime:  int(firstLog.EndAt.Sub(date).Seconds()),
 				},
 			)
 			logCounter++
@@ -107,8 +130,9 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 				dailyStudyLogs[dateCounter].Log = append(
 					dailyStudyLogs[dateCounter].Log,
 					dailySubjectLog{
-						SubjectID: log.Edges.Subject.ID.String(),
-						StudyTime: int(date.AddDate(0, 0, 1).Sub(log.StartAt).Seconds()),
+						SubjectID:  log.Edges.Subject.ID.String(),
+						CategoryID: log.Edges.Subject.Edges.Category.ID.String(),
+						StudyTime:  int(date.AddDate(0, 0, 1).Sub(log.StartAt).Seconds()),
 					},
 				)
 				break
@@ -116,8 +140,9 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 				dailyStudyLogs[dateCounter].Log = append(
 					dailyStudyLogs[dateCounter].Log,
 					dailySubjectLog{
-						SubjectID: log.Edges.Subject.ID.String(),
-						StudyTime: int(log.EndAt.Sub(log.StartAt).Seconds()),
+						SubjectID:  log.Edges.Subject.ID.String(),
+						CategoryID: log.Edges.Subject.Edges.Category.ID.String(),
+						StudyTime:  int(log.EndAt.Sub(log.StartAt).Seconds()),
 					},
 				)
 				logCounter++

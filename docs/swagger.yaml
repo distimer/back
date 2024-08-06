@@ -285,6 +285,8 @@ definitions:
     type: object
   studylogctrl.dailySubjectLog:
     properties:
+      category_id:
+        type: string
       study_time:
         type: integer
       subject_id:
@@ -1017,6 +1019,34 @@ paths:
       security:
       - Bearer: []
       summary: Create Study Log
+      tags:
+      - StudyLog
+  /studylog/statistics/date:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: "2006-01-02"
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/studylogctrl.dailySubjectLog'
+            type: array
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get statistics of study logs with date
       tags:
       - StudyLog
   /studylog/statistics/term:
