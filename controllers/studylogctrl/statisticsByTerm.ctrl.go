@@ -2,7 +2,6 @@ package studylogctrl
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -83,7 +82,6 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 	dateCounter := 0
 	logCounter := 0
 	date := startDate
-	fmt.Println("log length: ", len(studylogs))
 
 	for dateCounter < termDate {
 
@@ -133,7 +131,6 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 		date = date.AddDate(0, 0, 1)
 
 		if logCounter == len(studylogs) {
-			fmt.Println(dateCounter)
 			for dateCounter < termDate {
 				dailyStudyLogs[dateCounter].Date = date.Format("2006-01-02")
 				dailyStudyLogs[dateCounter].Log = []dailySubjectLog{}
