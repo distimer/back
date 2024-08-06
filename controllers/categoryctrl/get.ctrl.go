@@ -39,8 +39,9 @@ func GetCategoryList(c *fiber.Ctx) error {
 	result := make([]categoryDTO, len(categories))
 	for i, category := range categories {
 		result[i] = categoryDTO{
-			ID:   category.ID.String(),
-			Name: category.Name,
+			ID:    category.ID.String(),
+			Name:  category.Name,
+			Order: category.Order,
 			Subjects: func() []subjectctrl.SubjectDTO {
 				subjects := category.Edges.Subjects
 				if subjects == nil {
@@ -53,6 +54,7 @@ func GetCategoryList(c *fiber.Ctx) error {
 						ID:    subject.ID.String(),
 						Name:  subject.Name,
 						Color: subject.Color,
+						Order: subject.Order,
 					}
 				}
 

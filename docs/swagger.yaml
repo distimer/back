@@ -53,6 +53,9 @@ definitions:
         type: string
       name:
         type: string
+      order:
+        minimum: 0
+        type: integer
       subjects:
         items:
           $ref: '#/definitions/subjectctrl.SubjectDTO'
@@ -60,7 +63,19 @@ definitions:
     required:
     - id
     - name
+    - order
     - subjects
+    type: object
+  categoryctrl.categoryOrderElement:
+    properties:
+      category_id:
+        type: string
+      order:
+        minimum: 0
+        type: integer
+    required:
+    - category_id
+    - order
     type: object
   categoryctrl.createCategoryReq:
     properties:
@@ -307,10 +322,14 @@ definitions:
         type: string
       name:
         type: string
+      order:
+        minimum: 0
+        type: integer
     required:
     - color
     - id
     - name
+    - order
     type: object
   subjectctrl.createSubjectReq:
     properties:
@@ -325,14 +344,28 @@ definitions:
     type: object
   subjectctrl.modifySubjectInfoReq:
     properties:
+      category_id:
+        type: string
       color:
         type: string
       name:
         example: name between 1 and 20
         type: string
     required:
+    - category_id
     - color
     - name
+    type: object
+  subjectctrl.subjectOrderElement:
+    properties:
+      order:
+        minimum: 0
+        type: integer
+      subject_id:
+        type: string
+    required:
+    - order
+    - subject_id
     type: object
   timerctrl.createTimerReq:
     properties:
@@ -565,6 +598,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/categoryctrl.categoryDTO'
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
       security:
       - Bearer: []
       summary: Create Category
@@ -629,6 +668,39 @@ paths:
       security:
       - Bearer: []
       summary: Modify Category
+      tags:
+      - Category
+  /category/order:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: categoryOrderElement
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/categoryctrl.categoryOrderElement'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/categoryctrl.categoryOrderElement'
+            type: array
+        "400":
+          description: Bad Request
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Modify Category Order
       tags:
       - Category
   /group:
@@ -1062,6 +1134,8 @@ paths:
           description: Bad Request
         "404":
           description: Not Found
+        "409":
+          description: Conflict
         "500":
           description: Internal Server Error
       security:
@@ -1100,6 +1174,39 @@ paths:
       security:
       - Bearer: []
       summary: Modify Subject Info
+      tags:
+      - Subject
+  /subject/order:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: subjectOrderElement
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/subjectctrl.subjectOrderElement'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/subjectctrl.subjectOrderElement'
+            type: array
+        "400":
+          description: Bad Request
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Modify Subject Order
       tags:
       - Subject
   /timer:

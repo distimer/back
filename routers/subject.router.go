@@ -16,4 +16,6 @@ func initSubjectRouter(router fiber.Router) {
 	subjectRouter.Delete("/:id", subjectctrl.DeleteSubject)
 	subjectRouter.Put("/:id", subjectctrl.ModifySubjectInfo)
 
+	// subject order
+	subjectRouter.Patch("/order", subjectctrl.SubjectOrderModify)
 }

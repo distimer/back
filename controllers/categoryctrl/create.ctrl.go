@@ -5,8 +5,11 @@ import (
 	"unicode/utf8"
 
 	"github.com/gofiber/fiber/v2"
+	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/controllers/subjectctrl"
 	"pentag.kr/distimer/db"
+	"pentag.kr/distimer/ent/category"
+	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/dto"
 	"pentag.kr/distimer/utils/logger"
@@ -23,6 +26,9 @@ type createCategoryReq struct {
 // @Security Bearer
 // @Param request body createCategoryReq true "createCategoryReq"
 // @Success 200 {object} categoryDTO
+// @Failure 400
+// @Failure 409
+// @Failure 500
 // @Router /category [post]
 func CreateCategory(c *fiber.Ctx) error {
 	data := new(createCategoryReq)
@@ -41,6 +47,19 @@ func CreateCategory(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 
+	userCategoryCnt, err := dbConn.Category.Query().Where(category.HasUserWith(user.ID(userID))).Count(context.Background())
+	if err != nil {
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+	if userCategoryCnt >= configs.FreePlanCategoryLimit {
+		return c.Status(409).JSON(fiber.Map{
+			"error": "Category limit exceeded",
+		})
+	}
+
 	categoryObj, err := dbConn.Category.Create().
 		SetName(data.Name).
 		SetUserID(userID).
@@ -56,6 +75,7 @@ func CreateCategory(c *fiber.Ctx) error {
 		categoryDTO{
 			ID:       categoryObj.ID.String(),
 			Name:     categoryObj.Name,
+			Order:    categoryObj.Order,
 			Subjects: []subjectctrl.SubjectDTO{},
 		},
 	)

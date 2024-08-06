@@ -237,6 +237,68 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/categoryctrl.categoryDTO"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/category/order": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "Modify Category Order",
+                "parameters": [
+                    {
+                        "description": "categoryOrderElement",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/categoryctrl.categoryOrderElement"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/categoryctrl.categoryOrderElement"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -955,6 +1017,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/subject/order": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subject"
+                ],
+                "summary": "Modify Subject Order",
+                "parameters": [
+                    {
+                        "description": "subjectOrderElement",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/subjectctrl.subjectOrderElement"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/subjectctrl.subjectOrderElement"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/subject/{id}": {
             "put": {
                 "security": [
@@ -1054,6 +1169,9 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict"
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -1419,6 +1537,7 @@ const docTemplate = `{
             "required": [
                 "id",
                 "name",
+                "order",
                 "subjects"
             ],
             "properties": {
@@ -1428,11 +1547,31 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "order": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "subjects": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/subjectctrl.SubjectDTO"
                     }
+                }
+            }
+        },
+        "categoryctrl.categoryOrderElement": {
+            "type": "object",
+            "required": [
+                "category_id",
+                "order"
+            ],
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
@@ -1777,7 +1916,8 @@ const docTemplate = `{
             "required": [
                 "color",
                 "id",
-                "name"
+                "name",
+                "order"
             ],
             "properties": {
                 "color": {
@@ -1788,6 +1928,10 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "order": {
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
@@ -1810,16 +1954,36 @@ const docTemplate = `{
         "subjectctrl.modifySubjectInfoReq": {
             "type": "object",
             "required": [
+                "category_id",
                 "color",
                 "name"
             ],
             "properties": {
+                "category_id": {
+                    "type": "string"
+                },
                 "color": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string",
                     "example": "name between 1 and 20"
+                }
+            }
+        },
+        "subjectctrl.subjectOrderElement": {
+            "type": "object",
+            "required": [
+                "order",
+                "subject_id"
+            ],
+            "properties": {
+                "order": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "subject_id": {
+                    "type": "string"
                 }
             }
         },

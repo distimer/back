@@ -6,7 +6,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/db"
+	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
@@ -29,6 +31,7 @@ type createSubjectReq struct {
 // @Success 200 {object} SubjectDTO
 // @Failure 400
 // @Failure 404
+// @Failure 409
 // @Failure 500
 // @Router /subject/{id} [post]
 func CreateSubject(c *fiber.Ctx) error {
@@ -56,15 +59,20 @@ func CreateSubject(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 
-	categoryExist, err := dbConn.Category.Query().Where(category.And(category.ID(categoryID), category.HasUserWith(user.ID(userID)))).Exist(context.Background())
+	categoryObj, err := dbConn.Category.Query().Where(category.And(category.ID(categoryID), category.HasUserWith(user.ID(userID)))).WithSubjects().Only(context.Background())
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return c.Status(404).JSON(fiber.Map{
+				"error": "Category not found",
+			})
+		}
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
-	} else if !categoryExist {
-		return c.Status(404).JSON(fiber.Map{
-			"error": "Category not found or you are not the owner",
+	} else if len(categoryObj.Edges.Subjects) >= configs.FreePlanSubjectPerCategoryLimit {
+		return c.Status(409).JSON(fiber.Map{
+			"error": "Subject limit exceeded",
 		})
 	}
 
@@ -85,6 +93,7 @@ func CreateSubject(c *fiber.Ctx) error {
 			ID:    subjectObj.ID.String(),
 			Name:  subjectObj.Name,
 			Color: subjectObj.Color,
+			Order: subjectObj.Order,
 		},
 	)
 }

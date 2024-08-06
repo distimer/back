@@ -105,5 +105,6 @@ func ModifySubjectInfo(c *fiber.Ctx) error {
 		ID:    subjectID.String(),
 		Name:  data.Name,
 		Color: data.Color,
+		Order: subjectObj.Order,
 	})
 }

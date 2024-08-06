@@ -16,4 +16,7 @@ func initCategoryRouter(router fiber.Router) {
 	categoryRouter.Post("/", categoryctrl.CreateCategory)
 	categoryRouter.Put("/:id", categoryctrl.ModifyCategory)
 	categoryRouter.Delete("/:id", categoryctrl.DeleteCategory)
+
+	// category order
+	categoryRouter.Patch("/order", categoryctrl.CategoryOrderModify)
 }
