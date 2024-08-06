@@ -100,6 +100,10 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 
 	// Calculate the total study time
 
+	if len(studylogs) == 0 {
+		return c.JSON([]dailyStudyLog{})
+	}
+
 	// create array of daily study logs
 	dailyStudyLogs := make([]dailyStudyLog, termDate)
 	dateCounter := 0
