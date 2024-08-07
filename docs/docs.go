@@ -1265,7 +1265,6 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "[EDGE INCLUDED!]Subject info is included in timer",
                 "consumes": [
                     "application/json"
                 ],
@@ -1282,6 +1281,51 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/timerctrl.timerDTO"
                         }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Timer"
+                ],
+                "summary": "Modify Timer",
+                "parameters": [
+                    {
+                        "description": "modifyTimerDTO",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/timerctrl.modifyTimerDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/timerctrl.timerDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
                     },
                     "404": {
                         "description": "Not Found"
@@ -2039,11 +2083,42 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "content",
+                "shared_group_ids",
                 "subject_id"
             ],
             "properties": {
                 "content": {
+                    "type": "string",
+                    "example": "content between 0 and 30"
+                },
+                "shared_group_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "subject_id": {
                     "type": "string"
+                }
+            }
+        },
+        "timerctrl.modifyTimerDTO": {
+            "type": "object",
+            "required": [
+                "content",
+                "shared_group_ids",
+                "subject_id"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "content between 0 and 30"
+                },
+                "shared_group_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "subject_id": {
                     "type": "string"
@@ -2055,6 +2130,7 @@ const docTemplate = `{
             "required": [
                 "content",
                 "id",
+                "shared_group_ids",
                 "start_at",
                 "subject_id"
             ],
@@ -2064,6 +2140,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "shared_group_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "start_at": {
                     "type": "string"

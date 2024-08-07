@@ -14,7 +14,6 @@ import (
 )
 
 // @Summary Get My Timer Info
-// @Description [EDGE INCLUDED!]Subject info is included in timer
 // @Tags Timer
 // @Accept json
 // @Produce json
@@ -28,7 +27,7 @@ func GetMyTimerInfo(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 
-	foundTimer, err := dbConn.Timer.Query().Where(timer.HasUserWith(user.ID(userID))).WithSubject().First(context.Background())
+	foundTimer, err := dbConn.Timer.Query().Where(timer.HasUserWith(user.ID(userID))).WithSharedGroup().First(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return c.Status(404).JSON(fiber.Map{
@@ -45,5 +44,13 @@ func GetMyTimerInfo(c *fiber.Ctx) error {
 		SubjectID: foundTimer.SubjectID.String(),
 		Content:   foundTimer.Content,
 		StartAt:   foundTimer.StartAt.Format(time.RFC3339),
+		SharedGroupIDs: func() []string {
+			sharedGroups := foundTimer.Edges.SharedGroup
+			result := make([]string, len(sharedGroups))
+			for i, sharedGroup := range sharedGroups {
+				result[i] = sharedGroup.ID.String()
+			}
+			return result
+		}(),
 	})
 }

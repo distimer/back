@@ -2,11 +2,12 @@ package timerctrl
 
 import (
 	"context"
-	"time"
+	"unicode/utf8"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"pentag.kr/distimer/db"
+	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/timer"
@@ -15,34 +16,37 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-type createTimerReq struct {
+type modifyTimerDTO struct {
 	SubjectID      string   `json:"subject_id" validate:"required,uuid"`
 	Content        string   `json:"content" validate:"required" example:"content between 0 and 30"`
 	SharedGroupIDs []string `json:"shared_group_ids" validate:"required"`
 }
 
-// @Summary Create Timer
+// @Summary Modify Timer
 // @Tags Timer
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body createTimerReq true "createTimerReq"
+// @Param request body modifyTimerDTO true "modifyTimerDTO"
 // @Success 200 {object} timerDTO
 // @Failure 400
 // @Failure 404
-// @Failure 409
 // @Failure 500
-// @Router /timer [post]
-func CreateTimer(c *fiber.Ctx) error {
-	data := new(createTimerReq)
+// @Router /timer [put]
+func ModifyTimer(c *fiber.Ctx) error {
+	data := new(modifyTimerDTO)
 	if err := dto.Bind(c, data); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err,
 		})
 	}
+	if utf8.RuneCountInString(data.Content) > 30 {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Content length should be between 1 and 30",
+		})
+	}
 
 	subjectID := uuid.MustParse(data.SubjectID)
-
 	userID := middlewares.GetUserIDFromMiddleware(c)
 
 	dbConn := db.GetDBClient()
@@ -59,15 +63,16 @@ func CreateTimer(c *fiber.Ctx) error {
 		})
 	}
 
-	timerExist, err := dbConn.Timer.Query().Where(timer.UserID(userID)).Exist(context.Background())
+	timerObj, err := dbConn.Timer.Query().Where(timer.UserID(userID)).Only(context.Background())
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return c.Status(404).JSON(fiber.Map{
+				"error": "Timer not found",
+			})
+		}
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
-		})
-	} else if timerExist {
-		return c.Status(409).JSON(fiber.Map{
-			"error": "Timer already exists",
 		})
 	}
 
@@ -95,10 +100,11 @@ func CreateTimer(c *fiber.Ctx) error {
 		sharedGroupIDs = append(sharedGroupIDs, groupID)
 	}
 
-	timer, err := dbConn.Timer.Create().
+	timerObj, err = timerObj.Update().
+		Where(timer.UserID(userID)).
 		SetContent(data.Content).
 		SetSubjectID(subjectID).
-		SetUserID(userID).
+		ClearSharedGroup().
 		AddSharedGroupIDs(sharedGroupIDs...).
 		Save(context.Background())
 	if err != nil {
@@ -107,13 +113,10 @@ func CreateTimer(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
-	return c.JSON(
-		timerDTO{
-			ID:             timer.ID.String(),
-			SubjectID:      subjectID.String(),
-			Content:        timer.Content,
-			StartAt:        timer.StartAt.Format(time.RFC3339),
-			SharedGroupIDs: data.SharedGroupIDs,
-		},
-	)
+	return c.JSON(timerDTO{
+		ID:             timerObj.ID.String(),
+		SubjectID:      data.SubjectID,
+		Content:        timerObj.Content,
+		SharedGroupIDs: data.SharedGroupIDs,
+	})
 }

@@ -14,5 +14,6 @@ func initTimerRouter(router fiber.Router) {
 	// timer
 	timerRouter.Get("/", timerctrl.GetMyTimerInfo)
 	timerRouter.Post("/", timerctrl.CreateTimer)
+	timerRouter.Put("/", timerctrl.ModifyTimer)
 	timerRouter.Delete("/", timerctrl.DeleteTimer)
 }
