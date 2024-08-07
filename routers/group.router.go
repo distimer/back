@@ -20,6 +20,9 @@ func initGroupRouter(router fiber.Router) {
 	// group join
 	groupRouter.Post("/join", groupctrl.JoinGroup)
 
+	// group quit
+	groupRouter.Delete("/quit/:id", groupctrl.QuitGroup)
+
 	// group member
 	groupRouter.Get("/member/:id", groupctrl.GetAllGroupMembers)
 
