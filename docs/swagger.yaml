@@ -819,30 +819,6 @@ paths:
       summary: Modify Group Info
       tags:
       - Group
-  /group/invite/{id}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: group id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              type: string
-            type: array
-      security:
-      - Bearer: []
-      summary: Get Invite Code List
-      tags:
-      - Invite
   /group/join:
     post:
       consumes:
@@ -969,6 +945,29 @@ paths:
       tags:
       - Invite
   /invite/group/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      security:
+      - Bearer: []
+      summary: Get Invite Code List
+      tags:
+      - Invite
     post:
       consumes:
       - application/json

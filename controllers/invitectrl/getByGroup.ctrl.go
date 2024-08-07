@@ -21,7 +21,7 @@ import (
 // @Security Bearer
 // @Param id path string true "group id"
 // @Success 200 {array} string
-// @Router /group/invite/{id} [get]
+// @Router /invite/group/{id} [get]
 func GetInviteCodeList(c *fiber.Ctx) error {
 	groupIDStr := c.Params("id")
 	groupID, err := uuid.Parse(groupIDStr)
