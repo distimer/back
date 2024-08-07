@@ -1075,6 +1075,32 @@ paths:
       summary: Create Study Log
       tags:
       - StudyLog
+  /studylog/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: studylog id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Delete StudyLog
+      tags:
+      - StudyLog
   /studylog/statistics/date:
     get:
       consumes:

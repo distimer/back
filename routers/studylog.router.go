@@ -14,6 +14,7 @@ func initStudylogRouter(router fiber.Router) {
 	// studylog
 	studylogRouter.Get("/", studylogctrl.GetAllMyStudyLogs)
 	studylogRouter.Post("/", studylogctrl.CreateStudyLog)
+	studylogRouter.Delete("/:id", studylogctrl.DeleteStudyLog)
 
 	// studylog statistics
 	studylogRouter.Get("/statistics/date", studylogctrl.GetStatisticsWithDate)
