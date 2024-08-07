@@ -15,8 +15,8 @@ import (
 )
 
 type modifyGroupPolicyReq struct {
-	RevealPolicy int8 `json:"reveal_policy" validate:"required,min=0,max=2"`
-	InvitePolicy int8 `json:"invite_policy" validate:"required,min=0,max=2"`
+	RevealPolicy *int8 `json:"reveal_policy" validate:"required,min=0,max=2"`
+	InvitePolicy *int8 `json:"invite_policy" validate:"required,min=0,max=2"`
 }
 type modifyGroupPolicyRes struct {
 	RevealPolicy int8 `json:"reveal_policy" validate:"required,min=0,max=2"`
@@ -64,7 +64,7 @@ func ModifyGroupPolicy(c *fiber.Ctx) error {
 		})
 	}
 
-	err = groupObj.Update().SetRevealPolicy(data.RevealPolicy).SetInvitePolicy(data.InvitePolicy).Exec(context.Background())
+	err = groupObj.Update().SetRevealPolicy(*data.RevealPolicy).SetInvitePolicy(*data.InvitePolicy).Exec(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
@@ -73,7 +73,7 @@ func ModifyGroupPolicy(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(modifyGroupPolicyRes{
-		RevealPolicy: data.RevealPolicy,
-		InvitePolicy: data.InvitePolicy,
+		RevealPolicy: *data.RevealPolicy,
+		InvitePolicy: *data.InvitePolicy,
 	})
 }

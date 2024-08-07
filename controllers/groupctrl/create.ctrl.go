@@ -23,8 +23,8 @@ type createGroupReq struct {
 	Nickname       string `json:"nickname" validate:"required" example:"nickname between 1 and 20"`
 	Description    string `json:"description" example:"description between 0 and 100"`
 	NicknamePolicy string `json:"nickname_policy" example:"nickname_policy between 0 and 50"`
-	RevealPolicy   int8   `json:"reveal_policy" validate:"required,min=0,max=2"`
-	InvitePolicy   int8   `json:"invite_policy" validate:"required,min=0,max=2"`
+	RevealPolicy   *int8  `json:"reveal_policy" validate:"required,min=0,max=2"`
+	InvitePolicy   *int8  `json:"invite_policy" validate:"required,min=0,max=2"`
 }
 
 // @Summary Create Group
@@ -82,8 +82,8 @@ func CreateGroup(c *fiber.Ctx) error {
 		SetName(data.Name).
 		SetDescription(data.Description).
 		SetNicknamePolicy(data.NicknamePolicy).
-		SetRevealPolicy(data.RevealPolicy).
-		SetInvitePolicy(data.InvitePolicy).
+		SetRevealPolicy(*data.RevealPolicy).
+		SetInvitePolicy(*data.InvitePolicy).
 		SetOwnerID(userID).
 		Save(context.Background())
 	if err != nil {
@@ -111,7 +111,7 @@ func CreateGroup(c *fiber.Ctx) error {
 		Name:           data.Name,
 		Description:    data.Description,
 		NicknamePolicy: data.NicknamePolicy,
-		RevealPolicy:   data.RevealPolicy,
-		InvitePolicy:   data.InvitePolicy,
+		RevealPolicy:   *data.RevealPolicy,
+		InvitePolicy:   *data.InvitePolicy,
 	})
 }
