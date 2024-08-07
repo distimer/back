@@ -129,7 +129,7 @@ func CreateStudyLog(c *fiber.Ctx) error {
 		})
 	}
 
-	categoryObj, err := subjectObj.QueryCategory().Only(context.Background())
+	categoryObj, err := subjectObj.QueryCategory().WithUser().Only(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
