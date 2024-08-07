@@ -37,6 +37,19 @@ func DeleteGroup(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 
+	groupObj, err := dbConn.Group.Query().Where(group.And(group.ID(groupID), group.HasOwnerWith(user.ID(userID)))).Only(context.Background())
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return c.Status(404).JSON(fiber.Map{
+				"error": "Group not found or you are not the owner",
+			})
+		}
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+
 	// delete affiliation
 	_, err = dbConn.Affiliation.Delete().Where(
 		affiliation.GroupID(groupID),
@@ -63,19 +76,6 @@ func DeleteGroup(c *fiber.Ctx) error {
 		studylog.HasSharedGroupWith(group.ID(groupID)),
 	).RemoveSharedGroupIDs(groupID).Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
-		return c.Status(500).JSON(fiber.Map{
-			"error": "Internal server error",
-		})
-	}
-
-	groupObj, err := dbConn.Group.Query().Where(group.And(group.ID(groupID), group.HasOwnerWith(user.ID(userID)))).Only(context.Background())
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return c.Status(404).JSON(fiber.Map{
-				"error": "Group not found or you are not the owner",
-			})
-		}
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
