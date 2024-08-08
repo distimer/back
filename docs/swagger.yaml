@@ -1101,6 +1101,43 @@ paths:
       summary: Delete StudyLog
       tags:
       - StudyLog
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: studylog id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: createStudyLogReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/studylogctrl.createStudyLogReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studylogctrl.createStudyLogReq'
+        "400":
+          description: Bad Request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Modify Study Log
+      tags:
+      - StudyLog
   /studylog/statistics/date:
     get:
       consumes:
