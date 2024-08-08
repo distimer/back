@@ -91,17 +91,10 @@ func JoinGroup(c *fiber.Ctx) error {
 		})
 	}
 
-	ownerObj, err := inviteCodeObj.Edges.Group.QueryOwner().Only(context.Background())
-	if err != nil {
-		logger.Error(c, err)
-		return c.Status(500).JSON(fiber.Map{
-			"error": "Internal server error",
-		})
-	}
 	ownerAffiliationObj, err := dbConn.Affiliation.Query().Where(
 		affiliation.And(
 			affiliation.GroupID(inviteCodeObj.Edges.Group.ID),
-			affiliation.UserID(ownerObj.ID),
+			affiliation.Role(2),
 		),
 	).Only(context.Background())
 	if err != nil {
