@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"pentag.kr/distimer/db"
+	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/logger"
 )
@@ -32,6 +33,11 @@ func GetMyUserInfo(c *fiber.Ctx) error {
 
 	user, err := dbConn.User.Get(context.Background(), userID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return c.Status(401).JSON(fiber.Map{
+				"error": "Unauthorized",
+			})
+		}
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
