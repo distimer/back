@@ -1962,6 +1962,7 @@ const docTemplate = `{
                 "invite_policy",
                 "name",
                 "nickname_policy",
+                "owner_nickname",
                 "reveal_policy"
             ],
             "properties": {
@@ -1981,6 +1982,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "nickname_policy": {
+                    "type": "string"
+                },
+                "owner_nickname": {
                     "type": "string"
                 },
                 "reveal_policy": {

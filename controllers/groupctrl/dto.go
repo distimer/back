@@ -8,6 +8,7 @@ type groupDTO struct {
 	RevealPolicy   int8   `json:"reveal_policy" validate:"required"`
 	InvitePolicy   int8   `json:"invite_policy" validate:"required"`
 	CreateAt       string `json:"create_at" validate:"required"`
+	OwnerNickname  string `json:"owner_nickname" validate:"required"`
 }
 
 type AffiliationDTO struct {

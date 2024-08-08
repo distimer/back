@@ -91,6 +91,26 @@ func JoinGroup(c *fiber.Ctx) error {
 		})
 	}
 
+	ownerObj, err := inviteCodeObj.Edges.Group.QueryOwner().Only(context.Background())
+	if err != nil {
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+	ownerAffiliationObj, err := dbConn.Affiliation.Query().Where(
+		affiliation.And(
+			affiliation.GroupID(inviteCodeObj.Edges.Group.ID),
+			affiliation.UserID(ownerObj.ID),
+		),
+	).Only(context.Background())
+	if err != nil {
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+
 	result := groupDTO{
 		ID:             inviteCodeObj.Edges.Group.ID.String(),
 		Name:           inviteCodeObj.Edges.Group.Name,
@@ -99,6 +119,7 @@ func JoinGroup(c *fiber.Ctx) error {
 		RevealPolicy:   inviteCodeObj.Edges.Group.RevealPolicy,
 		InvitePolicy:   inviteCodeObj.Edges.Group.InvitePolicy,
 		CreateAt:       inviteCodeObj.Edges.Group.CreatedAt.Format(time.RFC3339),
+		OwnerNickname:  ownerAffiliationObj.Nickname,
 	}
 
 	return c.JSON(result)

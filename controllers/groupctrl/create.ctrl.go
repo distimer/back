@@ -113,5 +113,6 @@ func CreateGroup(c *fiber.Ctx) error {
 		NicknamePolicy: data.NicknamePolicy,
 		RevealPolicy:   *data.RevealPolicy,
 		InvitePolicy:   *data.InvitePolicy,
+		OwnerNickname:  data.Nickname,
 	})
 }
