@@ -43,18 +43,31 @@ func GetStatisticsWithTerm(c *fiber.Ctx) error {
 	startDateStr := c.Query("start_date")
 	endDateStr := c.Query("end_date")
 
-	startDate, err := time.Parse("2006-01-02", startDateStr)
+	startDate, err := time.Parse(time.RFC3339, startDateStr+"T00:00:00.000+09:00")
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "Invalid start_date",
 		})
 	}
-	endDate, err := time.Parse("2006-01-02", endDateStr)
+	if startDate.After(time.Now()) {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "date should be before today",
+		})
+	}
+
+	endDate, err := time.Parse(time.RFC3339, endDateStr+"T00:00:00.000+09:00")
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "Invalid end_date",
 		})
+
 	}
+	if endDate.After(time.Now()) {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "date should be before today",
+		})
+	}
+
 	if startDate.After(endDate) {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "start_date should be before end_date",
