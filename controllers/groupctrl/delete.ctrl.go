@@ -9,6 +9,7 @@ import (
 	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/ent/group"
+	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
@@ -65,6 +66,17 @@ func DeleteGroup(c *fiber.Ctx) error {
 	_, err = dbConn.Timer.Update().Where(
 		timer.HasSharedGroupWith(group.ID(groupID)),
 	).RemoveSharedGroupIDs(groupID).Save(context.Background())
+	if err != nil {
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+
+	// invite code
+	_, err = dbConn.InviteCode.Delete().Where(
+		invitecode.HasGroupWith(group.ID(groupID)),
+	).Exec(context.Background())
 	if err != nil {
 		logger.Error(c, err)
 		return c.Status(500).JSON(fiber.Map{
