@@ -977,8 +977,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "2006-01-02",
                         "name": "date",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {

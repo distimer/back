@@ -57,6 +57,7 @@ func GetAllMyStudyLogs(c *fiber.Ctx) error {
 	studyLogs, err := dbConn.StudyLog.Query().
 		Where(studylog.HasUserWith(user.ID(userID))).
 		WithSharedGroup().
+		WithSubject().
 		Order(ent.Desc("start_at")).
 		Limit(count).
 		Offset(offset).

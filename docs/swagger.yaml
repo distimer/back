@@ -1146,7 +1146,6 @@ paths:
       - description: "2006-01-02"
         in: query
         name: date
-        required: true
         type: string
       produces:
       - application/json

@@ -18,21 +18,20 @@ import (
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param date query string true "2006-01-02"
+// @Param date query string false "2006-01-02"
 // @Success 200 {array} dailySubjectLog
 // @Failure 400
 // @Failure 500
 // @Router /studylog/statistics/date [get]
 func GetStatisticsWithDate(c *fiber.Ctx) error {
 
-	dateStr := c.Query("date")
-	date, err := time.Parse("2006-01-02", dateStr)
+	dateStr := c.Query("date", "")
+	date, err := time.Parse(time.RFC3339, dateStr+"T00:00:00.000+09:00")
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "Invalid date format",
-		})
+		date = time.Now()
+		date = date.Truncate(24 * time.Hour)
+		date = date.Add(-9 * time.Hour)
 	}
-
 	if date.After(time.Now()) {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "date should be before today",

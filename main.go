@@ -22,6 +22,14 @@ import (
 // @name Authorization
 func main() {
 
+	location, err := time.LoadLocation("Asia/Seoul")
+	if err != nil {
+		panic(err)
+	}
+
+	// Set the timezone for the current process
+	time.Local = location
+
 	// Load environment variables
 	configs.LoadEnv()
 
