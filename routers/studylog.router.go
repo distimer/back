@@ -21,5 +21,9 @@ func initStudylogRouter(router fiber.Router) {
 	studylogRouter.Get("/statistics/date", studylogctrl.GetStatisticsWithDate)
 	studylogRouter.Get("/statistics/term", studylogctrl.GetStatisticsWithTerm)
 
+	// studylog with group
+	studylogRouter.Get("/group/statistics/date/:id", studylogctrl.GroupMemberStatisticsByDate)
+
+	// studylog with subject
 	studylogRouter.Get("/subject/:id", studylogctrl.GetStudyLogWithSubject)
 }

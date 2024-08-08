@@ -955,6 +955,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/studylog/group/statistics/date/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get Group Member Statistics by Date",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "group id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "2006-01-02",
+                        "name": "date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studylogctrl.groupMemberStatisticscResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/studylog/statistics/date": {
             "get": {
                 "security": [
@@ -2107,6 +2164,39 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "subject_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "studylogctrl.groupMemberStatisticsElem": {
+            "type": "object",
+            "required": [
+                "study_time",
+                "subject"
+            ],
+            "properties": {
+                "study_time": {
+                    "type": "integer"
+                },
+                "subject": {
+                    "$ref": "#/definitions/subjectctrl.SubjectDTO"
+                }
+            }
+        },
+        "studylogctrl.groupMemberStatisticscResponse": {
+            "type": "object",
+            "required": [
+                "log",
+                "user_id"
+            ],
+            "properties": {
+                "log": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studylogctrl.groupMemberStatisticsElem"
+                    }
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
