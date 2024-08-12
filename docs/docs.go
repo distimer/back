@@ -633,6 +633,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/group/role/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Modify Role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "group id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "modifyRoleReq",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.modifyRoleReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.AffiliationDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/group/{id}": {
             "put": {
                 "security": [
@@ -2073,6 +2127,23 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 2,
                     "minimum": 0
+                }
+            }
+        },
+        "groupctrl.modifyRoleReq": {
+            "type": "object",
+            "required": [
+                "role",
+                "user_id"
+            ],
+            "properties": {
+                "role": {
+                    "type": "integer",
+                    "maximum": 1,
+                    "minimum": 0
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },

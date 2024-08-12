@@ -229,6 +229,18 @@ definitions:
     - invite_policy
     - reveal_policy
     type: object
+  groupctrl.modifyRoleReq:
+    properties:
+      role:
+        maximum: 1
+        minimum: 0
+        type: integer
+      user_id:
+        type: string
+    required:
+    - role
+    - user_id
+    type: object
   invitectrl.inviteCodeInfoRes:
     properties:
       group_description:
@@ -945,6 +957,40 @@ paths:
       security:
       - Bearer: []
       summary: Quit Group
+      tags:
+      - Group
+  /group/role/{id}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: modifyRoleReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/groupctrl.modifyRoleReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupctrl.AffiliationDTO'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Modify Role
       tags:
       - Group
   /invite/{code}:
