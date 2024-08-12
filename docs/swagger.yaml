@@ -180,56 +180,28 @@ definitions:
     required:
     - invite_code
     type: object
-  groupctrl.modifyGroupInfoReq:
+  groupctrl.modifyGroupReq:
     properties:
       description:
         example: description between 0 and 100
         type: string
+      invite_policy:
+        maximum: 2
+        minimum: 0
+        type: integer
       name:
         example: name between 3 and 30
         type: string
-    required:
-    - name
-    type: object
-  groupctrl.modifyGroupInfoRes:
-    properties:
-      description:
+      nickname_policy:
+        example: nickname_policy between 0 and 50
         type: string
-      id:
-        type: string
-      name:
-        type: string
-    required:
-    - description
-    - id
-    - name
-    type: object
-  groupctrl.modifyGroupPolicyReq:
-    properties:
-      invite_policy:
-        maximum: 2
-        minimum: 0
-        type: integer
       reveal_policy:
         maximum: 2
         minimum: 0
         type: integer
     required:
     - invite_policy
-    - reveal_policy
-    type: object
-  groupctrl.modifyGroupPolicyRes:
-    properties:
-      invite_policy:
-        maximum: 2
-        minimum: 0
-        type: integer
-      reveal_policy:
-        maximum: 2
-        minimum: 0
-        type: integer
-    required:
-    - invite_policy
+    - name
     - reveal_policy
     type: object
   groupctrl.modifyRoleReq:
@@ -841,19 +813,19 @@ paths:
         name: id
         required: true
         type: string
-      - description: modifyGroupInfoReq
+      - description: modifyGroupReq
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/groupctrl.modifyGroupInfoReq'
+          $ref: '#/definitions/groupctrl.modifyGroupReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/groupctrl.modifyGroupInfoRes'
+            $ref: '#/definitions/groupctrl.groupDTO'
       security:
       - Bearer: []
       summary: Modify Group Info
@@ -904,34 +876,6 @@ paths:
       security:
       - Bearer: []
       summary: Get All Group Members
-      tags:
-      - Group
-  /group/policy/{id}:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: group id
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: modifyGroupPolicyReq
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/groupctrl.modifyGroupPolicyReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/groupctrl.modifyGroupPolicyRes'
-      security:
-      - Bearer: []
-      summary: Modify Group Policy
       tags:
       - Group
   /group/quit/{id}:

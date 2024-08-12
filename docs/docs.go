@@ -543,51 +543,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/group/policy/{id}": {
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Group"
-                ],
-                "summary": "Modify Group Policy",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "group id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "modifyGroupPolicyReq",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/groupctrl.modifyGroupPolicyReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/groupctrl.modifyGroupPolicyRes"
-                        }
-                    }
-                }
-            }
-        },
         "/group/quit/{id}": {
             "delete": {
                 "security": [
@@ -713,12 +668,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "modifyGroupInfoReq",
+                        "description": "modifyGroupReq",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/groupctrl.modifyGroupInfoReq"
+                            "$ref": "#/definitions/groupctrl.modifyGroupReq"
                         }
                     }
                 ],
@@ -726,7 +681,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/groupctrl.modifyGroupInfoRes"
+                            "$ref": "#/definitions/groupctrl.groupDTO"
                         }
                     }
                 }
@@ -2061,71 +2016,30 @@ const docTemplate = `{
                 }
             }
         },
-        "groupctrl.modifyGroupInfoReq": {
+        "groupctrl.modifyGroupReq": {
             "type": "object",
             "required": [
-                "name"
+                "invite_policy",
+                "name",
+                "reveal_policy"
             ],
             "properties": {
                 "description": {
                     "type": "string",
                     "example": "description between 0 and 100"
                 },
+                "invite_policy": {
+                    "type": "integer",
+                    "maximum": 2,
+                    "minimum": 0
+                },
                 "name": {
                     "type": "string",
                     "example": "name between 3 and 30"
-                }
-            }
-        },
-        "groupctrl.modifyGroupInfoRes": {
-            "type": "object",
-            "required": [
-                "description",
-                "id",
-                "name"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
                 },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "groupctrl.modifyGroupPolicyReq": {
-            "type": "object",
-            "required": [
-                "invite_policy",
-                "reveal_policy"
-            ],
-            "properties": {
-                "invite_policy": {
-                    "type": "integer",
-                    "maximum": 2,
-                    "minimum": 0
-                },
-                "reveal_policy": {
-                    "type": "integer",
-                    "maximum": 2,
-                    "minimum": 0
-                }
-            }
-        },
-        "groupctrl.modifyGroupPolicyRes": {
-            "type": "object",
-            "required": [
-                "invite_policy",
-                "reveal_policy"
-            ],
-            "properties": {
-                "invite_policy": {
-                    "type": "integer",
-                    "maximum": 2,
-                    "minimum": 0
+                "nickname_policy": {
+                    "type": "string",
+                    "example": "nickname_policy between 0 and 50"
                 },
                 "reveal_policy": {
                     "type": "integer",

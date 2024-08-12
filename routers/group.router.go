@@ -26,9 +26,6 @@ func initGroupRouter(router fiber.Router) {
 	// group member
 	groupRouter.Get("/member/:id", groupctrl.GetAllGroupMembers)
 
-	// group policy
-	groupRouter.Put("/policy/:id", groupctrl.ModifyGroupPolicy)
-
 	// group role
 	groupRouter.Patch("/role/:id", groupctrl.ModifyRole)
 }
