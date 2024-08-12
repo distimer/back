@@ -3,6 +3,7 @@ package groupctrl
 import (
 	"context"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gofiber/fiber/v2"
 	"pentag.kr/distimer/db"
@@ -16,6 +17,7 @@ import (
 
 type joinReq struct {
 	InviteCode string `json:"invite_code" validate:"required,len=7"`
+	Nickname   string `json:"nickname" example:"nickname between 1 and 20"`
 }
 
 // @Summary Join Group with Invite Code
@@ -31,6 +33,12 @@ func JoinGroup(c *fiber.Ctx) error {
 	if err := dto.Bind(c, data); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err,
+		})
+	}
+	if utf8.RuneCountInString(data.Nickname) < 1 || utf8.RuneCountInString(data.Nickname) > 20 {
+		data.Nickname = ""
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Nickname length should be between 1 and 20",
 		})
 	}
 
@@ -63,17 +71,10 @@ func JoinGroup(c *fiber.Ctx) error {
 			"error": "You are already the member of the group",
 		})
 	}
-	userObj, err := dbConn.User.Get(context.Background(), userID)
-	if err != nil {
-		logger.Error(c, err)
-		return c.Status(500).JSON(fiber.Map{
-			"error": "Internal server error",
-		})
-	}
 	_, err = dbConn.Affiliation.Create().
 		SetGroupID(inviteCodeObj.Edges.Group.ID).
 		SetUserID(userID).
-		SetNickname(userObj.Name).
+		SetNickname(data.Nickname).
 		SetRole(0).
 		Save(context.Background())
 	if err != nil {

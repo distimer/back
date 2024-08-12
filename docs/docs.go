@@ -2054,6 +2054,10 @@ const docTemplate = `{
             "properties": {
                 "invite_code": {
                     "type": "string"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "nickname between 1 and 20"
                 }
             }
         },

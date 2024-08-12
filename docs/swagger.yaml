@@ -174,6 +174,9 @@ definitions:
     properties:
       invite_code:
         type: string
+      nickname:
+        example: nickname between 1 and 20
+        type: string
     required:
     - invite_code
     type: object
