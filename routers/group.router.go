@@ -28,4 +28,7 @@ func initGroupRouter(router fiber.Router) {
 
 	// group role
 	groupRouter.Patch("/role/:id", groupctrl.ModifyRole)
+
+	// group nickname
+	groupRouter.Patch("/nickname/:id", groupctrl.ModifyNickname)
 }

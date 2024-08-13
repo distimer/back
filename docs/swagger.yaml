@@ -204,6 +204,14 @@ definitions:
     - name
     - reveal_policy
     type: object
+  groupctrl.modifyNicknameReq:
+    properties:
+      nickname:
+        example: nickname between 1 and 20
+        type: string
+    required:
+    - nickname
+    type: object
   groupctrl.modifyRoleReq:
     properties:
       role:
@@ -876,6 +884,40 @@ paths:
       security:
       - Bearer: []
       summary: Get All Group Members
+      tags:
+      - Group
+  /group/nickname/{id}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: modifyNicknameReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/groupctrl.modifyNicknameReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupctrl.AffiliationDTO'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Modify Nickname
       tags:
       - Group
   /group/quit/{id}:
