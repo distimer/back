@@ -1018,6 +1018,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/studylog/date": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get StudyLog by Date",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "2006-01-02",
+                        "name": "date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studylogctrl.myStudyLogDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/studylog/group/statistics/date/{id}": {
             "get": {
                 "security": [
