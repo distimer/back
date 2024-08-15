@@ -504,6 +504,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/group/member/{groupID}/{memberID}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Modify Member",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "group id",
+                        "name": "groupID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "member id",
+                        "name": "memberID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "modifyMemberReq",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.modifyMemberReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/groupctrl.AffiliationDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/group/member/{id}": {
             "get": {
                 "security": [
@@ -632,60 +693,6 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/group/role/{id}": {
-            "patch": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Group"
-                ],
-                "summary": "Modify Role",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "group id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "modifyRoleReq",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/groupctrl.modifyRoleReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/groupctrl.AffiliationDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
                     },
                     "404": {
                         "description": "Not Found"
@@ -2330,6 +2337,24 @@ const docTemplate = `{
                 }
             }
         },
+        "groupctrl.modifyMemberReq": {
+            "type": "object",
+            "required": [
+                "nickname",
+                "role"
+            ],
+            "properties": {
+                "nickname": {
+                    "type": "string",
+                    "example": "nickname between 1 and 20"
+                },
+                "role": {
+                    "type": "integer",
+                    "maximum": 1,
+                    "minimum": 0
+                }
+            }
+        },
         "groupctrl.modifyNicknameReq": {
             "type": "object",
             "required": [
@@ -2339,23 +2364,6 @@ const docTemplate = `{
                 "nickname": {
                     "type": "string",
                     "example": "nickname between 1 and 20"
-                }
-            }
-        },
-        "groupctrl.modifyRoleReq": {
-            "type": "object",
-            "required": [
-                "role",
-                "user_id"
-            ],
-            "properties": {
-                "role": {
-                    "type": "integer",
-                    "maximum": 1,
-                    "minimum": 0
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },

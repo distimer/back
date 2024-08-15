@@ -204,6 +204,19 @@ definitions:
     - name
     - reveal_policy
     type: object
+  groupctrl.modifyMemberReq:
+    properties:
+      nickname:
+        example: nickname between 1 and 20
+        type: string
+      role:
+        maximum: 1
+        minimum: 0
+        type: integer
+    required:
+    - nickname
+    - role
+    type: object
   groupctrl.modifyNicknameReq:
     properties:
       nickname:
@@ -211,18 +224,6 @@ definitions:
         type: string
     required:
     - nickname
-    type: object
-  groupctrl.modifyRoleReq:
-    properties:
-      role:
-        maximum: 1
-        minimum: 0
-        type: integer
-      user_id:
-        type: string
-    required:
-    - role
-    - user_id
     type: object
   invitectrl.inviteCodeInfoRes:
     properties:
@@ -903,6 +904,45 @@ paths:
       summary: Join Group with Invite Code
       tags:
       - Group
+  /group/member/{groupID}/{memberID}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: groupID
+        required: true
+        type: string
+      - description: member id
+        in: path
+        name: memberID
+        required: true
+        type: string
+      - description: modifyMemberReq
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/groupctrl.modifyMemberReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupctrl.AffiliationDTO'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Modify Member
+      tags:
+      - Group
   /group/member/{id}:
     get:
       consumes:
@@ -987,40 +1027,6 @@ paths:
       security:
       - Bearer: []
       summary: Quit Group
-      tags:
-      - Group
-  /group/role/{id}:
-    patch:
-      consumes:
-      - application/json
-      parameters:
-      - description: group id
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: modifyRoleReq
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/groupctrl.modifyRoleReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/groupctrl.AffiliationDTO'
-        "400":
-          description: Bad Request
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - Bearer: []
-      summary: Modify Role
       tags:
       - Group
   /invite/{code}:
