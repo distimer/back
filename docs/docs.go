@@ -1275,6 +1275,78 @@ const docTemplate = `{
                 }
             }
         },
+        "/studylog/statistics/term/{group_id}/{member_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get Statistics with Term",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "2006-01-02",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "2006-01-03",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "group_id",
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "member_id",
+                        "name": "member_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studylogctrl.groupMemberdailyStudyLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/studylog/subject/{id}": {
             "get": {
                 "security": [
@@ -2357,6 +2429,10 @@ const docTemplate = `{
         },
         "studylogctrl.dailyStudyLog": {
             "type": "object",
+            "required": [
+                "date",
+                "log"
+            ],
             "properties": {
                 "date": {
                     "type": "string"
@@ -2371,6 +2447,11 @@ const docTemplate = `{
         },
         "studylogctrl.dailySubjectLog": {
             "type": "object",
+            "required": [
+                "category_id",
+                "study_time",
+                "subject_id"
+            ],
             "properties": {
                 "category_id": {
                     "type": "string"
@@ -2380,6 +2461,47 @@ const docTemplate = `{
                 },
                 "subject_id": {
                     "type": "string"
+                }
+            }
+        },
+        "studylogctrl.groupMemberdailyStudyLog": {
+            "type": "object",
+            "required": [
+                "date",
+                "log"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "log": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studylogctrl.groupMemberdailySubjectLog"
+                    }
+                }
+            }
+        },
+        "studylogctrl.groupMemberdailySubjectLog": {
+            "type": "object",
+            "required": [
+                "category_id",
+                "category_name",
+                "study_time",
+                "subject_id"
+            ],
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "category_name": {
+                    "type": "string"
+                },
+                "study_time": {
+                    "type": "integer"
+                },
+                "subject_id": {
+                    "$ref": "#/definitions/subjectctrl.SubjectDTO"
                 }
             }
         },

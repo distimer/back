@@ -18,14 +18,14 @@ const (
 )
 
 type dailySubjectLog struct {
-	SubjectID  string `json:"subject_id"`
-	CategoryID string `json:"category_id"`
-	StudyTime  int    `json:"study_time"`
+	SubjectID  string `json:"subject_id" validate:"required"`
+	CategoryID string `json:"category_id" validate:"required"`
+	StudyTime  int    `json:"study_time" validate:"required"`
 }
 
 type dailyStudyLog struct {
-	Date string            `json:"date"`
-	Log  []dailySubjectLog `json:"log"`
+	Date string            `json:"date" validate:"required"`
+	Log  []dailySubjectLog `json:"log" validate:"required"`
 }
 
 // @Summary Get Statistics with Term
