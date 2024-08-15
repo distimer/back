@@ -17,16 +17,24 @@ func initStudylogRouter(router fiber.Router) {
 	studylogRouter.Put("/:id", studylogctrl.ModifyStudyLog)
 	studylogRouter.Delete("/:id", studylogctrl.DeleteStudyLog)
 
+	// studylog detail
+	studylogRouter.Get("/detail/:id", studylogctrl.GetDetailByID)
+
 	// studylog with date
 	studylogRouter.Get("/date", studylogctrl.GetByDate)
+	// studylog with term
+	studylogRouter.Get("/term", studylogctrl.GetByTerm)
 
 	// studylog statistics
-	studylogRouter.Get("/statistics/date", studylogctrl.GetStatisticsWithDate)
-	studylogRouter.Get("/statistics/term", studylogctrl.GetStatisticsWithTerm)
-
-	// studylog with group
-	studylogRouter.Get("/group/statistics/date/:id", studylogctrl.GroupMemberStatisticsByDate)
+	studylogRouter.Get("/statistics/date", studylogctrl.GetStatisticsByDate)
+	studylogRouter.Get("/statistics/term", studylogctrl.GetStatisticsByTerm)
 
 	// studylog with subject
 	studylogRouter.Get("/subject/:id", studylogctrl.GetStudyLogWithSubject)
+
+	// studylog with group
+	studylogRouter.Get("/group/term/:group_id/:member_id", studylogctrl.GetByTermWithGroup)
+
+	// studylog statistics with group
+	studylogRouter.Get("/statistics/group/term/:group_id/:member_id", studylogctrl.GetStatisticsByTermWithGroup)
 }

@@ -39,7 +39,7 @@ type dailyStudyLog struct {
 // @Failure 400
 // @Failure 500
 // @Router /studylog/statistics/term [get]
-func GetStatisticsWithTerm(c *fiber.Ctx) error {
+func GetStatisticsByTerm(c *fiber.Ctx) error {
 	startDateStr := c.Query("start_date")
 	endDateStr := c.Query("end_date")
 

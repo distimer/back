@@ -290,27 +290,30 @@ definitions:
       subject_id:
         type: string
     type: object
-  studylogctrl.groupMemberStatisticsElem:
+  studylogctrl.groupStudyLogDTO:
     properties:
-      study_time:
-        type: integer
+      category_id:
+        type: string
+      category_name:
+        type: string
+      content:
+        type: string
+      end_at:
+        type: string
+      id:
+        type: string
+      start_at:
+        type: string
       subject:
         $ref: '#/definitions/subjectctrl.SubjectDTO'
     required:
-    - study_time
+    - category_id
+    - category_name
+    - content
+    - end_at
+    - id
+    - start_at
     - subject
-    type: object
-  studylogctrl.groupMemberStatisticscResponse:
-    properties:
-      log:
-        items:
-          $ref: '#/definitions/studylogctrl.groupMemberStatisticsElem'
-        type: array
-      user_id:
-        type: string
-    required:
-    - log
-    - user_id
     type: object
   studylogctrl.myStudyLogDTO:
     properties:
@@ -1225,19 +1228,58 @@ paths:
       summary: Get StudyLog by Date
       tags:
       - StudyLog
-  /studylog/group/statistics/date/{id}:
+  /studylog/detail/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: studylog id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studylogctrl.myStudyLogDTO'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get StudyLog Detail by ID
+      tags:
+      - StudyLog
+  /studylog/group/term/{group_id}/{member_id}:
     get:
       consumes:
       - application/json
       parameters:
       - description: group id
         in: path
-        name: id
+        name: group_id
+        required: true
+        type: string
+      - description: member id
+        in: path
+        name: member_id
         required: true
         type: string
       - description: "2006-01-02"
         in: query
-        name: date
+        name: start_date
+        required: true
+        type: string
+      - description: "2006-01-03"
+        in: query
+        name: end_date
+        required: true
         type: string
       produces:
       - application/json
@@ -1246,7 +1288,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/studylogctrl.groupMemberStatisticscResponse'
+              $ref: '#/definitions/studylogctrl.groupStudyLogDTO'
             type: array
         "400":
           description: Bad Request
@@ -1258,7 +1300,7 @@ paths:
           description: Internal Server Error
       security:
       - Bearer: []
-      summary: Get Group Member Statistics by Date
+      summary: Get StudyLogs with Term with Group
       tags:
       - StudyLog
   /studylog/statistics/date:
@@ -1353,6 +1395,39 @@ paths:
       security:
       - Bearer: []
       summary: Get Study Log with Subject
+      tags:
+      - StudyLog
+  /studylog/term:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: "2006-01-02"
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: "2006-01-03"
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/studylogctrl.myStudyLogDTO'
+            type: array
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get StudyLogs with Term
       tags:
       - StudyLog
   /subject/{id}:

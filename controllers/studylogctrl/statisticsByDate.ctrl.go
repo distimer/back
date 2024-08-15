@@ -23,7 +23,7 @@ import (
 // @Failure 400
 // @Failure 500
 // @Router /studylog/statistics/date [get]
-func GetStatisticsWithDate(c *fiber.Ctx) error {
+func GetStatisticsByDate(c *fiber.Ctx) error {
 
 	dateStr := c.Query("date", "")
 	date, err := time.Parse(time.RFC3339, dateStr+"T00:00:00.000+09:00")

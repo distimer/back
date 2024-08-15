@@ -1062,7 +1062,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/studylog/group/statistics/date/{id}": {
+        "/studylog/detail/{id}": {
             "get": {
                 "security": [
                     {
@@ -1078,20 +1078,80 @@ const docTemplate = `{
                 "tags": [
                     "StudyLog"
                 ],
-                "summary": "Get Group Member Statistics by Date",
+                "summary": "Get StudyLog Detail by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "studylog id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studylogctrl.myStudyLogDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/studylog/group/term/{group_id}/{member_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get StudyLogs with Term with Group",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "group id",
-                        "name": "id",
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "member id",
+                        "name": "member_id",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "2006-01-02",
-                        "name": "date",
-                        "in": "query"
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "2006-01-03",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1100,7 +1160,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/studylogctrl.groupMemberStatisticscResponse"
+                                "$ref": "#/definitions/studylogctrl.groupStudyLogDTO"
                             }
                         }
                     },
@@ -1264,6 +1324,58 @@ const docTemplate = `{
                                 "$ref": "#/definitions/studylogctrl.myStudyLogDTO"
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/studylog/term": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "StudyLog"
+                ],
+                "summary": "Get StudyLogs with Term",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "2006-01-02",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "2006-01-03",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studylogctrl.myStudyLogDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -2271,36 +2383,38 @@ const docTemplate = `{
                 }
             }
         },
-        "studylogctrl.groupMemberStatisticsElem": {
+        "studylogctrl.groupStudyLogDTO": {
             "type": "object",
             "required": [
-                "study_time",
+                "category_id",
+                "category_name",
+                "content",
+                "end_at",
+                "id",
+                "start_at",
                 "subject"
             ],
             "properties": {
-                "study_time": {
-                    "type": "integer"
+                "category_id": {
+                    "type": "string"
+                },
+                "category_name": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "end_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "start_at": {
+                    "type": "string"
                 },
                 "subject": {
                     "$ref": "#/definitions/subjectctrl.SubjectDTO"
-                }
-            }
-        },
-        "studylogctrl.groupMemberStatisticscResponse": {
-            "type": "object",
-            "required": [
-                "log",
-                "user_id"
-            ],
-            "properties": {
-                "log": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/studylogctrl.groupMemberStatisticsElem"
-                    }
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },
