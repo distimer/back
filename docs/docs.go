@@ -2364,7 +2364,8 @@ const docTemplate = `{
             "required": [
                 "group_description",
                 "group_name",
-                "group_owner_nickname"
+                "group_owner_nickname",
+                "nickname_policy"
             ],
             "properties": {
                 "group_description": {
@@ -2374,6 +2375,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "group_owner_nickname": {
+                    "type": "string"
+                },
+                "nickname_policy": {
                     "type": "string"
                 }
             }

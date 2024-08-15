@@ -232,10 +232,13 @@ definitions:
         type: string
       group_owner_nickname:
         type: string
+      nickname_policy:
+        type: string
     required:
     - group_description
     - group_name
     - group_owner_nickname
+    - nickname_policy
     type: object
   invitectrl.inviteGroupRes:
     properties:

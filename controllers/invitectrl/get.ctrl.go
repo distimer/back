@@ -17,6 +17,7 @@ type inviteCodeInfoRes struct {
 	GroupName          string `json:"group_name" validate:"required"`
 	GroupOwnerNickname string `json:"group_owner_nickname" validate:"required"`
 	GroupDescription   string `json:"group_description" validate:"required"`
+	NicknamePolicy     string `json:"nickname_policy" validate:"required"`
 }
 
 // @Summary Get Invite Code Info
@@ -40,7 +41,7 @@ func GetInviteCodeInfo(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 
-	inviteCodeObj, err := dbConn.Group.Query().
+	groupObj, err := dbConn.Group.Query().
 		Where(group.HasInviteCodesWith(invitecode.Code(code))).
 		WithOwner().
 		Only(context.Background())
@@ -57,7 +58,7 @@ func GetInviteCodeInfo(c *fiber.Ctx) error {
 	}
 
 	ownerAffiliation, err := dbConn.Affiliation.Query().
-		Where(affiliation.And(affiliation.GroupID(inviteCodeObj.ID), affiliation.Role(2))).
+		Where(affiliation.And(affiliation.GroupID(groupObj.ID), affiliation.Role(2))).
 		Only(context.Background())
 	if err != nil {
 		logger.Error(c, err)
@@ -66,8 +67,9 @@ func GetInviteCodeInfo(c *fiber.Ctx) error {
 		})
 	}
 	return c.JSON(inviteCodeInfoRes{
-		GroupName:          inviteCodeObj.Name,
+		GroupName:          groupObj.Name,
 		GroupOwnerNickname: ownerAffiliation.Nickname,
-		GroupDescription:   inviteCodeObj.Description,
+		GroupDescription:   groupObj.Description,
+		NicknamePolicy:     groupObj.NicknamePolicy,
 	})
 }
