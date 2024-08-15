@@ -320,13 +320,13 @@ definitions:
         type: string
       study_time:
         type: integer
-      subject_id:
+      subject:
         $ref: '#/definitions/subjectctrl.SubjectDTO'
     required:
     - category_id
     - category_name
     - study_time
-    - subject_id
+    - subject
     type: object
   studylogctrl.groupStudyLogDTO:
     properties:

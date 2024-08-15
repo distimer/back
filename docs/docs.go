@@ -2492,7 +2492,7 @@ const docTemplate = `{
                 "category_id",
                 "category_name",
                 "study_time",
-                "subject_id"
+                "subject"
             ],
             "properties": {
                 "category_id": {
@@ -2504,7 +2504,7 @@ const docTemplate = `{
                 "study_time": {
                     "type": "integer"
                 },
-                "subject_id": {
+                "subject": {
                     "$ref": "#/definitions/subjectctrl.SubjectDTO"
                 }
             }

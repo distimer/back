@@ -17,7 +17,7 @@ import (
 )
 
 type groupMemberdailySubjectLog struct {
-	Subject      subjectctrl.SubjectDTO `json:"subject_id" validate:"required"`
+	Subject      subjectctrl.SubjectDTO `json:"subject" validate:"required"`
 	CategoryID   string                 `json:"category_id" validate:"required"`
 	CategoryName string                 `json:"category_name" validate:"required"`
 	StudyTime    int                    `json:"study_time" validate:"required"`
