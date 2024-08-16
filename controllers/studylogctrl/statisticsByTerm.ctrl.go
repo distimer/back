@@ -134,14 +134,16 @@ func GetStatisticsByTerm(c *fiber.Ctx) error {
 					StudyTime:  int(startDate.AddDate(0, 0, startDateIndex+1).Sub(log.StartAt).Seconds()),
 				},
 			)
-			dailyStudyLogs[endDateIndex].Log = append(
-				dailyStudyLogs[endDateIndex].Log,
-				dailySubjectLog{
-					SubjectID:  log.Edges.Subject.ID.String(),
-					CategoryID: log.Edges.Subject.Edges.Category.ID.String(),
-					StudyTime:  int(log.EndAt.Sub(startDate.AddDate(0, 0, endDateIndex)).Seconds()),
-				},
-			)
+			if startDateIndex < termDate-1 {
+				dailyStudyLogs[endDateIndex].Log = append(
+					dailyStudyLogs[endDateIndex].Log,
+					dailySubjectLog{
+						SubjectID:  log.Edges.Subject.ID.String(),
+						CategoryID: log.Edges.Subject.Edges.Category.ID.String(),
+						StudyTime:  int(log.EndAt.Sub(startDate.AddDate(0, 0, endDateIndex)).Seconds()),
+					},
+				)
+			}
 		} else {
 			dailyStudyLogs[startDateIndex].Log = append(
 				dailyStudyLogs[startDateIndex].Log,
