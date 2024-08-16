@@ -72,6 +72,14 @@ func CreateStudyLog(c *fiber.Ctx) error {
 			"error": "start_at should be before end_at",
 		})
 	}
+	if endAt.After(time.Now()) {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "end_at should be before now",
+		})
+	}
+	// truncate milliseconds
+	startAt = startAt.Truncate(time.Second)
+	endAt = endAt.Truncate(time.Second)
 
 	subjectID, err := uuid.Parse(data.SubjectID)
 	if err != nil {
