@@ -1656,6 +1656,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/subject/batch": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subject"
+                ],
+                "summary": "Create Batch Subject",
+                "parameters": [
+                    {
+                        "description": "subject data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/subjectctrl.createSubjectBatchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/subjectctrl.SubjectDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/subject/order": {
             "patch": {
                 "security": [
@@ -2718,6 +2771,40 @@ const docTemplate = `{
                 "order": {
                     "type": "integer",
                     "minimum": 0
+                }
+            }
+        },
+        "subjectctrl.createSubjectBatchElemReq": {
+            "type": "object",
+            "required": [
+                "category_id",
+                "color",
+                "name"
+            ],
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "name between 1 and 20"
+                }
+            }
+        },
+        "subjectctrl.createSubjectBatchReq": {
+            "type": "object",
+            "required": [
+                "subject_list"
+            ],
+            "properties": {
+                "subject_list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/subjectctrl.createSubjectBatchElemReq"
+                    }
                 }
             }
         },

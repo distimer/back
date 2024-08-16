@@ -404,6 +404,29 @@ definitions:
     - name
     - order
     type: object
+  subjectctrl.createSubjectBatchElemReq:
+    properties:
+      category_id:
+        type: string
+      color:
+        type: string
+      name:
+        example: name between 1 and 20
+        type: string
+    required:
+    - category_id
+    - color
+    - name
+    type: object
+  subjectctrl.createSubjectBatchReq:
+    properties:
+      subject_list:
+        items:
+          $ref: '#/definitions/subjectctrl.createSubjectBatchElemReq'
+        type: array
+    required:
+    - subject_list
+    type: object
   subjectctrl.createSubjectReq:
     properties:
       color:
@@ -1679,6 +1702,39 @@ paths:
       security:
       - Bearer: []
       summary: Modify Subject Info
+      tags:
+      - Subject
+  /subject/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: subject data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/subjectctrl.createSubjectBatchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/subjectctrl.SubjectDTO'
+            type: array
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Create Batch Subject
       tags:
       - Subject
   /subject/order:

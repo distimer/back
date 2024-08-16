@@ -11,6 +11,9 @@ func initSubjectRouter(router fiber.Router) {
 
 	subjectRouter.Use(middlewares.JWTMiddleware)
 
+	// create batch subject
+	subjectRouter.Post("/batch", subjectctrl.CreateBatchSubject)
+
 	// subject
 	subjectRouter.Post("/:id", subjectctrl.CreateSubject)
 	subjectRouter.Delete("/:id", subjectctrl.DeleteSubject)
