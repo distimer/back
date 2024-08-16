@@ -10,6 +10,7 @@ import (
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
+	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
@@ -143,7 +144,10 @@ func GetByTermWithGroup(c *fiber.Ctx) error {
 	logList, err := dbConn.StudyLog.Query().
 		Where(
 			studylog.And(
-				studylog.HasUserWith(user.ID(memberID)),
+				studylog.And(
+					studylog.HasUserWith(user.ID(memberID)),
+					studylog.HasSharedGroupWith(group.ID(groupID)),
+				),
 				studylog.And(
 					studylog.StartAtLT(endDate.AddDate(0, 0, 1)),
 					studylog.EndAtGT(startDate),

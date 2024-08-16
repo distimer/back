@@ -36,5 +36,5 @@ func initStudylogRouter(router fiber.Router) {
 	studylogRouter.Get("/group/term/:group_id/:member_id", studylogctrl.GetByTermWithGroup)
 
 	// studylog statistics with group
-	studylogRouter.Get("/statistics/group/term/:group_id/:member_id", studylogctrl.GetStatisticsByTermWithGroup)
+	studylogRouter.Get("/group/statistics/term/:group_id/:member_id", studylogctrl.GetStatisticsByTermWithGroup)
 }

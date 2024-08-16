@@ -10,6 +10,7 @@ import (
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
+	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
@@ -42,7 +43,7 @@ type groupMemberdailyStudyLog struct {
 // @Failure 403
 // @Failure 404
 // @Failure 500
-// @Router /studylog/statistics/term/{group_id}/{member_id} [get]
+// @Router /studylog/group/statistics/term/{group_id}/{member_id} [get]
 func GetStatisticsByTermWithGroup(c *fiber.Ctx) error {
 	startDateStr := c.Query("start_date")
 	endDateStr := c.Query("end_date")
@@ -155,7 +156,10 @@ func GetStatisticsByTermWithGroup(c *fiber.Ctx) error {
 	studylogs, err := dbConn.StudyLog.Query().
 		Where(
 			studylog.And(
-				studylog.HasUserWith(user.ID(memberID)),
+				studylog.And(
+					studylog.HasUserWith(user.ID(memberID)),
+					studylog.HasSharedGroupWith(group.ID(groupID)),
+				),
 				studylog.And(
 					studylog.StartAtLT(endDate.AddDate(0, 0, 1)),
 					studylog.EndAtGT(startDate),
@@ -178,94 +182,65 @@ func GetStatisticsByTermWithGroup(c *fiber.Ctx) error {
 		}
 	}
 
-	// Calculate the total study time
-
-	if len(studylogs) == 0 {
-		return c.JSON([]groupMemberdailyStudyLog{})
-	}
-
 	// create array of daily study logs
 	dailyStudyLogs := make([]groupMemberdailyStudyLog, termDate)
-	dateCounter := 0
-	logCounter := 0
-	date := startDate
-	for dateCounter < termDate {
+	dateCounter := startDate
 
-		firstLog := studylogs[logCounter]
+	for i := range dailyStudyLogs {
+		dailyStudyLogs[i].Date = dateCounter.Format("2006-01-02")
+		dailyStudyLogs[i].Log = make([]groupMemberdailySubjectLog, 0)
+		dateCounter = dateCounter.AddDate(0, 0, 1)
+	}
 
-		// check if the log is separated by date
-		if firstLog.StartAt.Day() < date.Day() {
-			dailyStudyLogs[dateCounter].Log = append(
-				dailyStudyLogs[dateCounter].Log,
+	for _, log := range studylogs {
+		startDateIndex := int(log.StartAt.Sub(startDate).Hours() / 24)
+		endDateIndex := int(log.EndAt.Sub(startDate).Hours() / 24)
+		if startDateIndex != endDateIndex {
+			// log is separated by date
+			dailyStudyLogs[startDateIndex].Log = append(
+				dailyStudyLogs[startDateIndex].Log,
 				groupMemberdailySubjectLog{
 					Subject: subjectctrl.SubjectDTO{
-						ID:    firstLog.Edges.Subject.ID.String(),
-						Name:  firstLog.Edges.Subject.Name,
-						Color: firstLog.Edges.Subject.Color,
-						Order: firstLog.Edges.Subject.Order,
+						ID:    log.Edges.Subject.ID.String(),
+						Name:  log.Edges.Subject.Name,
+						Color: log.Edges.Subject.Color,
+						Order: log.Edges.Subject.Order,
 					},
-					CategoryID:   firstLog.Edges.Subject.Edges.Category.ID.String(),
-					CategoryName: firstLog.Edges.Subject.Edges.Category.Name,
-					StudyTime:    int(firstLog.EndAt.Sub(date).Seconds()),
+					CategoryID:   log.Edges.Subject.Edges.Category.ID.String(),
+					CategoryName: log.Edges.Subject.Edges.Category.Name,
+					StudyTime:    int(startDate.AddDate(0, 0, startDateIndex+1).Sub(log.StartAt).Seconds()),
 				},
 			)
-			logCounter++
-		}
-
-		flag := true
-		for flag && logCounter != len(studylogs) && studylogs[logCounter].StartAt.Day() <= date.Day() {
-			log := studylogs[logCounter]
-			if log.EndAt.Day() > date.Day() {
-				flag = false
-				dailyStudyLogs[dateCounter].Log = append(
-					dailyStudyLogs[dateCounter].Log,
-					groupMemberdailySubjectLog{
-						Subject: subjectctrl.SubjectDTO{
-							ID:    log.Edges.Subject.ID.String(),
-							Name:  log.Edges.Subject.Name,
-							Color: log.Edges.Subject.Color,
-							Order: log.Edges.Subject.Order,
-						},
-						CategoryID:   log.Edges.Subject.Edges.Category.ID.String(),
-						CategoryName: log.Edges.Subject.Edges.Category.Name,
-						StudyTime:    int(date.AddDate(0, 0, 1).Sub(log.StartAt).Seconds()),
+			dailyStudyLogs[endDateIndex].Log = append(
+				dailyStudyLogs[endDateIndex].Log,
+				groupMemberdailySubjectLog{
+					Subject: subjectctrl.SubjectDTO{
+						ID:    log.Edges.Subject.ID.String(),
+						Name:  log.Edges.Subject.Name,
+						Color: log.Edges.Subject.Color,
+						Order: log.Edges.Subject.Order,
 					},
-				)
-				break
-			} else {
-				dailyStudyLogs[dateCounter].Log = append(
-					dailyStudyLogs[dateCounter].Log,
-					groupMemberdailySubjectLog{
-						Subject: subjectctrl.SubjectDTO{
-							ID:    log.Edges.Subject.ID.String(),
-							Name:  log.Edges.Subject.Name,
-							Color: log.Edges.Subject.Color,
-							Order: log.Edges.Subject.Order,
-						},
-						CategoryID:   log.Edges.Subject.Edges.Category.ID.String(),
-						CategoryName: log.Edges.Subject.Edges.Category.Name,
-						StudyTime:    int(log.EndAt.Sub(log.StartAt).Seconds()),
+					CategoryID:   log.Edges.Subject.Edges.Category.ID.String(),
+					CategoryName: log.Edges.Subject.Edges.Category.Name,
+					StudyTime:    int(log.EndAt.Sub(startDate.AddDate(0, 0, endDateIndex)).Seconds()),
+				},
+			)
+		} else {
+			dailyStudyLogs[startDateIndex].Log = append(
+				dailyStudyLogs[startDateIndex].Log,
+				groupMemberdailySubjectLog{
+					Subject: subjectctrl.SubjectDTO{
+						ID:    log.Edges.Subject.ID.String(),
+						Name:  log.Edges.Subject.Name,
+						Color: log.Edges.Subject.Color,
+						Order: log.Edges.Subject.Order,
 					},
-				)
-				logCounter++
-			}
-		}
-		dailyStudyLogs[dateCounter].Date = date.Format("2006-01-02")
-		if dailyStudyLogs[dateCounter].Log == nil {
-			dailyStudyLogs[dateCounter].Log = []groupMemberdailySubjectLog{}
-		}
-		dateCounter++
-		date = date.AddDate(0, 0, 1)
-
-		if logCounter == len(studylogs) {
-			for dateCounter < termDate {
-				dailyStudyLogs[dateCounter].Date = date.Format("2006-01-02")
-				dailyStudyLogs[dateCounter].Log = []groupMemberdailySubjectLog{}
-				dateCounter++
-				date = date.AddDate(0, 0, 1)
-			}
-			break
+					CategoryID:   log.Edges.Subject.Edges.Category.ID.String(),
+					CategoryName: log.Edges.Subject.Edges.Category.Name,
+					StudyTime:    int(log.EndAt.Sub(log.StartAt).Seconds()),
+				},
+			)
 		}
 	}
-	return nil
+	return c.JSON(dailyStudyLogs)
 }
