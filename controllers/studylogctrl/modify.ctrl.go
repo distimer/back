@@ -57,7 +57,7 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 			"error": "Content length should be between 1 and 30",
 		})
 	}
-	// parse date with rf3339 format
+	// parse date with rfc3339 format
 	startAt, err := time.Parse(time.RFC3339, data.StartAt)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -82,6 +82,9 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 			"error": "Invalid subject ID",
 		})
 	}
+
+	startAt = startAt.Truncate(time.Second)
+	endAt = endAt.Truncate(time.Second)
 
 	var groupIDs []uuid.UUID
 	count := 1

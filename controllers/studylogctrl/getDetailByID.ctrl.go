@@ -2,6 +2,7 @@ package studylogctrl
 
 import (
 	"context"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -35,7 +36,7 @@ func GetDetailByID(c *fiber.Ctx) error {
 	userID := middlewares.GetUserIDFromMiddleware(c)
 	dbConn := db.GetDBClient()
 
-	logObj, err := dbConn.StudyLog.Query().Where(studylog.And(studylog.ID(studylogID), studylog.HasUserWith(user.ID(userID)))).WithSubject().Only(context.Background())
+	logObj, err := dbConn.StudyLog.Query().Where(studylog.And(studylog.ID(studylogID), studylog.HasUserWith(user.ID(userID)))).WithSubject().WithSharedGroup().Only(context.Background())
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -51,9 +52,16 @@ func GetDetailByID(c *fiber.Ctx) error {
 	result := myStudyLogDTO{
 		ID:        logObj.ID.String(),
 		SubjectID: logObj.Edges.Subject.ID.String(),
-		StartAt:   logObj.StartAt.Format("2006-01-02T15:04:05"),
-		EndAt:     logObj.EndAt.Format("2006-01-02T15:04:05"),
+		StartAt:   logObj.StartAt.Format(time.RFC3339),
+		EndAt:     logObj.EndAt.Format(time.RFC3339),
 		Content:   logObj.Content,
+		GroupsToShare: func() []string {
+			groups := make([]string, len(logObj.Edges.SharedGroup))
+			for i, v := range logObj.Edges.SharedGroup {
+				groups[i] = v.ID.String()
+			}
+			return groups
+		}(),
 	}
 	return c.JSON(result)
 }
