@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	maxTermDateRange = 31
+	maxTermDateRange = 62
 )
 
 type dailySubjectLog struct {
@@ -77,7 +77,7 @@ func GetStatisticsByTerm(c *fiber.Ctx) error {
 	termDate := int(endDate.Sub(startDate).Hours()/24) + 1
 	if termDate > maxTermDateRange {
 		return c.Status(400).JSON(fiber.Map{
-			"error": "The term date range should be less than 31 days",
+			"error": "The term date range should be less than 62 days",
 		})
 	}
 
