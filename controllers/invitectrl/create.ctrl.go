@@ -97,7 +97,7 @@ func InviteToGroup(c *fiber.Ctx) error {
 	})
 }
 
-const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const letters = "abcdefghijklmnopqrstuvwxyz0123456789"
 
 func randString(n int) string {
 	// 문자열의 길이가 0인 경우 빈 문자열 반환
