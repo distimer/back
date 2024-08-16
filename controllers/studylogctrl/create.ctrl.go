@@ -77,6 +77,13 @@ func CreateStudyLog(c *fiber.Ctx) error {
 			"error": "end_at should be before now",
 		})
 	}
+	// if more than 24 hours return error
+	if endAt.Sub(startAt) > time.Hour*24 {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Study log should be less than 24 hours",
+		})
+	}
+
 	// truncate milliseconds
 	startAt = startAt.Truncate(time.Second)
 	endAt = endAt.Truncate(time.Second)
