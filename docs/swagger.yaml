@@ -77,6 +77,15 @@ definitions:
     - category_id
     - order
     type: object
+  categoryctrl.createCategoryBatchReq:
+    properties:
+      category_list:
+        items:
+          type: string
+        type: array
+    required:
+    - category_list
+    type: object
   categoryctrl.createCategoryReq:
     properties:
       name:
@@ -759,6 +768,37 @@ paths:
       security:
       - Bearer: []
       summary: Modify Category
+      tags:
+      - Category
+  /category/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: category data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/categoryctrl.createCategoryBatchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/categoryctrl.categoryDTO'
+            type: array
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Create Batch Category
       tags:
       - Category
   /category/order:

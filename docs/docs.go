@@ -250,6 +250,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/category/batch": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "Create Batch Category",
+                "parameters": [
+                    {
+                        "description": "category data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/categoryctrl.createCategoryBatchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/categoryctrl.categoryDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/category/order": {
             "patch": {
                 "security": [
@@ -2205,6 +2255,20 @@ const docTemplate = `{
                 "order": {
                     "type": "integer",
                     "minimum": 0
+                }
+            }
+        },
+        "categoryctrl.createCategoryBatchReq": {
+            "type": "object",
+            "required": [
+                "category_list"
+            ],
+            "properties": {
+                "category_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
