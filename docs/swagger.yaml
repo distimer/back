@@ -905,6 +905,36 @@ paths:
       tags:
       - Group
   /group/member/{groupID}/{memberID}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: group id
+        in: path
+        name: groupID
+        required: true
+        type: string
+      - description: member id
+        in: path
+        name: memberID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Expel Member
+      tags:
+      - Group
     put:
       consumes:
       - application/json
