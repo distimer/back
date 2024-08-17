@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
+	"pentag.kr/distimer/ent/deleteduser"
 	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/utils/crypt"
 	"pentag.kr/distimer/utils/dto"
@@ -34,6 +35,7 @@ type loginRes struct {
 // @Success 201 {object} loginRes
 // @Failure 400
 // @Failure 401
+// @Failure 409
 // @Failure 500
 // @Router /auth/oauth/google [post]
 func GoogleOauthLogin(c *fiber.Ctx) error {
@@ -61,6 +63,21 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 	findUser, err = dbConn.User.Query().Where(user.And(user.OauthID(claims.SUB), user.OauthProvider(1))).Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
+			// check deleted user
+			existUser, err := dbConn.DeletedUser.Query().
+				Where(deleteduser.And(deleteduser.OauthProvider(1), deleteduser.OauthID(claims.SUB))).
+				Exist(context.Background())
+			if err != nil {
+				logger.Error(c, err)
+				return c.Status(500).JSON(fiber.Map{
+					"error": "Internal server error",
+				})
+			}
+			if existUser {
+				return c.Status(409).JSON(fiber.Map{
+					"error": "Quit user can re-register after 1 week",
+				})
+			}
 			// Create User
 			userID := uuid.New()
 			findUser, err = dbConn.User.Create().
@@ -176,6 +193,21 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 	findUser, err = dbConn.User.Query().Where(user.And(user.OauthID(claims.Sub), user.OauthProvider(0))).Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
+			// check deleted user
+			existUser, err := dbConn.DeletedUser.Query().
+				Where(deleteduser.And(deleteduser.OauthProvider(0), deleteduser.OauthID(claims.Sub))).
+				Exist(context.Background())
+			if err != nil {
+				logger.Error(c, err)
+				return c.Status(500).JSON(fiber.Map{
+					"error": "Internal server error",
+				})
+			}
+			if existUser {
+				return c.Status(409).JSON(fiber.Map{
+					"error": "Quit user can re-register after 1 week",
+				})
+			}
 			// Create User
 			userID := uuid.New()
 			findUser, err = dbConn.User.Create().

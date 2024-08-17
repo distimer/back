@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/ent/category"
+	"pentag.kr/distimer/ent/deleteduser"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/refreshtoken"
@@ -36,6 +37,8 @@ type Client struct {
 	Affiliation *AffiliationClient
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
+	// DeletedUser is the client for interacting with the DeletedUser builders.
+	DeletedUser *DeletedUserClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// InviteCode is the client for interacting with the InviteCode builders.
@@ -63,6 +66,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Affiliation = NewAffiliationClient(c.config)
 	c.Category = NewCategoryClient(c.config)
+	c.DeletedUser = NewDeletedUserClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.InviteCode = NewInviteCodeClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
@@ -164,6 +168,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:       cfg,
 		Affiliation:  NewAffiliationClient(cfg),
 		Category:     NewCategoryClient(cfg),
+		DeletedUser:  NewDeletedUserClient(cfg),
 		Group:        NewGroupClient(cfg),
 		InviteCode:   NewInviteCodeClient(cfg),
 		RefreshToken: NewRefreshTokenClient(cfg),
@@ -192,6 +197,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:       cfg,
 		Affiliation:  NewAffiliationClient(cfg),
 		Category:     NewCategoryClient(cfg),
+		DeletedUser:  NewDeletedUserClient(cfg),
 		Group:        NewGroupClient(cfg),
 		InviteCode:   NewInviteCodeClient(cfg),
 		RefreshToken: NewRefreshTokenClient(cfg),
@@ -228,8 +234,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Affiliation, c.Category, c.Group, c.InviteCode, c.RefreshToken, c.StudyLog,
-		c.Subject, c.Timer, c.User,
+		c.Affiliation, c.Category, c.DeletedUser, c.Group, c.InviteCode, c.RefreshToken,
+		c.StudyLog, c.Subject, c.Timer, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -239,8 +245,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Affiliation, c.Category, c.Group, c.InviteCode, c.RefreshToken, c.StudyLog,
-		c.Subject, c.Timer, c.User,
+		c.Affiliation, c.Category, c.DeletedUser, c.Group, c.InviteCode, c.RefreshToken,
+		c.StudyLog, c.Subject, c.Timer, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -253,6 +259,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Affiliation.mutate(ctx, m)
 	case *CategoryMutation:
 		return c.Category.mutate(ctx, m)
+	case *DeletedUserMutation:
+		return c.DeletedUser.mutate(ctx, m)
 	case *GroupMutation:
 		return c.Group.mutate(ctx, m)
 	case *InviteCodeMutation:
@@ -550,6 +558,139 @@ func (c *CategoryClient) mutate(ctx context.Context, m *CategoryMutation) (Value
 		return (&CategoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Category mutation op: %q", m.Op())
+	}
+}
+
+// DeletedUserClient is a client for the DeletedUser schema.
+type DeletedUserClient struct {
+	config
+}
+
+// NewDeletedUserClient returns a client for the DeletedUser from the given config.
+func NewDeletedUserClient(c config) *DeletedUserClient {
+	return &DeletedUserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `deleteduser.Hooks(f(g(h())))`.
+func (c *DeletedUserClient) Use(hooks ...Hook) {
+	c.hooks.DeletedUser = append(c.hooks.DeletedUser, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `deleteduser.Intercept(f(g(h())))`.
+func (c *DeletedUserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DeletedUser = append(c.inters.DeletedUser, interceptors...)
+}
+
+// Create returns a builder for creating a DeletedUser entity.
+func (c *DeletedUserClient) Create() *DeletedUserCreate {
+	mutation := newDeletedUserMutation(c.config, OpCreate)
+	return &DeletedUserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DeletedUser entities.
+func (c *DeletedUserClient) CreateBulk(builders ...*DeletedUserCreate) *DeletedUserCreateBulk {
+	return &DeletedUserCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DeletedUserClient) MapCreateBulk(slice any, setFunc func(*DeletedUserCreate, int)) *DeletedUserCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DeletedUserCreateBulk{err: fmt.Errorf("calling to DeletedUserClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DeletedUserCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DeletedUserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DeletedUser.
+func (c *DeletedUserClient) Update() *DeletedUserUpdate {
+	mutation := newDeletedUserMutation(c.config, OpUpdate)
+	return &DeletedUserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DeletedUserClient) UpdateOne(du *DeletedUser) *DeletedUserUpdateOne {
+	mutation := newDeletedUserMutation(c.config, OpUpdateOne, withDeletedUser(du))
+	return &DeletedUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DeletedUserClient) UpdateOneID(id uuid.UUID) *DeletedUserUpdateOne {
+	mutation := newDeletedUserMutation(c.config, OpUpdateOne, withDeletedUserID(id))
+	return &DeletedUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DeletedUser.
+func (c *DeletedUserClient) Delete() *DeletedUserDelete {
+	mutation := newDeletedUserMutation(c.config, OpDelete)
+	return &DeletedUserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DeletedUserClient) DeleteOne(du *DeletedUser) *DeletedUserDeleteOne {
+	return c.DeleteOneID(du.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DeletedUserClient) DeleteOneID(id uuid.UUID) *DeletedUserDeleteOne {
+	builder := c.Delete().Where(deleteduser.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DeletedUserDeleteOne{builder}
+}
+
+// Query returns a query builder for DeletedUser.
+func (c *DeletedUserClient) Query() *DeletedUserQuery {
+	return &DeletedUserQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDeletedUser},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DeletedUser entity by its id.
+func (c *DeletedUserClient) Get(ctx context.Context, id uuid.UUID) (*DeletedUser, error) {
+	return c.Query().Where(deleteduser.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DeletedUserClient) GetX(ctx context.Context, id uuid.UUID) *DeletedUser {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DeletedUserClient) Hooks() []Hook {
+	return c.hooks.DeletedUser
+}
+
+// Interceptors returns the client interceptors.
+func (c *DeletedUserClient) Interceptors() []Interceptor {
+	return c.inters.DeletedUser
+}
+
+func (c *DeletedUserClient) mutate(ctx context.Context, m *DeletedUserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DeletedUserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DeletedUserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DeletedUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DeletedUserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DeletedUser mutation op: %q", m.Op())
 	}
 }
 
@@ -1855,11 +1996,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Affiliation, Category, Group, InviteCode, RefreshToken, StudyLog, Subject,
-		Timer, User []ent.Hook
+		Affiliation, Category, DeletedUser, Group, InviteCode, RefreshToken, StudyLog,
+		Subject, Timer, User []ent.Hook
 	}
 	inters struct {
-		Affiliation, Category, Group, InviteCode, RefreshToken, StudyLog, Subject,
-		Timer, User []ent.Interceptor
+		Affiliation, Category, DeletedUser, Group, InviteCode, RefreshToken, StudyLog,
+		Subject, Timer, User []ent.Interceptor
 	}
 )

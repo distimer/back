@@ -5,4 +5,5 @@ const (
 	FreePlanCategoryLimit           = 11
 	FreePlanSubjectPerCategoryLimit = 10
 	InviteCodeLength                = 7
+	ReRegisterDay                   = 7
 )

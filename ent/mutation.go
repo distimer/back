@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/ent/category"
+	"pentag.kr/distimer/ent/deleteduser"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/predicate"
@@ -35,6 +36,7 @@ const (
 	// Node types.
 	TypeAffiliation  = "Affiliation"
 	TypeCategory     = "Category"
+	TypeDeletedUser  = "DeletedUser"
 	TypeGroup        = "Group"
 	TypeInviteCode   = "InviteCode"
 	TypeRefreshToken = "RefreshToken"
@@ -1136,6 +1138,536 @@ func (m *CategoryMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Category edge %s", name)
+}
+
+// DeletedUserMutation represents an operation that mutates the DeletedUser nodes in the graph.
+type DeletedUserMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	name              *string
+	oauth_id          *string
+	oauth_provider    *int8
+	addoauth_provider *int8
+	created_at        *time.Time
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*DeletedUser, error)
+	predicates        []predicate.DeletedUser
+}
+
+var _ ent.Mutation = (*DeletedUserMutation)(nil)
+
+// deleteduserOption allows management of the mutation configuration using functional options.
+type deleteduserOption func(*DeletedUserMutation)
+
+// newDeletedUserMutation creates new mutation for the DeletedUser entity.
+func newDeletedUserMutation(c config, op Op, opts ...deleteduserOption) *DeletedUserMutation {
+	m := &DeletedUserMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDeletedUser,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDeletedUserID sets the ID field of the mutation.
+func withDeletedUserID(id uuid.UUID) deleteduserOption {
+	return func(m *DeletedUserMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DeletedUser
+		)
+		m.oldValue = func(ctx context.Context) (*DeletedUser, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DeletedUser.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDeletedUser sets the old DeletedUser of the mutation.
+func withDeletedUser(node *DeletedUser) deleteduserOption {
+	return func(m *DeletedUserMutation) {
+		m.oldValue = func(context.Context) (*DeletedUser, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DeletedUserMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DeletedUserMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DeletedUser entities.
+func (m *DeletedUserMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DeletedUserMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DeletedUserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DeletedUser.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *DeletedUserMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *DeletedUserMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the DeletedUser entity.
+// If the DeletedUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeletedUserMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *DeletedUserMutation) ResetName() {
+	m.name = nil
+}
+
+// SetOauthID sets the "oauth_id" field.
+func (m *DeletedUserMutation) SetOauthID(s string) {
+	m.oauth_id = &s
+}
+
+// OauthID returns the value of the "oauth_id" field in the mutation.
+func (m *DeletedUserMutation) OauthID() (r string, exists bool) {
+	v := m.oauth_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOauthID returns the old "oauth_id" field's value of the DeletedUser entity.
+// If the DeletedUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeletedUserMutation) OldOauthID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOauthID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOauthID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOauthID: %w", err)
+	}
+	return oldValue.OauthID, nil
+}
+
+// ResetOauthID resets all changes to the "oauth_id" field.
+func (m *DeletedUserMutation) ResetOauthID() {
+	m.oauth_id = nil
+}
+
+// SetOauthProvider sets the "oauth_provider" field.
+func (m *DeletedUserMutation) SetOauthProvider(i int8) {
+	m.oauth_provider = &i
+	m.addoauth_provider = nil
+}
+
+// OauthProvider returns the value of the "oauth_provider" field in the mutation.
+func (m *DeletedUserMutation) OauthProvider() (r int8, exists bool) {
+	v := m.oauth_provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOauthProvider returns the old "oauth_provider" field's value of the DeletedUser entity.
+// If the DeletedUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeletedUserMutation) OldOauthProvider(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOauthProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOauthProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOauthProvider: %w", err)
+	}
+	return oldValue.OauthProvider, nil
+}
+
+// AddOauthProvider adds i to the "oauth_provider" field.
+func (m *DeletedUserMutation) AddOauthProvider(i int8) {
+	if m.addoauth_provider != nil {
+		*m.addoauth_provider += i
+	} else {
+		m.addoauth_provider = &i
+	}
+}
+
+// AddedOauthProvider returns the value that was added to the "oauth_provider" field in this mutation.
+func (m *DeletedUserMutation) AddedOauthProvider() (r int8, exists bool) {
+	v := m.addoauth_provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOauthProvider resets all changes to the "oauth_provider" field.
+func (m *DeletedUserMutation) ResetOauthProvider() {
+	m.oauth_provider = nil
+	m.addoauth_provider = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DeletedUserMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DeletedUserMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the DeletedUser entity.
+// If the DeletedUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeletedUserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DeletedUserMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// Where appends a list predicates to the DeletedUserMutation builder.
+func (m *DeletedUserMutation) Where(ps ...predicate.DeletedUser) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DeletedUserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DeletedUserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DeletedUser, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DeletedUserMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DeletedUserMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DeletedUser).
+func (m *DeletedUserMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DeletedUserMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.name != nil {
+		fields = append(fields, deleteduser.FieldName)
+	}
+	if m.oauth_id != nil {
+		fields = append(fields, deleteduser.FieldOauthID)
+	}
+	if m.oauth_provider != nil {
+		fields = append(fields, deleteduser.FieldOauthProvider)
+	}
+	if m.created_at != nil {
+		fields = append(fields, deleteduser.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DeletedUserMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case deleteduser.FieldName:
+		return m.Name()
+	case deleteduser.FieldOauthID:
+		return m.OauthID()
+	case deleteduser.FieldOauthProvider:
+		return m.OauthProvider()
+	case deleteduser.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DeletedUserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case deleteduser.FieldName:
+		return m.OldName(ctx)
+	case deleteduser.FieldOauthID:
+		return m.OldOauthID(ctx)
+	case deleteduser.FieldOauthProvider:
+		return m.OldOauthProvider(ctx)
+	case deleteduser.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown DeletedUser field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeletedUserMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case deleteduser.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case deleteduser.FieldOauthID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOauthID(v)
+		return nil
+	case deleteduser.FieldOauthProvider:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOauthProvider(v)
+		return nil
+	case deleteduser.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DeletedUser field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DeletedUserMutation) AddedFields() []string {
+	var fields []string
+	if m.addoauth_provider != nil {
+		fields = append(fields, deleteduser.FieldOauthProvider)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DeletedUserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case deleteduser.FieldOauthProvider:
+		return m.AddedOauthProvider()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeletedUserMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case deleteduser.FieldOauthProvider:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOauthProvider(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DeletedUser numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DeletedUserMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DeletedUserMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DeletedUserMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DeletedUser nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DeletedUserMutation) ResetField(name string) error {
+	switch name {
+	case deleteduser.FieldName:
+		m.ResetName()
+		return nil
+	case deleteduser.FieldOauthID:
+		m.ResetOauthID()
+		return nil
+	case deleteduser.FieldOauthProvider:
+		m.ResetOauthProvider()
+		return nil
+	case deleteduser.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown DeletedUser field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DeletedUserMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DeletedUserMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DeletedUserMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DeletedUserMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DeletedUserMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DeletedUserMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DeletedUserMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown DeletedUser unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DeletedUserMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown DeletedUser edge %s", name)
 }
 
 // GroupMutation represents an operation that mutates the Group nodes in the graph.

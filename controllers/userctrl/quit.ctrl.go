@@ -135,6 +135,21 @@ func QuitService(c *fiber.Ctx) error {
 		})
 	}
 
+	// add to deleted user
+	_, err = dbConn.DeletedUser.Create().
+		SetID(foundUser.ID).
+		SetName(foundUser.Name).
+		SetOauthID(foundUser.OauthID).
+		SetOauthProvider(foundUser.OauthProvider).
+		SetCreatedAt(foundUser.CreatedAt).
+		Save(context.Background())
+	if err != nil {
+		logger.Error(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+
 	return c.Status(204).JSON(fiber.Map{
 		"message": "Bye Bye :(",
 	})

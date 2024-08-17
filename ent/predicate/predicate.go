@@ -12,6 +12,9 @@ type Affiliation func(*sql.Selector)
 // Category is the predicate function for category builders.
 type Category func(*sql.Selector)
 
+// DeletedUser is the predicate function for deleteduser builders.
+type DeletedUser func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 

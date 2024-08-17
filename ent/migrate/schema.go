@@ -76,6 +76,20 @@ var (
 			},
 		},
 	}
+	// DeletedUsersColumns holds the columns for the "deleted_users" table.
+	DeletedUsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "oauth_id", Type: field.TypeString},
+		{Name: "oauth_provider", Type: field.TypeInt8},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// DeletedUsersTable holds the schema information for the "deleted_users" table.
+	DeletedUsersTable = &schema.Table{
+		Name:       "deleted_users",
+		Columns:    DeletedUsersColumns,
+		PrimaryKey: []*schema.Column{DeletedUsersColumns[0]},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -326,6 +340,7 @@ var (
 	Tables = []*schema.Table{
 		AffiliationsTable,
 		CategoriesTable,
+		DeletedUsersTable,
 		GroupsTable,
 		InviteCodesTable,
 		RefreshTokensTable,
