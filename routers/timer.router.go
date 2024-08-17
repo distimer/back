@@ -16,4 +16,5 @@ func initTimerRouter(router fiber.Router) {
 	timerRouter.Post("/", timerctrl.CreateTimer)
 	timerRouter.Put("/", timerctrl.ModifyTimer)
 	timerRouter.Delete("/", timerctrl.DeleteTimer)
+	timerRouter.Get("/group/:id", timerctrl.GetTimerByGroup)
 }
