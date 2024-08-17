@@ -171,6 +171,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 // @Success 201 {object} loginRes
 // @Failure 400
 // @Failure 401
+// @Failure 409
 // @Failure 500
 // @Router /auth/oauth/apple [post]
 func AppleOauthLogin(c *fiber.Ctx) error {
