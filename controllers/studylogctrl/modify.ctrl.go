@@ -120,7 +120,7 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 				"error": "Studylog not found or you are not the owner",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -129,7 +129,7 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 	// check if study log is already exist at the same time
 	duplicatedStudyLogs, err := dbConn.StudyLog.Query().Where(studylog.And(studylog.StartAtLTE(endAt), studylog.EndAtGTE(startAt))).All(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -152,7 +152,7 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 					"error": "Subject not found",
 				})
 			}
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -160,7 +160,7 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 
 		userObj, err := subjectObj.Edges.Category.QueryUser().Only(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -176,7 +176,7 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 	for _, groupID := range groupIDs {
 		exist, err := dbConn.Affiliation.Query().Where(affiliation.And(affiliation.GroupID(groupID), affiliation.UserID(userID))).Exist(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -196,7 +196,7 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 		AddSharedGroupIDs(groupIDs...).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

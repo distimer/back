@@ -66,7 +66,7 @@ func CreateGroup(c *fiber.Ctx) error {
 	dbConn := db.GetDBClient()
 	count, err := dbConn.Group.Query().Where(group.HasOwnerWith(user.ID(userID))).Count(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -87,7 +87,7 @@ func CreateGroup(c *fiber.Ctx) error {
 		SetOwnerID(userID).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -100,7 +100,7 @@ func CreateGroup(c *fiber.Ctx) error {
 		SetNickname(data.Nickname).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

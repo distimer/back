@@ -51,7 +51,7 @@ func GetInviteCodeInfo(c *fiber.Ctx) error {
 				"error": "Invite code is not exist",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -61,7 +61,7 @@ func GetInviteCodeInfo(c *fiber.Ctx) error {
 		Where(affiliation.And(affiliation.GroupID(groupObj.ID), affiliation.Role(2))).
 		Only(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

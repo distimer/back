@@ -53,7 +53,7 @@ func ModifyTimer(c *fiber.Ctx) error {
 
 	subjectExist, err := dbConn.Subject.Query().Where(subject.ID(subjectID)).Exist(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -70,7 +70,7 @@ func ModifyTimer(c *fiber.Ctx) error {
 				"error": "Timer not found",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -87,7 +87,7 @@ func ModifyTimer(c *fiber.Ctx) error {
 
 		exist, err := dbConn.Affiliation.Query().Where(affiliation.And(affiliation.GroupID(groupID), affiliation.UserID(userID))).Exist(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -108,7 +108,7 @@ func ModifyTimer(c *fiber.Ctx) error {
 		AddSharedGroupIDs(sharedGroupIDs...).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

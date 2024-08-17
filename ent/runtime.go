@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/ent/category"
+	"pentag.kr/distimer/ent/deleteduser"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/refreshtoken"
@@ -38,6 +39,12 @@ func init() {
 	categoryDescID := categoryFields[0].Descriptor()
 	// category.DefaultID holds the default value on creation for the id field.
 	category.DefaultID = categoryDescID.Default.(func() uuid.UUID)
+	deleteduserFields := schema.DeletedUser{}.Fields()
+	_ = deleteduserFields
+	// deleteduserDescDeletedAt is the schema descriptor for deleted_at field.
+	deleteduserDescDeletedAt := deleteduserFields[5].Descriptor()
+	// deleteduser.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	deleteduser.DefaultDeletedAt = deleteduserDescDeletedAt.Default.(func() time.Time)
 	groupFields := schema.Group{}.Fields()
 	_ = groupFields
 	// groupDescDescription is the schema descriptor for description field.

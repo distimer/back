@@ -39,7 +39,7 @@ func Logout(c *fiber.Ctx) error {
 				"error": "Invalid refresh token",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

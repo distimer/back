@@ -28,7 +28,7 @@ func DeleteTimer(c *fiber.Ctx) error {
 
 	count, err := dbConn.Timer.Delete().Where(timer.HasUserWith(user.ID(userID))).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

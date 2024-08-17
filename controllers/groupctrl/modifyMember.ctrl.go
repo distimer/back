@@ -70,7 +70,7 @@ func ModifyMember(c *fiber.Ctx) error {
 
 	exist, err := dbConn.Group.Query().Where(group.And(group.ID(groupID), group.HasOwnerWith(user.ID(userID)))).Exist(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -87,7 +87,7 @@ func ModifyMember(c *fiber.Ctx) error {
 				"error": "User not found in the group",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -95,7 +95,7 @@ func ModifyMember(c *fiber.Ctx) error {
 
 	err = dbConn.Affiliation.UpdateOne(affiliationObj).SetRole(*data.Role).SetNickname(data.Nickname).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

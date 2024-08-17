@@ -48,7 +48,7 @@ func ModifyUserInfo(c *fiber.Ctx) error {
 
 	_, err := dbConn.User.UpdateOneID(userID).SetName(data.Name).SetTermsAgreed(data.TermsAgreed).Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

@@ -45,7 +45,7 @@ func Refresh(c *fiber.Ctx) error {
 				"error": "Invalid refresh token",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -53,7 +53,7 @@ func Refresh(c *fiber.Ctx) error {
 
 	owner, err := refreshTokenObj.QueryUser().Only(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -64,7 +64,7 @@ func Refresh(c *fiber.Ctx) error {
 
 	err = dbConn.RefreshToken.DeleteOne(refreshTokenObj).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -75,7 +75,7 @@ func Refresh(c *fiber.Ctx) error {
 		SetUser(owner).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

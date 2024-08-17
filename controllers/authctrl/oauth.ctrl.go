@@ -68,7 +68,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 				Where(deleteduser.And(deleteduser.OauthProvider(1), deleteduser.OauthID(claims.SUB))).
 				Exist(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
@@ -87,7 +87,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 				SetOauthProvider(1).
 				Save(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
@@ -99,7 +99,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 				SetUserID(userID).
 				Save(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
@@ -112,14 +112,14 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 				SetCategory(categoryObj).
 				Save(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
 			}
 			new = true
 		} else {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -133,7 +133,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 		SetUserID(findUser.ID).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -199,7 +199,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 				Where(deleteduser.And(deleteduser.OauthProvider(0), deleteduser.OauthID(claims.Sub))).
 				Exist(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
@@ -217,7 +217,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 				SetOauthProvider(0).
 				Save(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
@@ -228,7 +228,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 				SetUserID(userID).
 				Save(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
@@ -241,14 +241,14 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 				SetCategory(categoryObj).
 				Save(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
 			}
 			new = true
 		} else {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -262,7 +262,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 		SetUserID(findUser.ID).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

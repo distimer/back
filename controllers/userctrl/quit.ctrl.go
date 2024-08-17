@@ -28,7 +28,7 @@ func QuitService(c *fiber.Ctx) error {
 
 	foundUser, err := dbConn.User.Get(context.Background(), userID)
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -37,7 +37,7 @@ func QuitService(c *fiber.Ctx) error {
 	// group owner check
 	ownedGroups, err := foundUser.QueryOwnedGroups().All(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -51,7 +51,7 @@ func QuitService(c *fiber.Ctx) error {
 	// refresh token deletion
 	_, err = dbConn.RefreshToken.Delete().Where(refreshtoken.HasUserWith(user.ID(userID))).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -60,14 +60,14 @@ func QuitService(c *fiber.Ctx) error {
 	// timer deletion
 	userTimer, err := foundUser.QueryTimers().Only(context.Background())
 	if err != nil && !ent.IsNotFound(err) {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
 	} else if err == nil && !ent.IsNotFound(err) {
 		err = dbConn.Timer.DeleteOne(userTimer).Exec(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -77,7 +77,7 @@ func QuitService(c *fiber.Ctx) error {
 	// study log deletion
 	_, err = dbConn.StudyLog.Delete().Where(studylog.HasUserWith(user.ID(userID))).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -86,7 +86,7 @@ func QuitService(c *fiber.Ctx) error {
 	// category and subject deletion
 	categories, err := foundUser.QueryOwnedCategories().All(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -94,7 +94,7 @@ func QuitService(c *fiber.Ctx) error {
 	for _, category := range categories {
 		subjects, err := category.QuerySubjects().All(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -102,7 +102,7 @@ func QuitService(c *fiber.Ctx) error {
 		for _, subject := range subjects {
 			err = dbConn.Subject.DeleteOne(subject).Exec(context.Background())
 			if err != nil {
-				logger.Error(c, err)
+				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
@@ -110,7 +110,7 @@ func QuitService(c *fiber.Ctx) error {
 		}
 		err = dbConn.Category.DeleteOne(category).Exec(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -120,7 +120,7 @@ func QuitService(c *fiber.Ctx) error {
 	// affiliation deletion
 	_, err = dbConn.Affiliation.Delete().Where(affiliation.UserID(userID)).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -129,7 +129,7 @@ func QuitService(c *fiber.Ctx) error {
 	// user deletion
 	err = dbConn.User.DeleteOne(foundUser).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -144,7 +144,7 @@ func QuitService(c *fiber.Ctx) error {
 		SetCreatedAt(foundUser.CreatedAt).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

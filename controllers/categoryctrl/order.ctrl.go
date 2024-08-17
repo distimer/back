@@ -57,7 +57,7 @@ func CategoryOrderModify(c *fiber.Ctx) error {
 					"error": "Invalid category ID",
 				})
 			}
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal Server Error",
 			})
@@ -70,7 +70,7 @@ func CategoryOrderModify(c *fiber.Ctx) error {
 
 		// Update the order
 		if _, err = dbConn.Category.UpdateOne(categoryObj).SetOrder(element.Order).Save(context.Background()); err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal Server Error",
 			})

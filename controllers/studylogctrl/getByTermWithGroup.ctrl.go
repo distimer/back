@@ -108,7 +108,7 @@ func GetByTermWithGroup(c *fiber.Ctx) error {
 				"error": "You are not a member of this group",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal Server Error",
 		})
@@ -129,7 +129,7 @@ func GetByTermWithGroup(c *fiber.Ctx) error {
 		).
 		Exist(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal Server Error",
 		})
@@ -154,7 +154,7 @@ func GetByTermWithGroup(c *fiber.Ctx) error {
 				)),
 		).Order(ent.Asc("start_at")).WithSubject().All(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -164,7 +164,7 @@ func GetByTermWithGroup(c *fiber.Ctx) error {
 	for i, log := range logList {
 		categoryObj, err := log.Edges.Subject.QueryCategory().Only(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})

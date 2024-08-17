@@ -34,7 +34,7 @@ func GetAllGroupMembers(c *fiber.Ctx) error {
 
 	userExistInGroup, err := dbConn.Affiliation.Query().Where(affiliation.And(affiliation.GroupID(groupID), affiliation.UserID(userID))).Exist(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -46,7 +46,7 @@ func GetAllGroupMembers(c *fiber.Ctx) error {
 
 	affiliations, err := dbConn.Affiliation.Query().Where(affiliation.GroupID(groupID)).All(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

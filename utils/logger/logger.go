@@ -39,9 +39,13 @@ func Fatal(err error) {
 	myLogger.Fatal(err.Error())
 }
 
-func Error(c *fiber.Ctx, err error) {
+func CtxError(c *fiber.Ctx, err error) {
 	// METHOD IP URL ERROR
 	myLogger.Error("Internal Server Error", zap.String("METHOD", c.Method()), zap.String("IP", c.IP()), zap.String("URL", c.OriginalURL()), zap.Error(err))
+}
+
+func Error(err error) {
+	myLogger.Error(err.Error())
 }
 
 // unused but keep it for future use

@@ -45,7 +45,7 @@ func DeleteGroup(c *fiber.Ctx) error {
 				"error": "Group not found or you are not the owner",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -56,7 +56,7 @@ func DeleteGroup(c *fiber.Ctx) error {
 		affiliation.GroupID(groupID),
 	).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -67,7 +67,7 @@ func DeleteGroup(c *fiber.Ctx) error {
 		timer.HasSharedGroupWith(group.ID(groupID)),
 	).RemoveSharedGroupIDs(groupID).Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -78,7 +78,7 @@ func DeleteGroup(c *fiber.Ctx) error {
 		invitecode.HasGroupWith(group.ID(groupID)),
 	).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -88,7 +88,7 @@ func DeleteGroup(c *fiber.Ctx) error {
 		studylog.HasSharedGroupWith(group.ID(groupID)),
 	).RemoveSharedGroupIDs(groupID).Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -96,7 +96,7 @@ func DeleteGroup(c *fiber.Ctx) error {
 
 	err = dbConn.Group.DeleteOne(groupObj).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

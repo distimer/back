@@ -83,6 +83,7 @@ var (
 		{Name: "oauth_id", Type: field.TypeString},
 		{Name: "oauth_provider", Type: field.TypeInt8},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime},
 	}
 	// DeletedUsersTable holds the schema information for the "deleted_users" table.
 	DeletedUsersTable = &schema.Table{

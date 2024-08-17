@@ -46,7 +46,7 @@ func DeleteSubject(c *fiber.Ctx) error {
 				"error": "Subject not found",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -55,14 +55,14 @@ func DeleteSubject(c *fiber.Ctx) error {
 	// Get the category object
 	categoryObj, err := subjectObj.QueryCategory().Only(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
 	}
 	userObj, err := categoryObj.QueryUser().Only(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -82,12 +82,12 @@ func DeleteSubject(c *fiber.Ctx) error {
 		WithSubjects().
 		Only(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
 	} else if len(defaultCategory.Edges.Subjects) != 1 {
-		logger.Error(c, errors.New("default category should have exactly one subject"))
+		logger.CtxError(c, errors.New("default category should have exactly one subject"))
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -95,7 +95,7 @@ func DeleteSubject(c *fiber.Ctx) error {
 
 	err = dbConn.StudyLog.Update().Where(studylog.HasSubjectWith(subject.ID(subjectID))).SetSubject(defaultCategory.Edges.Subjects[0]).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -103,7 +103,7 @@ func DeleteSubject(c *fiber.Ctx) error {
 
 	err = dbConn.Subject.DeleteOne(subjectObj).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

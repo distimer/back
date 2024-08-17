@@ -25,7 +25,9 @@ type DeletedUser struct {
 	// OauthProvider holds the value of the "oauth_provider" field.
 	OauthProvider int8 `json:"oauth_provider,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt    time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt    time.Time `json:"deleted_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -38,7 +40,7 @@ func (*DeletedUser) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case deleteduser.FieldName, deleteduser.FieldOauthID:
 			values[i] = new(sql.NullString)
-		case deleteduser.FieldCreatedAt:
+		case deleteduser.FieldCreatedAt, deleteduser.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		case deleteduser.FieldID:
 			values[i] = new(uuid.UUID)
@@ -87,6 +89,12 @@ func (du *DeletedUser) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				du.CreatedAt = value.Time
 			}
+		case deleteduser.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				du.DeletedAt = value.Time
+			}
 		default:
 			du.selectValues.Set(columns[i], values[i])
 		}
@@ -134,6 +142,9 @@ func (du *DeletedUser) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(du.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("deleted_at=")
+	builder.WriteString(du.DeletedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

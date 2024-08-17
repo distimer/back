@@ -72,7 +72,7 @@ func ModifyGroupInfo(c *fiber.Ctx) error {
 				"error": "Group not found or you are not the owner",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -87,7 +87,7 @@ func ModifyGroupInfo(c *fiber.Ctx) error {
 		Exec(context.Background())
 
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -96,7 +96,7 @@ func ModifyGroupInfo(c *fiber.Ctx) error {
 	affiliationObj, err := dbConn.Affiliation.Query().Where(affiliation.And(affiliation.GroupID(groupID), affiliation.UserID(userID))).Only(context.Background())
 
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

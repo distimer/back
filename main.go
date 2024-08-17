@@ -8,6 +8,7 @@ import (
 	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/routers"
+	"pentag.kr/distimer/schedulers"
 	"pentag.kr/distimer/utils/logger"
 
 	_ "pentag.kr/distimer/docs"
@@ -39,6 +40,9 @@ func main() {
 	// Connect database client
 	db.ConnectDBClient()
 
+	schedulerObj := schedulers.GenerateSchedularObj()
+	schedulerObj.Start()
+
 	app := fiber.New()
 	if configs.Env.LogLevel == "DEBUG" {
 		swaggerConf := swagger.ConfigDefault
@@ -50,4 +54,5 @@ func main() {
 	routers.EnrollRouter(app)
 
 	logger.Fatal(app.Listen(":3000"))
+	schedulerObj.Stop()
 }

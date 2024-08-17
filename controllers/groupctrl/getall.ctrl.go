@@ -25,7 +25,7 @@ func GetJoinedGroups(c *fiber.Ctx) error {
 	dbConn := db.GetDBClient()
 	groups, err := dbConn.User.Query().Where(user.ID(userID)).QueryJoinedGroups().All(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -35,7 +35,7 @@ func GetJoinedGroups(c *fiber.Ctx) error {
 	for i, group := range groups {
 		ownerAffiliationObj, err := dbConn.Affiliation.Query().Where(affiliation.And(affiliation.GroupID(group.ID), affiliation.Role(2))).Only(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})

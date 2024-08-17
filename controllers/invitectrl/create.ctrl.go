@@ -50,7 +50,7 @@ func InviteToGroup(c *fiber.Ctx) error {
 				"error": "Group is not exist , or you are not the member of the group",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -58,7 +58,7 @@ func InviteToGroup(c *fiber.Ctx) error {
 	if affiliationObj.Role != 2 {
 		groupObj, err := dbConn.Group.Query().Where(group.ID(groupID)).Only(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -70,7 +70,7 @@ func InviteToGroup(c *fiber.Ctx) error {
 	}
 	count, err := dbConn.InviteCode.Query().Where(invitecode.HasGroupWith(group.ID(groupID))).Count(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -87,7 +87,7 @@ func InviteToGroup(c *fiber.Ctx) error {
 		SetGroupID(groupID).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

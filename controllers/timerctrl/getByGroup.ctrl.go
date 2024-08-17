@@ -51,7 +51,7 @@ func GetTimerByGroup(c *fiber.Ctx) error {
 				"error": "Group not found or not affiliated",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -64,7 +64,7 @@ func GetTimerByGroup(c *fiber.Ctx) error {
 
 	timers, err := affiliationObj.Edges.Group.QuerySharedTimer().WithUser().WithSubject().All(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -74,7 +74,7 @@ func GetTimerByGroup(c *fiber.Ctx) error {
 
 		affiliationObj, err := timer.Edges.User.QueryAffiliations().Where(affiliation.GroupID(groupID)).Only(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})

@@ -68,7 +68,7 @@ func ModifyCategory(c *fiber.Ctx) error {
 				"error": "Category not found or you are not the owner",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -78,7 +78,7 @@ func ModifyCategory(c *fiber.Ctx) error {
 		SetName(data.Name).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

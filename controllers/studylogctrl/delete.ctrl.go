@@ -43,7 +43,7 @@ func DeleteStudyLog(c *fiber.Ctx) error {
 		),
 	).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

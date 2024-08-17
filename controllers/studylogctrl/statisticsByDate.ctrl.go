@@ -53,7 +53,7 @@ func GetStatisticsByDate(c *fiber.Ctx) error {
 				)),
 		).Order(ent.Asc("start_at")).WithSubject().All(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -62,7 +62,7 @@ func GetStatisticsByDate(c *fiber.Ctx) error {
 	for _, log := range logs {
 		log.Edges.Subject.Edges.Category, err = log.Edges.Subject.QueryCategory().Only(context.Background())
 		if err != nil {
-			logger.Error(c, err)
+			logger.CtxError(c, err)
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Internal server error",
 			})

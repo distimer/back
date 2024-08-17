@@ -1151,6 +1151,7 @@ type DeletedUserMutation struct {
 	oauth_provider    *int8
 	addoauth_provider *int8
 	created_at        *time.Time
+	deleted_at        *time.Time
 	clearedFields     map[string]struct{}
 	done              bool
 	oldValue          func(context.Context) (*DeletedUser, error)
@@ -1425,6 +1426,42 @@ func (m *DeletedUserMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *DeletedUserMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *DeletedUserMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the DeletedUser entity.
+// If the DeletedUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeletedUserMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *DeletedUserMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+}
+
 // Where appends a list predicates to the DeletedUserMutation builder.
 func (m *DeletedUserMutation) Where(ps ...predicate.DeletedUser) {
 	m.predicates = append(m.predicates, ps...)
@@ -1459,7 +1496,7 @@ func (m *DeletedUserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DeletedUserMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.name != nil {
 		fields = append(fields, deleteduser.FieldName)
 	}
@@ -1471,6 +1508,9 @@ func (m *DeletedUserMutation) Fields() []string {
 	}
 	if m.created_at != nil {
 		fields = append(fields, deleteduser.FieldCreatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, deleteduser.FieldDeletedAt)
 	}
 	return fields
 }
@@ -1488,6 +1528,8 @@ func (m *DeletedUserMutation) Field(name string) (ent.Value, bool) {
 		return m.OauthProvider()
 	case deleteduser.FieldCreatedAt:
 		return m.CreatedAt()
+	case deleteduser.FieldDeletedAt:
+		return m.DeletedAt()
 	}
 	return nil, false
 }
@@ -1505,6 +1547,8 @@ func (m *DeletedUserMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldOauthProvider(ctx)
 	case deleteduser.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case deleteduser.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown DeletedUser field %s", name)
 }
@@ -1541,6 +1585,13 @@ func (m *DeletedUserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case deleteduser.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown DeletedUser field %s", name)
@@ -1617,6 +1668,9 @@ func (m *DeletedUserMutation) ResetField(name string) error {
 		return nil
 	case deleteduser.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case deleteduser.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown DeletedUser field %s", name)

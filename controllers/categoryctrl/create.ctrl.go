@@ -53,7 +53,7 @@ func CreateCategory(c *fiber.Ctx) error {
 
 	userCategoryCnt, err := dbConn.Category.Query().Where(category.HasUserWith(user.ID(userID))).Count(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -69,7 +69,7 @@ func CreateCategory(c *fiber.Ctx) error {
 		SetUserID(userID).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

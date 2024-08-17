@@ -51,7 +51,7 @@ func JoinGroup(c *fiber.Ctx) error {
 				"error": "Invite code is not exist",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -61,7 +61,7 @@ func JoinGroup(c *fiber.Ctx) error {
 		Where(affiliation.And(affiliation.GroupID(inviteCodeObj.Edges.Group.ID), affiliation.UserID(userID))).
 		Exist(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -78,7 +78,7 @@ func JoinGroup(c *fiber.Ctx) error {
 		SetRole(0).
 		Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -86,7 +86,7 @@ func JoinGroup(c *fiber.Ctx) error {
 
 	err = dbConn.InviteCode.UpdateOne(inviteCodeObj).AddUsed(1).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -99,7 +99,7 @@ func JoinGroup(c *fiber.Ctx) error {
 		),
 	).Only(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})

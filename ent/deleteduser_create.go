@@ -45,6 +45,20 @@ func (duc *DeletedUserCreate) SetCreatedAt(t time.Time) *DeletedUserCreate {
 	return duc
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (duc *DeletedUserCreate) SetDeletedAt(t time.Time) *DeletedUserCreate {
+	duc.mutation.SetDeletedAt(t)
+	return duc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (duc *DeletedUserCreate) SetNillableDeletedAt(t *time.Time) *DeletedUserCreate {
+	if t != nil {
+		duc.SetDeletedAt(*t)
+	}
+	return duc
+}
+
 // SetID sets the "id" field.
 func (duc *DeletedUserCreate) SetID(u uuid.UUID) *DeletedUserCreate {
 	duc.mutation.SetID(u)
@@ -58,6 +72,7 @@ func (duc *DeletedUserCreate) Mutation() *DeletedUserMutation {
 
 // Save creates the DeletedUser in the database.
 func (duc *DeletedUserCreate) Save(ctx context.Context) (*DeletedUser, error) {
+	duc.defaults()
 	return withHooks(ctx, duc.sqlSave, duc.mutation, duc.hooks)
 }
 
@@ -83,6 +98,14 @@ func (duc *DeletedUserCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (duc *DeletedUserCreate) defaults() {
+	if _, ok := duc.mutation.DeletedAt(); !ok {
+		v := deleteduser.DefaultDeletedAt()
+		duc.mutation.SetDeletedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (duc *DeletedUserCreate) check() error {
 	if _, ok := duc.mutation.Name(); !ok {
@@ -96,6 +119,9 @@ func (duc *DeletedUserCreate) check() error {
 	}
 	if _, ok := duc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "DeletedUser.created_at"`)}
+	}
+	if _, ok := duc.mutation.DeletedAt(); !ok {
+		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "DeletedUser.deleted_at"`)}
 	}
 	return nil
 }
@@ -148,6 +174,10 @@ func (duc *DeletedUserCreate) createSpec() (*DeletedUser, *sqlgraph.CreateSpec) 
 		_spec.SetField(deleteduser.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
+	if value, ok := duc.mutation.DeletedAt(); ok {
+		_spec.SetField(deleteduser.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = value
+	}
 	return _node, _spec
 }
 
@@ -169,6 +199,7 @@ func (ducb *DeletedUserCreateBulk) Save(ctx context.Context) ([]*DeletedUser, er
 	for i := range ducb.builders {
 		func(i int, root context.Context) {
 			builder := ducb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DeletedUserMutation)
 				if !ok {

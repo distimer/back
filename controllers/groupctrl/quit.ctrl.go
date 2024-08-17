@@ -52,7 +52,7 @@ func QuitGroup(c *fiber.Ctx) error {
 				"error": "Affiliation not found",
 			})
 		}
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -68,7 +68,7 @@ func QuitGroup(c *fiber.Ctx) error {
 		timer.HasSharedGroupWith(group.ID(groupID)),
 	).RemoveSharedGroupIDs(groupID).Save(c.Context())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -82,7 +82,7 @@ func QuitGroup(c *fiber.Ctx) error {
 		),
 	).RemoveSharedGroupIDs(groupID).Save(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
@@ -94,7 +94,7 @@ func QuitGroup(c *fiber.Ctx) error {
 		affiliation.UserID(userID),
 	)).Exec(context.Background())
 	if err != nil {
-		logger.Error(c, err)
+		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
