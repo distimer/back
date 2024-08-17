@@ -12,7 +12,7 @@ import (
 )
 
 func deleteUserPurgeSchedule(c *cron.Cron) {
-	_, err := c.AddFunc("* * * * *", deleteUserPurge)
+	_, err := c.AddFunc("0 * * * *", deleteUserPurge)
 	if err != nil {
 		logger.Fatal(err)
 	}
