@@ -12,6 +12,7 @@ import (
 	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/ent/studylog"
+	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/dto"
 	"pentag.kr/distimer/utils/logger"
@@ -119,7 +120,12 @@ func CreateStudyLog(c *fiber.Ctx) error {
 	dbConn := db.GetDBClient()
 
 	// check if study log is already exist at the same time
-	exist, err := dbConn.StudyLog.Query().Where(studylog.And(studylog.StartAtLTE(endAt), studylog.EndAtGTE(startAt))).Exist(context.Background())
+	exist, err := dbConn.StudyLog.Query().
+		Where(studylog.And(
+			studylog.HasUserWith(user.ID(userID)),
+			studylog.StartAtLTE(endAt),
+			studylog.EndAtGTE(startAt))).
+		Exist(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
