@@ -94,17 +94,9 @@ jobs:
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
 
-      # Pull Image at server for deployment with ssh
-      - name: Pull Image at server for deployment with ssh
+      # Pull Image at server for deployment with webhook
+      - name: Invoke deployment hook
         if: ${{ github.event_name != 'pull_request' }}
-        uses: appleboy/ssh-action@master
+        uses: distributhor/workflow-webhook@v3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASS }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ./distimer-back
-            docker compose pull
-            docker compose down
-            docker compose up -d
+          webhook_url: ${{ secrets.WEBHOOK_URL }}
