@@ -79,6 +79,4 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd distimer
-            ./deploy.sh ${TAGS}
+          script: cd distimer && ./deploy.sh ${TAGS}
