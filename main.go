@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/ansrivas/fiberprometheus/v2"
+	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 	"pentag.kr/distimer/configs"
@@ -49,6 +50,10 @@ func main() {
 	prometheus := fiberprometheus.New("my-service-name")
 	prometheus.RegisterAt(app, "/metrics")
 	app.Use(prometheus.Middleware)
+
+	app.Use(fiberzap.New(fiberzap.Config{
+		Logger: logger.MyLogger,
+	}))
 
 	if configs.Env.LogLevel == "DEBUG" {
 		swaggerConf := swagger.ConfigDefault
