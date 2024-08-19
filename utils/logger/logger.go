@@ -1,9 +1,12 @@
 package logger
 
 import (
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var MyLogger *zap.Logger
@@ -25,15 +28,33 @@ func InitLogger(logLevel string) {
 		level = zapcore.InfoLevel
 	}
 
-	config := zap.NewProductionConfig()
-	config.Level = zap.NewAtomicLevelAt(level)
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.Encoding = "console"
-	logger, err := config.Build()
-	if err != nil {
-		panic(err)
+	rotateLogger := &lumberjack.Logger{
+		Filename:   "./log/log.log", // Or any other path
+		MaxSize:    100,             // MB; after this size, a new log file is created
+		MaxBackups: 30,              // Number of backups to keep
+		MaxAge:     90,              // Days
+		Compress:   true,            // Compress the backups using gzip
 	}
-	MyLogger = logger
+
+	consoleSyncer := zapcore.AddSync(os.Stdout)
+	fileSyncer := zapcore.AddSync(rotateLogger)
+
+	consoleCore := zapcore.NewCore(
+		zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+		consoleSyncer,
+		level,
+	)
+	fileCore := zapcore.NewCore(
+		zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+		fileSyncer,
+		level,
+	)
+	core := zapcore.NewTee(fileCore, consoleCore)
+
+	loggerZap := zap.New(core)
+	defer loggerZap.Sync()
+	MyLogger = loggerZap
+
 }
 
 func Fatal(err error) {
