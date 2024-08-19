@@ -42,7 +42,13 @@ func Fatal(err error) {
 
 func CtxError(c *fiber.Ctx, err error) {
 	// METHOD IP URL ERROR
-	MyLogger.Error("Internal Server Error", zap.String("METHOD", c.Method()), zap.String("IP", c.IP()), zap.String("URL", c.OriginalURL()), zap.Error(err))
+	MyLogger.Error("Internal Server Error", zap.String("METHOD", c.Method()), zap.String("IP", func() string {
+		// cloudflare ip
+		if ip := c.Get("CF-Connecting-IP"); ip != "" {
+			return ip
+		}
+		return c.IP()
+	}()), zap.String("URL", c.OriginalURL()), zap.Error(err))
 }
 
 func Error(err error) {

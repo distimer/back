@@ -45,9 +45,11 @@ func main() {
 	schedulerObj := schedulers.GenerateSchedularObj()
 	schedulerObj.Start()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ProxyHeader: "CF-Connecting-IP",
+	})
 
-	prometheus := fiberprometheus.New("my-service-name")
+	prometheus := fiberprometheus.New("distimer")
 	prometheus.RegisterAt(app, "/metrics")
 	app.Use(prometheus.Middleware)
 
