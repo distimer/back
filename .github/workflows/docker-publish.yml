@@ -7,7 +7,7 @@ name: Docker
 
 on:
   push:
-    branches: ["release-v**"]
+    branches: ["develop", "release-v**"]
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
@@ -70,7 +70,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to:
+            type=gha,mode=max
             # Pull Image at server for deployment with ssh
       - name: Pull Image at Server for Deployment with SSH
         uses: appleboy/ssh-action@master

@@ -1935,8 +1935,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/timerctrl.timerDTO"
                         }
                     },
-                    "404": {
-                        "description": "Not Found"
+                    "204": {
+                        "description": "No Content"
                     },
                     "500": {
                         "description": "Internal Server Error"

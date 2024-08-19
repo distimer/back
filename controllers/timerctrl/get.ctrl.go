@@ -19,7 +19,7 @@ import (
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} timerDTO
-// @Success 404
+// @Success 204
 // @Failure 500
 // @Router /timer [get]
 func GetMyTimerInfo(c *fiber.Ctx) error {
@@ -30,7 +30,7 @@ func GetMyTimerInfo(c *fiber.Ctx) error {
 	foundTimer, err := dbConn.Timer.Query().Where(timer.HasUserWith(user.ID(userID))).WithSharedGroup().First(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return c.Status(404).JSON(fiber.Map{
+			return c.Status(204).JSON(fiber.Map{
 				"info": "Timer not found",
 			})
 		}
