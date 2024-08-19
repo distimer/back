@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 	"pentag.kr/distimer/configs"
@@ -44,6 +45,11 @@ func main() {
 	schedulerObj.Start()
 
 	app := fiber.New()
+
+	prometheus := fiberprometheus.New("my-service-name")
+	prometheus.RegisterAt(app, "/metrics")
+	app.Use(prometheus.Middleware)
+
 	if configs.Env.LogLevel == "DEBUG" {
 		swaggerConf := swagger.ConfigDefault
 		swaggerConf.CustomStyle = configs.SwaggerDarkStyle
