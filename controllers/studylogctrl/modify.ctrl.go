@@ -137,7 +137,12 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 	}
 
 	// check if study log is already exist at the same time
-	duplicatedStudyLogs, err := dbConn.StudyLog.Query().Where(studylog.And(studylog.StartAtLTE(endAt), studylog.EndAtGTE(startAt))).All(context.Background())
+	duplicatedStudyLogs, err := dbConn.StudyLog.Query().Where(
+		studylog.And(
+			studylog.HasUserWith(user.ID(userID)),
+			studylog.StartAtLTE(endAt),
+			studylog.EndAtGTE(startAt))).
+		All(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
