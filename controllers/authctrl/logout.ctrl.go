@@ -7,21 +7,20 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
-	"pentag.kr/distimer/utils/dto"
 	"pentag.kr/distimer/utils/logger"
 )
 
 func Logout(c *fiber.Ctx) error {
-	data := new(refreshTokenDTO)
-	if err := dto.Bind(c, data); err != nil {
+	refreshTokenStr := c.Query("refresh_token")
+	refreshToken, err := uuid.Parse(refreshTokenStr)
+	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"error": err,
+			"error": "Invalid refresh token",
 		})
 	}
 	dbConn := db.GetDBClient()
-	refreshToken := uuid.MustParse(data.RefreshToken)
 
-	err := dbConn.RefreshToken.DeleteOneID(refreshToken).Exec(context.Background())
+	err = dbConn.RefreshToken.DeleteOneID(refreshToken).Exec(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return c.Status(401).JSON(fiber.Map{
