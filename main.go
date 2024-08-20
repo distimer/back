@@ -3,23 +3,16 @@ package main
 import (
 	"time"
 
-	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
 	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/db"
+	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/routers"
 	"pentag.kr/distimer/schedulers"
 	"pentag.kr/distimer/utils/logger"
 )
 
-// @title Distimer Swagger API
-// @version	1.0
-// @host localhost:3000
-// @BasePath  /
-// @securityDefinitions.apikey Bearer
-// @in header
-// @name Authorization
 func main() {
 
 	location, err := time.LoadLocation("Asia/Seoul")
@@ -46,9 +39,10 @@ func main() {
 		ProxyHeader: "CF-Connecting-IP",
 	})
 
-	prometheus := fiberprometheus.New("distimer")
-	prometheus.RegisterAt(app, "/metrics")
-	app.Use(prometheus.Middleware)
+	if configs.Env.Branch != "local" {
+		logger.InitLokiLogger()
+		app.Use(middlewares.LokiLoggerMiddleware)
+	}
 
 	app.Use(fiberzap.New(fiberzap.Config{
 		Logger: logger.MyLogger,

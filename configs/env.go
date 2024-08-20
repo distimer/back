@@ -21,6 +21,8 @@ type ServerEnv struct {
 	AppleClientID      string `env:"APPLE_CLIENT_ID"`
 	GoogleClientID     string `env:"GOOGLE_CLIENT_ID"`
 	GoogleClientSecret string `env:"GOOGLE_CLIENT_SECRET"`
+	Branch             string `env:"BRANCH"`
+	LokiURL            string `env:"LOKI_URL"`
 }
 
 func getEnvStr(envName string) string {
