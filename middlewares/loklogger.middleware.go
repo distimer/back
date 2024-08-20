@@ -28,7 +28,7 @@ func LokiLoggerMiddleware(c *fiber.Ctx) error {
 	method := c.Method()
 	path := c.Path()
 	// get cf-connecting-ip
-	ip := c.Get("CF-Connecting-IP")
+	ip := c.IP()
 	err := c.Next()
 	status := c.Response().StatusCode()
 	latency := time.Since(c.Context().Time()).Microseconds()
