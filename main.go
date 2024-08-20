@@ -3,9 +3,9 @@ package main
 import (
 	"time"
 
-	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
+	slogfiber "github.com/samber/slog-fiber"
 	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/routers"
@@ -46,9 +46,10 @@ func main() {
 		ProxyHeader: "CF-Connecting-IP",
 	})
 
-	prometheus := fiberprometheus.New("distimer")
-	prometheus.RegisterAt(app, "/metrics")
-	app.Use(prometheus.Middleware)
+	if configs.Env.Branch != "local" {
+		logger.InitLokiLogger()
+		app.Use(slogfiber.New(logger.LokiLogger))
+	}
 
 	app.Use(fiberzap.New(fiberzap.Config{
 		Logger: logger.MyLogger,
