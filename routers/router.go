@@ -15,4 +15,10 @@ func EnrollRouter(app *fiber.App) {
 	initStudylogRouter(apiRouter)
 	initInviteRouter(apiRouter)
 	initTimerRouter(apiRouter)
+
+	apiRouter.Get("/ping", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"message": "pong",
+		})
+	})
 }
