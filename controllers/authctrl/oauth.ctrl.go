@@ -19,25 +19,6 @@ type oauthLoginReq struct {
 	Token string `json:"token" validate:"required"`
 }
 
-type loginRes struct {
-	UserID       string `json:"user_id" validate:"required,uuid"`
-	Name         string `json:"name" validate:"required"`
-	AccessToken  string `json:"access_token" validate:"required"`
-	RefreshToken string `json:"refresh_token" validate:"required,uuid"`
-}
-
-// @Summary Google Oauth Login
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param request body authctrl.oauthLoginReq true "oauthLoginReq"
-// @Success 200 {object} loginRes
-// @Success 201 {object} loginRes
-// @Failure 400
-// @Failure 401
-// @Failure 409
-// @Failure 500
-// @Router /auth/oauth/google [post]
 func GoogleOauthLogin(c *fiber.Ctx) error {
 	data := new(oauthLoginReq)
 	if err := dto.Bind(c, data); err != nil {
@@ -144,7 +125,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 
 	if new {
 		return c.Status(201).JSON(
-			loginRes{
+			accessInfoDTO{
 				UserID:       findUser.ID.String(),
 				Name:         findUser.Name,
 				AccessToken:  newAccessToken,
@@ -153,7 +134,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 		)
 	}
 	return c.JSON(
-		loginRes{
+		accessInfoDTO{
 			UserID:       findUser.ID.String(),
 			Name:         findUser.Name,
 			AccessToken:  newAccessToken,
@@ -167,8 +148,8 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param request body authctrl.oauthLoginReq true "oauthLoginReq"
-// @Success 200 {object} loginRes
-// @Success 201 {object} loginRes
+// @Success 200 {object} accessInfoDTO
+// @Success 201 {object} accessInfoDTO
 // @Failure 400
 // @Failure 401
 // @Failure 409
@@ -272,7 +253,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 	newAccessToken := crypt.NewJWT(findUser.ID, findUser.TermsAgreed)
 	if new {
 		return c.Status(201).JSON(
-			loginRes{
+			accessInfoDTO{
 				UserID:       findUser.ID.String(),
 				Name:         findUser.Name,
 				AccessToken:  newAccessToken,
@@ -281,7 +262,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 		)
 	}
 	return c.JSON(
-		loginRes{
+		accessInfoDTO{
 			UserID:       findUser.ID.String(),
 			Name:         findUser.Name,
 			AccessToken:  newAccessToken,
