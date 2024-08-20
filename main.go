@@ -6,14 +6,11 @@ import (
 	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/swagger"
 	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/routers"
 	"pentag.kr/distimer/schedulers"
 	"pentag.kr/distimer/utils/logger"
-
-	_ "pentag.kr/distimer/docs"
 )
 
 // @title Distimer Swagger API
@@ -56,12 +53,6 @@ func main() {
 	app.Use(fiberzap.New(fiberzap.Config{
 		Logger: logger.MyLogger,
 	}))
-
-	if configs.Env.LogLevel == "DEBUG" {
-		swaggerConf := swagger.ConfigDefault
-		swaggerConf.CustomStyle = configs.SwaggerDarkStyle
-		app.Get("/swagger/*", swagger.New(swaggerConf)) // default
-	}
 
 	// Register routers
 	routers.EnrollRouter(app)

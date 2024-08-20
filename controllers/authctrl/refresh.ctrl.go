@@ -12,24 +12,8 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-type refreshTokenReq struct {
-	RefreshToken string `json:"refresh_token" validate:"required,uuid"`
-}
-
-type refreshTokenRes struct {
-	RefreshToken string `json:"refresh_token" validate:"required,uuid"`
-	AccessToken  string `json:"access_token" validate:"required"`
-}
-
-// @Summary Refresh Token
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param request body authctrl.refreshTokenReq true "refreshTokenReq"
-// @Success 200 {object} refreshTokenRes
-// @Router /auth/refresh [post]
 func Refresh(c *fiber.Ctx) error {
-	data := new(refreshTokenReq)
+	data := new(refreshTokenDTO)
 	if err := dto.Bind(c, data); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err,
@@ -80,7 +64,9 @@ func Refresh(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
-	return c.JSON(refreshTokenRes{
+	return c.JSON(accessInfoDTO{
+		UserID:       owner.ID.String(),
+		Name:         owner.Name,
 		RefreshToken: newRefrshToken.String(),
 		AccessToken:  newAccessToken,
 	})
