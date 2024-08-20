@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,24 +16,39 @@ import (
 // 5. LATENCY
 // 6. IP
 
-const (
-	lokiLoggerFormat = `{"time":"%s","method":"%s","path":"%s","status":"%d","latency":%dus,"ip":"%s"}`
-)
-
 func LokiLoggerMiddleware(c *fiber.Ctx) error {
 
 	lokiLogger := logger.LokiLogger
 
-	now := time.Now().Format(time.RFC3339)
+	now := c.Context().Time()
 	method := c.Method()
 	path := c.Path()
-	// get cf-connecting-ip
 	ip := c.IP()
-	err := c.Next()
-	status := c.Response().StatusCode()
-	latency := time.Since(c.Context().Time()).Microseconds()
 
-	lokiLogger.Info(fmt.Sprintf(lokiLoggerFormat, now, method, path, status, latency, ip))
+	err := c.Next()
+
+	status := c.Response().StatusCode()
+	latency := time.Since(now).Microseconds()
+
+	requestAttributes := []slog.Attr{
+		slog.Time("time", now),
+		slog.String("method", method),
+		slog.String("path", path),
+		slog.String("ip", ip),
+		slog.Int("status", status),
+		slog.Int64("latency", latency),
+	}
+	logErr := err
+	if logErr == nil {
+		logErr = fiber.NewError(status)
+	}
+	level := slog.LevelInfo
+	msg := "Incoming request"
+	if status >= 500 {
+		level = slog.LevelError
+		msg = logErr.Error()
+	}
+	lokiLogger.LogAttrs(c.UserContext(), level, msg, requestAttributes...)
 
 	return err
 }
