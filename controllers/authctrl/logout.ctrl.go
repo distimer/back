@@ -11,19 +11,8 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-type logoutTokenReq struct {
-	RefreshToken string `json:"refresh_token" validate:"required,uuid"`
-}
-
-// @Summary Logout
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param request body authctrl.logoutTokenReq true "logoutTokenReq"
-// @Success 204
-// @Router /auth/logout [delete]
 func Logout(c *fiber.Ctx) error {
-	data := new(logoutTokenReq)
+	data := new(refreshTokenDTO)
 	if err := dto.Bind(c, data); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err,
