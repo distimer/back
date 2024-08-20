@@ -25,6 +25,6 @@ RUN wget -q -t3 'https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.ke
 
 COPY --from=builder /app/main .
 
-HEALTHCHECK CMD curl --fail http://localhost/ping
+HEALTHCHECK CMD curl --fail http://localhost:3000/ping
 
 CMD ["doppler", "run", "--", "./main"]
