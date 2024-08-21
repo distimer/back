@@ -39,6 +39,13 @@ func main() {
 		ProxyHeader: "CF-Connecting-IP",
 	})
 
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "*",
+		AllowMethods: "*",
+	}))
+  
 	if configs.Env.Branch != "local" {
 		logger.InitLokiLogger()
 		app.Use(middlewares.LokiLoggerMiddleware)
