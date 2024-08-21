@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/middlewares"
@@ -39,13 +40,12 @@ func main() {
 		ProxyHeader: "CF-Connecting-IP",
 	})
 
-
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowHeaders: "*",
 		AllowMethods: "*",
 	}))
-  
+
 	if configs.Env.Branch != "local" {
 		logger.InitLokiLogger()
 		app.Use(middlewares.LokiLoggerMiddleware)
