@@ -30,6 +30,19 @@ func GetMyTimerInfo(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
+	if time.Since(foundTimer.StartAt) > time.Hour*24 {
+		// delete timer if it's older than 24 hours
+		err := dbConn.Timer.DeleteOne(foundTimer).Exec(context.Background())
+		if err != nil {
+			logger.CtxError(c, err)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Internal server error",
+			})
+		}
+		return c.Status(404).JSON(fiber.Map{
+			"info": "Timer not found",
+		})
+	}
 	return c.JSON(timerDTO{
 		ID:        foundTimer.ID.String(),
 		SubjectID: foundTimer.SubjectID.String(),
