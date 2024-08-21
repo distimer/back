@@ -8,7 +8,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/db"
-	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/routers"
 	"pentag.kr/distimer/schedulers"
 	"pentag.kr/distimer/utils/logger"
@@ -45,11 +44,6 @@ func main() {
 		AllowHeaders: "*",
 		AllowMethods: "*",
 	}))
-
-	if configs.Env.Branch != "local" {
-		logger.InitLokiLogger()
-		app.Use(middlewares.LokiLoggerMiddleware)
-	}
 
 	app.Use(fiberzap.New(fiberzap.Config{
 		Logger: logger.MyLogger,

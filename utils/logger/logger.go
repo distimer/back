@@ -5,29 +5,13 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/grafana/loki-client-go/loki"
-	slogloki "github.com/samber/slog-loki/v3"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"pentag.kr/distimer/configs"
 )
 
 var MyLogger *zap.Logger
 var LokiLogger *slog.Logger
-
-func InitLokiLogger() {
-	// setup loki client
-	config, _ := loki.NewDefaultConfig(configs.Env.LokiURL)
-	config.TenantID = "distimer"
-	client, _ := loki.New(config)
-
-	logger := slog.New(slogloki.Option{Level: slog.LevelInfo, Client: client}.NewLokiHandler())
-	logger = logger.
-		With("app", "distimer").
-		With("branch", configs.Env.Branch)
-	LokiLogger = logger
-}
 
 func InitLogger(logLevel string) {
 	var level zapcore.Level
