@@ -22,23 +22,10 @@ type createStudyLogReq struct {
 	SubjectID     string   `json:"subject_id" validate:"required,uuid" example:"subject_id"`
 	StartAt       string   `json:"start_at" validate:"required" example:"2020-08-28T09:20:26.187+09:00"`
 	EndAt         string   `json:"end_at" validate:"required" example:"2020-08-28T09:20:26.187+09:00"`
-	Content       string   `json:"content" validate:"required" example:"content between 0 and 30"`
+	Content       string   `json:"content" example:"content between 0 and 30"`
 	GroupsToShare []string `json:"groups_to_share" validate:"required" example:"group_id"`
 }
 
-// @Summary Create Study Log
-// @Tags StudyLog
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Param request body createStudyLogReq true "createStudyLogReq"
-// @Success 200 {object} myStudyLogDTO
-// @Failure 400
-// @Failure 403
-// @Failure 404
-// @Failure 409
-// @Failure 500
-// @Router /studylog [post]
 func CreateStudyLog(c *fiber.Ctx) error {
 
 	// Data Parsing

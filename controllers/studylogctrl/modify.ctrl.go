@@ -217,5 +217,12 @@ func ModifyStudyLog(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(data)
+	return c.JSON(myStudyLogDTO{
+		ID:            studylogObj.ID.String(),
+		Content:       data.Content,
+		StartAt:       startAt.Format(time.RFC3339),
+		EndAt:         endAt.Format(time.RFC3339),
+		SubjectID:     subjectID.String(),
+		GroupsToShare: data.GroupsToShare,
+	})
 }
