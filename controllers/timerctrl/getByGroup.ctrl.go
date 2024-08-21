@@ -15,18 +15,6 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-// @Summary Get Timer by Group
-// @Tags Timer
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Param id path string true "Group ID"
-// @Success 200 {array} timerWithEdgeInfoDTO
-// @Failure 400
-// @Failure 403
-// @Failure 404
-// @Failure 500
-// @Router /timer/group/{id} [get]
 func GetTimerByGroup(c *fiber.Ctx) error {
 
 	groupIDStr := c.Params("id")

@@ -11,15 +11,6 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-// @Summary Delete the timer of the user
-// @Tags Timer
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Success 204
-// @Failure 404
-// @Failure 500
-// @Router /timer [delete]
 func DeleteTimer(c *fiber.Ctx) error {
 
 	userID := middlewares.GetUserIDFromMiddleware(c)

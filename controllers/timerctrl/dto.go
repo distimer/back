@@ -20,3 +20,9 @@ type timerWithEdgeInfoDTO struct {
 	StartAt     string                   `json:"start_at" validate:"required"`
 	Affiliation groupctrl.AffiliationDTO `json:"affiliation" validate:"required"`
 }
+
+type timerMetadataDTO struct {
+	SubjectID      string   `json:"subject_id" validate:"required,uuid"`
+	Content        string   `json:"content" validate:"required" example:"content between 0 and 30"`
+	SharedGroupIDs []string `json:"shared_group_ids" validate:"required"`
+}

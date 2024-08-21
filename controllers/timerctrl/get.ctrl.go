@@ -13,15 +13,6 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-// @Summary Get My Timer Info
-// @Tags Timer
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Success 200 {object} timerDTO
-// @Success 204
-// @Failure 500
-// @Router /timer [get]
 func GetMyTimerInfo(c *fiber.Ctx) error {
 	userID := middlewares.GetUserIDFromMiddleware(c)
 
