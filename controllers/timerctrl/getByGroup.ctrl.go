@@ -72,6 +72,18 @@ func GetTimerByGroup(c *fiber.Ctx) error {
 	result := make([]timerWithEdgeInfoDTO, len(timers))
 	for i, timer := range timers {
 
+		if time.Since(timer.StartAt) > time.Hour*24 {
+			// delete timer if it's older than 24 hours
+			err := dbConn.Timer.DeleteOne(timer).Exec(context.Background())
+			if err != nil {
+				logger.CtxError(c, err)
+				return c.Status(500).JSON(fiber.Map{
+					"error": "Internal server error",
+				})
+			}
+			continue
+		}
+
 		affiliationObj, err := timer.Edges.User.QueryAffiliations().Where(affiliation.GroupID(groupID)).Only(context.Background())
 		if err != nil {
 			logger.CtxError(c, err)

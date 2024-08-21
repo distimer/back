@@ -6,6 +6,7 @@ import (
 	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 	"pentag.kr/distimer/configs"
 	"pentag.kr/distimer/db"
@@ -48,6 +49,12 @@ func main() {
 	app := fiber.New(fiber.Config{
 		ProxyHeader: "CF-Connecting-IP",
 	})
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "*",
+		AllowMethods: "*",
+	}))
 
 	prometheus := fiberprometheus.New("distimer")
 	prometheus.RegisterAt(app, "/metrics")
