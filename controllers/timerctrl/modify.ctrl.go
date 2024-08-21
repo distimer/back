@@ -16,25 +16,8 @@ import (
 	"pentag.kr/distimer/utils/logger"
 )
 
-type modifyTimerDTO struct {
-	SubjectID      string   `json:"subject_id" validate:"required,uuid"`
-	Content        string   `json:"content" validate:"required" example:"content between 0 and 30"`
-	SharedGroupIDs []string `json:"shared_group_ids" validate:"required"`
-}
-
-// @Summary Modify Timer
-// @Tags Timer
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Param request body modifyTimerDTO true "modifyTimerDTO"
-// @Success 200 {object} timerDTO
-// @Failure 400
-// @Failure 404
-// @Failure 500
-// @Router /timer [put]
 func ModifyTimer(c *fiber.Ctx) error {
-	data := new(modifyTimerDTO)
+	data := new(timerMetadataDTO)
 	if err := dto.Bind(c, data); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err,
