@@ -10,7 +10,7 @@ COPY . .
 
 RUN go build -o main .
 
-FROM alpine:3.20
+FROM alpine/curl:8.9.0
 
 RUN apk --no-cache add tzdata && \
 	cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
@@ -24,5 +24,7 @@ RUN wget -q -t3 'https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.ke
     apk add doppler
 
 COPY --from=builder /app/main .
+
+HEALTHCHECK CMD curl --fail http://localhost:3000/ping
 
 CMD ["doppler", "run", "--", "./main"]
