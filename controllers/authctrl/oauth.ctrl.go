@@ -113,7 +113,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 	sessionObj, err := dbConn.Session.Create().
 		SetRefreshToken(newRefreshToken).
 		SetDeviceType(*data.DeviceType).
-		SetUserID(findUser.ID).
+		SetOwnerID(findUser.ID).
 		Save(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)
@@ -245,7 +245,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 	sessionObj, err := dbConn.Session.Create().
 		SetRefreshToken(newRefreshToken).
 		SetDeviceType(*data.DeviceType).
-		SetUserID(findUser.ID).
+		SetOwnerID(findUser.ID).
 		Save(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)

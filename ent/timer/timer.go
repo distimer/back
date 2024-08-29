@@ -35,7 +35,7 @@ const (
 	UserTable = "timers"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "apns_tokens"
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
 	// SubjectTable is the table that holds the subject relation/edge.

@@ -43,12 +43,12 @@ const (
 	MembersTable = "affiliations"
 	// MembersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	MembersInverseTable = "apns_tokens"
+	MembersInverseTable = "users"
 	// OwnerTable is the table that holds the owner relation/edge.
 	OwnerTable = "groups"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	OwnerInverseTable = "apns_tokens"
+	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "user_owned_groups"
 	// SharedStudyLogsTable is the table that holds the shared_study_logs relation/edge. The primary key declared below.

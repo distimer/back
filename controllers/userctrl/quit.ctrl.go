@@ -52,7 +52,7 @@ func QuitService(c *fiber.Ctx) error {
 
 	// session deletion
 
-	sessionList, err := dbConn.Session.Query().Where(session.HasUserWith(user.ID(userID))).All(context.Background())
+	sessionList, err := dbConn.Session.Query().Where(session.HasOwnerWith(user.ID(userID))).All(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{

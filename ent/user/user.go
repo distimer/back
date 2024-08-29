@@ -39,7 +39,7 @@ const (
 	// EdgeAffiliations holds the string denoting the affiliations edge name in mutations.
 	EdgeAffiliations = "affiliations"
 	// Table holds the table name of the user in the database.
-	Table = "apns_tokens"
+	Table = "users"
 	// JoinedGroupsTable is the table that holds the joined_groups relation/edge. The primary key declared below.
 	JoinedGroupsTable = "affiliations"
 	// JoinedGroupsInverseTable is the table name for the Group entity.

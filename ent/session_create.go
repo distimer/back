@@ -86,15 +86,15 @@ func (sc *SessionCreate) SetNillableID(u *uuid.UUID) *SessionCreate {
 	return sc
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (sc *SessionCreate) SetUserID(id uuid.UUID) *SessionCreate {
-	sc.mutation.SetUserID(id)
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (sc *SessionCreate) SetOwnerID(id uuid.UUID) *SessionCreate {
+	sc.mutation.SetOwnerID(id)
 	return sc
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (sc *SessionCreate) SetUser(u *User) *SessionCreate {
-	return sc.SetUserID(u.ID)
+// SetOwner sets the "owner" edge to the User entity.
+func (sc *SessionCreate) SetOwner(u *User) *SessionCreate {
+	return sc.SetOwnerID(u.ID)
 }
 
 // SetApnsTokenID sets the "apns_token" edge to the APNsToken entity by ID.
@@ -202,8 +202,8 @@ func (sc *SessionCreate) check() error {
 	if _, ok := sc.mutation.LastActive(); !ok {
 		return &ValidationError{Name: "last_active", err: errors.New(`ent: missing required field "Session.last_active"`)}
 	}
-	if _, ok := sc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Session.user"`)}
+	if _, ok := sc.mutation.OwnerID(); !ok {
+		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Session.owner"`)}
 	}
 	return nil
 }
@@ -256,12 +256,12 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_spec.SetField(session.FieldLastActive, field.TypeTime, value)
 		_node.LastActive = value
 	}
-	if nodes := sc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := sc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   session.OwnerTable,
+			Columns: []string{session.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),

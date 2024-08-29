@@ -4135,8 +4135,8 @@ type SessionMutation struct {
 	adddevice_type    *int8
 	last_active       *time.Time
 	clearedFields     map[string]struct{}
-	user              *uuid.UUID
-	cleareduser       bool
+	owner             *uuid.UUID
+	clearedowner      bool
 	apns_token        *int
 	clearedapns_token bool
 	fcm_token         *int
@@ -4414,43 +4414,43 @@ func (m *SessionMutation) ResetLastActive() {
 	m.last_active = nil
 }
 
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *SessionMutation) SetUserID(id uuid.UUID) {
-	m.user = &id
+// SetOwnerID sets the "owner" edge to the User entity by id.
+func (m *SessionMutation) SetOwnerID(id uuid.UUID) {
+	m.owner = &id
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (m *SessionMutation) ClearUser() {
-	m.cleareduser = true
+// ClearOwner clears the "owner" edge to the User entity.
+func (m *SessionMutation) ClearOwner() {
+	m.clearedowner = true
 }
 
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *SessionMutation) UserCleared() bool {
-	return m.cleareduser
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
+func (m *SessionMutation) OwnerCleared() bool {
+	return m.clearedowner
 }
 
-// UserID returns the "user" edge ID in the mutation.
-func (m *SessionMutation) UserID() (id uuid.UUID, exists bool) {
-	if m.user != nil {
-		return *m.user, true
+// OwnerID returns the "owner" edge ID in the mutation.
+func (m *SessionMutation) OwnerID() (id uuid.UUID, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
 	}
 	return
 }
 
-// UserIDs returns the "user" edge IDs in the mutation.
+// OwnerIDs returns the "owner" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *SessionMutation) UserIDs() (ids []uuid.UUID) {
-	if id := m.user; id != nil {
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *SessionMutation) OwnerIDs() (ids []uuid.UUID) {
+	if id := m.owner; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetUser resets all changes to the "user" edge.
-func (m *SessionMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
+// ResetOwner resets all changes to the "owner" edge.
+func (m *SessionMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
 }
 
 // SetApnsTokenID sets the "apns_token" edge to the APNsToken entity by id.
@@ -4731,8 +4731,8 @@ func (m *SessionMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SessionMutation) AddedEdges() []string {
 	edges := make([]string, 0, 3)
-	if m.user != nil {
-		edges = append(edges, session.EdgeUser)
+	if m.owner != nil {
+		edges = append(edges, session.EdgeOwner)
 	}
 	if m.apns_token != nil {
 		edges = append(edges, session.EdgeApnsToken)
@@ -4747,8 +4747,8 @@ func (m *SessionMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *SessionMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case session.EdgeUser:
-		if id := m.user; id != nil {
+	case session.EdgeOwner:
+		if id := m.owner; id != nil {
 			return []ent.Value{*id}
 		}
 	case session.EdgeApnsToken:
@@ -4778,8 +4778,8 @@ func (m *SessionMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SessionMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 3)
-	if m.cleareduser {
-		edges = append(edges, session.EdgeUser)
+	if m.clearedowner {
+		edges = append(edges, session.EdgeOwner)
 	}
 	if m.clearedapns_token {
 		edges = append(edges, session.EdgeApnsToken)
@@ -4794,8 +4794,8 @@ func (m *SessionMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *SessionMutation) EdgeCleared(name string) bool {
 	switch name {
-	case session.EdgeUser:
-		return m.cleareduser
+	case session.EdgeOwner:
+		return m.clearedowner
 	case session.EdgeApnsToken:
 		return m.clearedapns_token
 	case session.EdgeFcmToken:
@@ -4808,8 +4808,8 @@ func (m *SessionMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *SessionMutation) ClearEdge(name string) error {
 	switch name {
-	case session.EdgeUser:
-		m.ClearUser()
+	case session.EdgeOwner:
+		m.ClearOwner()
 		return nil
 	case session.EdgeApnsToken:
 		m.ClearApnsToken()
@@ -4825,8 +4825,8 @@ func (m *SessionMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SessionMutation) ResetEdge(name string) error {
 	switch name {
-	case session.EdgeUser:
-		m.ResetUser()
+	case session.EdgeOwner:
+		m.ResetOwner()
 		return nil
 	case session.EdgeApnsToken:
 		m.ResetApnsToken()

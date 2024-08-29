@@ -23,21 +23,21 @@ const (
 	FieldDeviceType = "device_type"
 	// FieldLastActive holds the string denoting the last_active field in the database.
 	FieldLastActive = "last_active"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 	// EdgeApnsToken holds the string denoting the apns_token edge name in mutations.
 	EdgeApnsToken = "apns_token"
 	// EdgeFcmToken holds the string denoting the fcm_token edge name in mutations.
 	EdgeFcmToken = "fcm_token"
 	// Table holds the table name of the session in the database.
 	Table = "sessions"
-	// UserTable is the table that holds the user relation/edge.
-	UserTable = "sessions"
-	// UserInverseTable is the table name for the User entity.
+	// OwnerTable is the table that holds the owner relation/edge.
+	OwnerTable = "sessions"
+	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "apns_tokens"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_sessions"
+	OwnerInverseTable = "users"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "user_sessions"
 	// ApnsTokenTable is the table that holds the apns_token relation/edge.
 	ApnsTokenTable = "ap_ns_tokens"
 	// ApnsTokenInverseTable is the table name for the APNsToken entity.
@@ -123,10 +123,10 @@ func ByLastActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastActive, opts...).ToFunc()
 }
 
-// ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByOwnerField orders the results by owner field.
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -143,11 +143,11 @@ func ByFcmTokenField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newFcmTokenStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newUserStep() *sqlgraph.Step {
+func newOwnerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		sqlgraph.To(OwnerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
 	)
 }
 func newApnsTokenStep() *sqlgraph.Step {

@@ -36,7 +36,7 @@ func Refresh(c *fiber.Ctx) error {
 		})
 	}
 
-	owner, err := sessionObj.QueryUser().Only(context.Background())
+	owner, err := sessionObj.QueryOwner().Only(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{

@@ -60,15 +60,15 @@ func (su *SessionUpdate) SetNillableLastActive(t *time.Time) *SessionUpdate {
 	return su
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (su *SessionUpdate) SetUserID(id uuid.UUID) *SessionUpdate {
-	su.mutation.SetUserID(id)
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (su *SessionUpdate) SetOwnerID(id uuid.UUID) *SessionUpdate {
+	su.mutation.SetOwnerID(id)
 	return su
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (su *SessionUpdate) SetUser(u *User) *SessionUpdate {
-	return su.SetUserID(u.ID)
+// SetOwner sets the "owner" edge to the User entity.
+func (su *SessionUpdate) SetOwner(u *User) *SessionUpdate {
+	return su.SetOwnerID(u.ID)
 }
 
 // SetApnsTokenID sets the "apns_token" edge to the APNsToken entity by ID.
@@ -114,9 +114,9 @@ func (su *SessionUpdate) Mutation() *SessionMutation {
 	return su.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (su *SessionUpdate) ClearUser() *SessionUpdate {
-	su.mutation.ClearUser()
+// ClearOwner clears the "owner" edge to the User entity.
+func (su *SessionUpdate) ClearOwner() *SessionUpdate {
+	su.mutation.ClearOwner()
 	return su
 }
 
@@ -161,8 +161,8 @@ func (su *SessionUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (su *SessionUpdate) check() error {
-	if _, ok := su.mutation.UserID(); su.mutation.UserCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Session.user"`)
+	if _, ok := su.mutation.OwnerID(); su.mutation.OwnerCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Session.owner"`)
 	}
 	return nil
 }
@@ -185,12 +185,12 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := su.mutation.LastActive(); ok {
 		_spec.SetField(session.FieldLastActive, field.TypeTime, value)
 	}
-	if su.mutation.UserCleared() {
+	if su.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   session.OwnerTable,
+			Columns: []string{session.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -198,12 +198,12 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := su.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := su.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   session.OwnerTable,
+			Columns: []string{session.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -320,15 +320,15 @@ func (suo *SessionUpdateOne) SetNillableLastActive(t *time.Time) *SessionUpdateO
 	return suo
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (suo *SessionUpdateOne) SetUserID(id uuid.UUID) *SessionUpdateOne {
-	suo.mutation.SetUserID(id)
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (suo *SessionUpdateOne) SetOwnerID(id uuid.UUID) *SessionUpdateOne {
+	suo.mutation.SetOwnerID(id)
 	return suo
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (suo *SessionUpdateOne) SetUser(u *User) *SessionUpdateOne {
-	return suo.SetUserID(u.ID)
+// SetOwner sets the "owner" edge to the User entity.
+func (suo *SessionUpdateOne) SetOwner(u *User) *SessionUpdateOne {
+	return suo.SetOwnerID(u.ID)
 }
 
 // SetApnsTokenID sets the "apns_token" edge to the APNsToken entity by ID.
@@ -374,9 +374,9 @@ func (suo *SessionUpdateOne) Mutation() *SessionMutation {
 	return suo.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (suo *SessionUpdateOne) ClearUser() *SessionUpdateOne {
-	suo.mutation.ClearUser()
+// ClearOwner clears the "owner" edge to the User entity.
+func (suo *SessionUpdateOne) ClearOwner() *SessionUpdateOne {
+	suo.mutation.ClearOwner()
 	return suo
 }
 
@@ -434,8 +434,8 @@ func (suo *SessionUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (suo *SessionUpdateOne) check() error {
-	if _, ok := suo.mutation.UserID(); suo.mutation.UserCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Session.user"`)
+	if _, ok := suo.mutation.OwnerID(); suo.mutation.OwnerCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Session.owner"`)
 	}
 	return nil
 }
@@ -475,12 +475,12 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 	if value, ok := suo.mutation.LastActive(); ok {
 		_spec.SetField(session.FieldLastActive, field.TypeTime, value)
 	}
-	if suo.mutation.UserCleared() {
+	if suo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   session.OwnerTable,
+			Columns: []string{session.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -488,12 +488,12 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := suo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := suo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   session.OwnerTable,
+			Columns: []string{session.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
