@@ -17,7 +17,7 @@ type pushUpdateTokenDTO struct {
 	UpdateToken string `json:"update_token" validate:"required"`
 }
 
-func UpdateTokenUpsert(c *fiber.Ctx) error {
+func UpserUpdateToken(c *fiber.Ctx) error {
 	data := new(pushUpdateTokenDTO)
 	if err := dto.Bind(c, data); err != nil {
 		return c.Status(400).JSON(fiber.Map{
