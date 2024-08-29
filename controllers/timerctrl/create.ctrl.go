@@ -7,12 +7,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"pentag.kr/distimer/db"
+	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/dto"
 	"pentag.kr/distimer/utils/logger"
+	"pentag.kr/distimer/utils/notify"
 )
 
 func CreateTimer(c *fiber.Ctx) error {
@@ -29,15 +31,16 @@ func CreateTimer(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 
-	subjectExist, err := dbConn.Subject.Query().Where(subject.ID(subjectID)).Exist(context.Background())
+	subjectObj, err := dbConn.Subject.Query().Where(subject.ID(subjectID)).Only(context.Background())
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return c.Status(404).JSON(fiber.Map{
+				"error": "Subject not found",
+			})
+		}
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
-		})
-	} else if !subjectExist {
-		return c.Status(404).JSON(fiber.Map{
-			"error": "Subject not found",
 		})
 	}
 
@@ -77,10 +80,17 @@ func CreateTimer(c *fiber.Ctx) error {
 		sharedGroupIDs = append(sharedGroupIDs, groupID)
 	}
 
+	userObj, err := dbConn.User.Get(context.Background(), userID)
+	if err != nil {
+		logger.CtxError(c, err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
 	timer, err := dbConn.Timer.Create().
 		SetContent(data.Content).
-		SetSubjectID(subjectID).
-		SetUserID(userID).
+		SetSubject(subjectObj).
+		SetUser(userObj).
 		AddSharedGroupIDs(sharedGroupIDs...).
 		Save(context.Background())
 	if err != nil {
@@ -89,6 +99,7 @@ func CreateTimer(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
+	go notify.SendTimerCreate(userID.String(), timer, subjectObj)
 	return c.JSON(
 		timerDTO{
 			ID:             timer.ID.String(),

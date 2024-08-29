@@ -32,14 +32,14 @@ const (
 	EdgeStudyLogs = "study_logs"
 	// EdgeTimers holds the string denoting the timers edge name in mutations.
 	EdgeTimers = "timers"
-	// EdgeRefreshTokens holds the string denoting the refresh_tokens edge name in mutations.
-	EdgeRefreshTokens = "refresh_tokens"
+	// EdgeSessions holds the string denoting the sessions edge name in mutations.
+	EdgeSessions = "sessions"
 	// EdgeOwnedCategories holds the string denoting the owned_categories edge name in mutations.
 	EdgeOwnedCategories = "owned_categories"
 	// EdgeAffiliations holds the string denoting the affiliations edge name in mutations.
 	EdgeAffiliations = "affiliations"
 	// Table holds the table name of the user in the database.
-	Table = "users"
+	Table = "apns_tokens"
 	// JoinedGroupsTable is the table that holds the joined_groups relation/edge. The primary key declared below.
 	JoinedGroupsTable = "affiliations"
 	// JoinedGroupsInverseTable is the table name for the Group entity.
@@ -66,13 +66,13 @@ const (
 	TimersInverseTable = "timers"
 	// TimersColumn is the table column denoting the timers relation/edge.
 	TimersColumn = "user_id"
-	// RefreshTokensTable is the table that holds the refresh_tokens relation/edge.
-	RefreshTokensTable = "refresh_tokens"
-	// RefreshTokensInverseTable is the table name for the RefreshToken entity.
-	// It exists in this package in order to avoid circular dependency with the "refreshtoken" package.
-	RefreshTokensInverseTable = "refresh_tokens"
-	// RefreshTokensColumn is the table column denoting the refresh_tokens relation/edge.
-	RefreshTokensColumn = "user_refresh_tokens"
+	// SessionsTable is the table that holds the sessions relation/edge.
+	SessionsTable = "sessions"
+	// SessionsInverseTable is the table name for the Session entity.
+	// It exists in this package in order to avoid circular dependency with the "session" package.
+	SessionsInverseTable = "sessions"
+	// SessionsColumn is the table column denoting the sessions relation/edge.
+	SessionsColumn = "user_sessions"
 	// OwnedCategoriesTable is the table that holds the owned_categories relation/edge.
 	OwnedCategoriesTable = "categories"
 	// OwnedCategoriesInverseTable is the table name for the Category entity.
@@ -206,17 +206,17 @@ func ByTimersField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByRefreshTokensCount orders the results by refresh_tokens count.
-func ByRefreshTokensCount(opts ...sql.OrderTermOption) OrderOption {
+// BySessionsCount orders the results by sessions count.
+func BySessionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newRefreshTokensStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newSessionsStep(), opts...)
 	}
 }
 
-// ByRefreshTokens orders the results by refresh_tokens terms.
-func ByRefreshTokens(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// BySessions orders the results by sessions terms.
+func BySessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRefreshTokensStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -275,11 +275,11 @@ func newTimersStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2O, false, TimersTable, TimersColumn),
 	)
 }
-func newRefreshTokensStep() *sqlgraph.Step {
+func newSessionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RefreshTokensInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, RefreshTokensTable, RefreshTokensColumn),
+		sqlgraph.To(SessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
 	)
 }
 func newOwnedCategoriesStep() *sqlgraph.Step {

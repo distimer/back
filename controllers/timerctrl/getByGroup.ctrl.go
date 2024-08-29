@@ -13,6 +13,7 @@ import (
 	"pentag.kr/distimer/ent/affiliation"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/logger"
+	"pentag.kr/distimer/utils/notify"
 )
 
 func GetTimerByGroup(c *fiber.Ctx) error {
@@ -63,6 +64,7 @@ func GetTimerByGroup(c *fiber.Ctx) error {
 		if time.Since(timer.StartAt) > time.Hour*24 {
 			// delete timer if it's older than 24 hours
 			err := dbConn.Timer.DeleteOne(timer).Exec(context.Background())
+			go notify.SendTimerDelete(timer.Edges.User.ID.String())
 			if err != nil {
 				logger.CtxError(c, err)
 				return c.Status(500).JSON(fiber.Map{

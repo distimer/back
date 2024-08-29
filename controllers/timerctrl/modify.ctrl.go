@@ -14,6 +14,7 @@ import (
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/dto"
 	"pentag.kr/distimer/utils/logger"
+	"pentag.kr/distimer/utils/notify"
 )
 
 func ModifyTimer(c *fiber.Ctx) error {
@@ -34,15 +35,16 @@ func ModifyTimer(c *fiber.Ctx) error {
 
 	dbConn := db.GetDBClient()
 
-	subjectExist, err := dbConn.Subject.Query().Where(subject.ID(subjectID)).Exist(context.Background())
+	subjectObj, err := dbConn.Subject.Query().Where(subject.ID(subjectID)).Only(context.Background())
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return c.Status(404).JSON(fiber.Map{
+				"error": "Subject not found",
+			})
+		}
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
-		})
-	} else if !subjectExist {
-		return c.Status(404).JSON(fiber.Map{
-			"error": "Subject not found",
 		})
 	}
 
@@ -86,7 +88,7 @@ func ModifyTimer(c *fiber.Ctx) error {
 	timerObj, err = timerObj.Update().
 		Where(timer.UserID(userID)).
 		SetContent(data.Content).
-		SetSubjectID(subjectID).
+		SetSubject(subjectObj).
 		ClearSharedGroup().
 		AddSharedGroupIDs(sharedGroupIDs...).
 		Save(context.Background())
@@ -96,6 +98,7 @@ func ModifyTimer(c *fiber.Ctx) error {
 			"error": "Internal server error",
 		})
 	}
+	go notify.SendTimerUpdate(userID.String(), timerObj, subjectObj)
 	return c.JSON(timerDTO{
 		ID:             timerObj.ID.String(),
 		SubjectID:      data.SubjectID,

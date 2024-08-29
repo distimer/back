@@ -17,11 +17,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"pentag.kr/distimer/ent/affiliation"
+	"pentag.kr/distimer/ent/apnstoken"
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/deleteduser"
+	"pentag.kr/distimer/ent/fcmtoken"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
-	"pentag.kr/distimer/ent/refreshtoken"
+	"pentag.kr/distimer/ent/session"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/timer"
@@ -33,18 +35,22 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// APNsToken is the client for interacting with the APNsToken builders.
+	APNsToken *APNsTokenClient
 	// Affiliation is the client for interacting with the Affiliation builders.
 	Affiliation *AffiliationClient
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
 	// DeletedUser is the client for interacting with the DeletedUser builders.
 	DeletedUser *DeletedUserClient
+	// FCMToken is the client for interacting with the FCMToken builders.
+	FCMToken *FCMTokenClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// InviteCode is the client for interacting with the InviteCode builders.
 	InviteCode *InviteCodeClient
-	// RefreshToken is the client for interacting with the RefreshToken builders.
-	RefreshToken *RefreshTokenClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// StudyLog is the client for interacting with the StudyLog builders.
 	StudyLog *StudyLogClient
 	// Subject is the client for interacting with the Subject builders.
@@ -64,12 +70,14 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.APNsToken = NewAPNsTokenClient(c.config)
 	c.Affiliation = NewAffiliationClient(c.config)
 	c.Category = NewCategoryClient(c.config)
 	c.DeletedUser = NewDeletedUserClient(c.config)
+	c.FCMToken = NewFCMTokenClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.InviteCode = NewInviteCodeClient(c.config)
-	c.RefreshToken = NewRefreshTokenClient(c.config)
+	c.Session = NewSessionClient(c.config)
 	c.StudyLog = NewStudyLogClient(c.config)
 	c.Subject = NewSubjectClient(c.config)
 	c.Timer = NewTimerClient(c.config)
@@ -164,18 +172,20 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Affiliation:  NewAffiliationClient(cfg),
-		Category:     NewCategoryClient(cfg),
-		DeletedUser:  NewDeletedUserClient(cfg),
-		Group:        NewGroupClient(cfg),
-		InviteCode:   NewInviteCodeClient(cfg),
-		RefreshToken: NewRefreshTokenClient(cfg),
-		StudyLog:     NewStudyLogClient(cfg),
-		Subject:      NewSubjectClient(cfg),
-		Timer:        NewTimerClient(cfg),
-		User:         NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		APNsToken:   NewAPNsTokenClient(cfg),
+		Affiliation: NewAffiliationClient(cfg),
+		Category:    NewCategoryClient(cfg),
+		DeletedUser: NewDeletedUserClient(cfg),
+		FCMToken:    NewFCMTokenClient(cfg),
+		Group:       NewGroupClient(cfg),
+		InviteCode:  NewInviteCodeClient(cfg),
+		Session:     NewSessionClient(cfg),
+		StudyLog:    NewStudyLogClient(cfg),
+		Subject:     NewSubjectClient(cfg),
+		Timer:       NewTimerClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
@@ -193,25 +203,27 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Affiliation:  NewAffiliationClient(cfg),
-		Category:     NewCategoryClient(cfg),
-		DeletedUser:  NewDeletedUserClient(cfg),
-		Group:        NewGroupClient(cfg),
-		InviteCode:   NewInviteCodeClient(cfg),
-		RefreshToken: NewRefreshTokenClient(cfg),
-		StudyLog:     NewStudyLogClient(cfg),
-		Subject:      NewSubjectClient(cfg),
-		Timer:        NewTimerClient(cfg),
-		User:         NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		APNsToken:   NewAPNsTokenClient(cfg),
+		Affiliation: NewAffiliationClient(cfg),
+		Category:    NewCategoryClient(cfg),
+		DeletedUser: NewDeletedUserClient(cfg),
+		FCMToken:    NewFCMTokenClient(cfg),
+		Group:       NewGroupClient(cfg),
+		InviteCode:  NewInviteCodeClient(cfg),
+		Session:     NewSessionClient(cfg),
+		StudyLog:    NewStudyLogClient(cfg),
+		Subject:     NewSubjectClient(cfg),
+		Timer:       NewTimerClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Affiliation.
+//		APNsToken.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -234,8 +246,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Affiliation, c.Category, c.DeletedUser, c.Group, c.InviteCode, c.RefreshToken,
-		c.StudyLog, c.Subject, c.Timer, c.User,
+		c.APNsToken, c.Affiliation, c.Category, c.DeletedUser, c.FCMToken, c.Group,
+		c.InviteCode, c.Session, c.StudyLog, c.Subject, c.Timer, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -245,8 +257,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Affiliation, c.Category, c.DeletedUser, c.Group, c.InviteCode, c.RefreshToken,
-		c.StudyLog, c.Subject, c.Timer, c.User,
+		c.APNsToken, c.Affiliation, c.Category, c.DeletedUser, c.FCMToken, c.Group,
+		c.InviteCode, c.Session, c.StudyLog, c.Subject, c.Timer, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -255,18 +267,22 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *APNsTokenMutation:
+		return c.APNsToken.mutate(ctx, m)
 	case *AffiliationMutation:
 		return c.Affiliation.mutate(ctx, m)
 	case *CategoryMutation:
 		return c.Category.mutate(ctx, m)
 	case *DeletedUserMutation:
 		return c.DeletedUser.mutate(ctx, m)
+	case *FCMTokenMutation:
+		return c.FCMToken.mutate(ctx, m)
 	case *GroupMutation:
 		return c.Group.mutate(ctx, m)
 	case *InviteCodeMutation:
 		return c.InviteCode.mutate(ctx, m)
-	case *RefreshTokenMutation:
-		return c.RefreshToken.mutate(ctx, m)
+	case *SessionMutation:
+		return c.Session.mutate(ctx, m)
 	case *StudyLogMutation:
 		return c.StudyLog.mutate(ctx, m)
 	case *SubjectMutation:
@@ -277,6 +293,155 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// APNsTokenClient is a client for the APNsToken schema.
+type APNsTokenClient struct {
+	config
+}
+
+// NewAPNsTokenClient returns a client for the APNsToken from the given config.
+func NewAPNsTokenClient(c config) *APNsTokenClient {
+	return &APNsTokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `apnstoken.Hooks(f(g(h())))`.
+func (c *APNsTokenClient) Use(hooks ...Hook) {
+	c.hooks.APNsToken = append(c.hooks.APNsToken, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `apnstoken.Intercept(f(g(h())))`.
+func (c *APNsTokenClient) Intercept(interceptors ...Interceptor) {
+	c.inters.APNsToken = append(c.inters.APNsToken, interceptors...)
+}
+
+// Create returns a builder for creating a APNsToken entity.
+func (c *APNsTokenClient) Create() *APNsTokenCreate {
+	mutation := newAPNsTokenMutation(c.config, OpCreate)
+	return &APNsTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of APNsToken entities.
+func (c *APNsTokenClient) CreateBulk(builders ...*APNsTokenCreate) *APNsTokenCreateBulk {
+	return &APNsTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *APNsTokenClient) MapCreateBulk(slice any, setFunc func(*APNsTokenCreate, int)) *APNsTokenCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &APNsTokenCreateBulk{err: fmt.Errorf("calling to APNsTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*APNsTokenCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &APNsTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for APNsToken.
+func (c *APNsTokenClient) Update() *APNsTokenUpdate {
+	mutation := newAPNsTokenMutation(c.config, OpUpdate)
+	return &APNsTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *APNsTokenClient) UpdateOne(ant *APNsToken) *APNsTokenUpdateOne {
+	mutation := newAPNsTokenMutation(c.config, OpUpdateOne, withAPNsToken(ant))
+	return &APNsTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *APNsTokenClient) UpdateOneID(id int) *APNsTokenUpdateOne {
+	mutation := newAPNsTokenMutation(c.config, OpUpdateOne, withAPNsTokenID(id))
+	return &APNsTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for APNsToken.
+func (c *APNsTokenClient) Delete() *APNsTokenDelete {
+	mutation := newAPNsTokenMutation(c.config, OpDelete)
+	return &APNsTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *APNsTokenClient) DeleteOne(ant *APNsToken) *APNsTokenDeleteOne {
+	return c.DeleteOneID(ant.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *APNsTokenClient) DeleteOneID(id int) *APNsTokenDeleteOne {
+	builder := c.Delete().Where(apnstoken.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &APNsTokenDeleteOne{builder}
+}
+
+// Query returns a query builder for APNsToken.
+func (c *APNsTokenClient) Query() *APNsTokenQuery {
+	return &APNsTokenQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAPNsToken},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a APNsToken entity by its id.
+func (c *APNsTokenClient) Get(ctx context.Context, id int) (*APNsToken, error) {
+	return c.Query().Where(apnstoken.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *APNsTokenClient) GetX(ctx context.Context, id int) *APNsToken {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySession queries the session edge of a APNsToken.
+func (c *APNsTokenClient) QuerySession(ant *APNsToken) *SessionQuery {
+	query := (&SessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ant.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(apnstoken.Table, apnstoken.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, apnstoken.SessionTable, apnstoken.SessionColumn),
+		)
+		fromV = sqlgraph.Neighbors(ant.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *APNsTokenClient) Hooks() []Hook {
+	return c.hooks.APNsToken
+}
+
+// Interceptors returns the client interceptors.
+func (c *APNsTokenClient) Interceptors() []Interceptor {
+	return c.inters.APNsToken
+}
+
+func (c *APNsTokenClient) mutate(ctx context.Context, m *APNsTokenMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&APNsTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&APNsTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&APNsTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&APNsTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown APNsToken mutation op: %q", m.Op())
 	}
 }
 
@@ -694,6 +859,155 @@ func (c *DeletedUserClient) mutate(ctx context.Context, m *DeletedUserMutation) 
 	}
 }
 
+// FCMTokenClient is a client for the FCMToken schema.
+type FCMTokenClient struct {
+	config
+}
+
+// NewFCMTokenClient returns a client for the FCMToken from the given config.
+func NewFCMTokenClient(c config) *FCMTokenClient {
+	return &FCMTokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `fcmtoken.Hooks(f(g(h())))`.
+func (c *FCMTokenClient) Use(hooks ...Hook) {
+	c.hooks.FCMToken = append(c.hooks.FCMToken, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `fcmtoken.Intercept(f(g(h())))`.
+func (c *FCMTokenClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FCMToken = append(c.inters.FCMToken, interceptors...)
+}
+
+// Create returns a builder for creating a FCMToken entity.
+func (c *FCMTokenClient) Create() *FCMTokenCreate {
+	mutation := newFCMTokenMutation(c.config, OpCreate)
+	return &FCMTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FCMToken entities.
+func (c *FCMTokenClient) CreateBulk(builders ...*FCMTokenCreate) *FCMTokenCreateBulk {
+	return &FCMTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FCMTokenClient) MapCreateBulk(slice any, setFunc func(*FCMTokenCreate, int)) *FCMTokenCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FCMTokenCreateBulk{err: fmt.Errorf("calling to FCMTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FCMTokenCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FCMTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FCMToken.
+func (c *FCMTokenClient) Update() *FCMTokenUpdate {
+	mutation := newFCMTokenMutation(c.config, OpUpdate)
+	return &FCMTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FCMTokenClient) UpdateOne(ft *FCMToken) *FCMTokenUpdateOne {
+	mutation := newFCMTokenMutation(c.config, OpUpdateOne, withFCMToken(ft))
+	return &FCMTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FCMTokenClient) UpdateOneID(id int) *FCMTokenUpdateOne {
+	mutation := newFCMTokenMutation(c.config, OpUpdateOne, withFCMTokenID(id))
+	return &FCMTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FCMToken.
+func (c *FCMTokenClient) Delete() *FCMTokenDelete {
+	mutation := newFCMTokenMutation(c.config, OpDelete)
+	return &FCMTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FCMTokenClient) DeleteOne(ft *FCMToken) *FCMTokenDeleteOne {
+	return c.DeleteOneID(ft.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FCMTokenClient) DeleteOneID(id int) *FCMTokenDeleteOne {
+	builder := c.Delete().Where(fcmtoken.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FCMTokenDeleteOne{builder}
+}
+
+// Query returns a query builder for FCMToken.
+func (c *FCMTokenClient) Query() *FCMTokenQuery {
+	return &FCMTokenQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFCMToken},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FCMToken entity by its id.
+func (c *FCMTokenClient) Get(ctx context.Context, id int) (*FCMToken, error) {
+	return c.Query().Where(fcmtoken.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FCMTokenClient) GetX(ctx context.Context, id int) *FCMToken {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySession queries the session edge of a FCMToken.
+func (c *FCMTokenClient) QuerySession(ft *FCMToken) *SessionQuery {
+	query := (&SessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ft.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fcmtoken.Table, fcmtoken.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, fcmtoken.SessionTable, fcmtoken.SessionColumn),
+		)
+		fromV = sqlgraph.Neighbors(ft.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FCMTokenClient) Hooks() []Hook {
+	return c.hooks.FCMToken
+}
+
+// Interceptors returns the client interceptors.
+func (c *FCMTokenClient) Interceptors() []Interceptor {
+	return c.inters.FCMToken
+}
+
+func (c *FCMTokenClient) mutate(ctx context.Context, m *FCMTokenMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FCMTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FCMTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FCMTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FCMTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FCMToken mutation op: %q", m.Op())
+	}
+}
+
 // GroupClient is a client for the Group schema.
 type GroupClient struct {
 	config
@@ -1056,107 +1370,107 @@ func (c *InviteCodeClient) mutate(ctx context.Context, m *InviteCodeMutation) (V
 	}
 }
 
-// RefreshTokenClient is a client for the RefreshToken schema.
-type RefreshTokenClient struct {
+// SessionClient is a client for the Session schema.
+type SessionClient struct {
 	config
 }
 
-// NewRefreshTokenClient returns a client for the RefreshToken from the given config.
-func NewRefreshTokenClient(c config) *RefreshTokenClient {
-	return &RefreshTokenClient{config: c}
+// NewSessionClient returns a client for the Session from the given config.
+func NewSessionClient(c config) *SessionClient {
+	return &SessionClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `refreshtoken.Hooks(f(g(h())))`.
-func (c *RefreshTokenClient) Use(hooks ...Hook) {
-	c.hooks.RefreshToken = append(c.hooks.RefreshToken, hooks...)
+// A call to `Use(f, g, h)` equals to `session.Hooks(f(g(h())))`.
+func (c *SessionClient) Use(hooks ...Hook) {
+	c.hooks.Session = append(c.hooks.Session, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `refreshtoken.Intercept(f(g(h())))`.
-func (c *RefreshTokenClient) Intercept(interceptors ...Interceptor) {
-	c.inters.RefreshToken = append(c.inters.RefreshToken, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `session.Intercept(f(g(h())))`.
+func (c *SessionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Session = append(c.inters.Session, interceptors...)
 }
 
-// Create returns a builder for creating a RefreshToken entity.
-func (c *RefreshTokenClient) Create() *RefreshTokenCreate {
-	mutation := newRefreshTokenMutation(c.config, OpCreate)
-	return &RefreshTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Session entity.
+func (c *SessionClient) Create() *SessionCreate {
+	mutation := newSessionMutation(c.config, OpCreate)
+	return &SessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of RefreshToken entities.
-func (c *RefreshTokenClient) CreateBulk(builders ...*RefreshTokenCreate) *RefreshTokenCreateBulk {
-	return &RefreshTokenCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Session entities.
+func (c *SessionClient) CreateBulk(builders ...*SessionCreate) *SessionCreateBulk {
+	return &SessionCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *RefreshTokenClient) MapCreateBulk(slice any, setFunc func(*RefreshTokenCreate, int)) *RefreshTokenCreateBulk {
+func (c *SessionClient) MapCreateBulk(slice any, setFunc func(*SessionCreate, int)) *SessionCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &RefreshTokenCreateBulk{err: fmt.Errorf("calling to RefreshTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &SessionCreateBulk{err: fmt.Errorf("calling to SessionClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*RefreshTokenCreate, rv.Len())
+	builders := make([]*SessionCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &RefreshTokenCreateBulk{config: c.config, builders: builders}
+	return &SessionCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for RefreshToken.
-func (c *RefreshTokenClient) Update() *RefreshTokenUpdate {
-	mutation := newRefreshTokenMutation(c.config, OpUpdate)
-	return &RefreshTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Session.
+func (c *SessionClient) Update() *SessionUpdate {
+	mutation := newSessionMutation(c.config, OpUpdate)
+	return &SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *RefreshTokenClient) UpdateOne(rt *RefreshToken) *RefreshTokenUpdateOne {
-	mutation := newRefreshTokenMutation(c.config, OpUpdateOne, withRefreshToken(rt))
-	return &RefreshTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *SessionClient) UpdateOne(s *Session) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(s))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RefreshTokenClient) UpdateOneID(id uuid.UUID) *RefreshTokenUpdateOne {
-	mutation := newRefreshTokenMutation(c.config, OpUpdateOne, withRefreshTokenID(id))
-	return &RefreshTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *SessionClient) UpdateOneID(id uuid.UUID) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for RefreshToken.
-func (c *RefreshTokenClient) Delete() *RefreshTokenDelete {
-	mutation := newRefreshTokenMutation(c.config, OpDelete)
-	return &RefreshTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Session.
+func (c *SessionClient) Delete() *SessionDelete {
+	mutation := newSessionMutation(c.config, OpDelete)
+	return &SessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *RefreshTokenClient) DeleteOne(rt *RefreshToken) *RefreshTokenDeleteOne {
-	return c.DeleteOneID(rt.ID)
+func (c *SessionClient) DeleteOne(s *Session) *SessionDeleteOne {
+	return c.DeleteOneID(s.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RefreshTokenClient) DeleteOneID(id uuid.UUID) *RefreshTokenDeleteOne {
-	builder := c.Delete().Where(refreshtoken.ID(id))
+func (c *SessionClient) DeleteOneID(id uuid.UUID) *SessionDeleteOne {
+	builder := c.Delete().Where(session.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &RefreshTokenDeleteOne{builder}
+	return &SessionDeleteOne{builder}
 }
 
-// Query returns a query builder for RefreshToken.
-func (c *RefreshTokenClient) Query() *RefreshTokenQuery {
-	return &RefreshTokenQuery{
+// Query returns a query builder for Session.
+func (c *SessionClient) Query() *SessionQuery {
+	return &SessionQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeRefreshToken},
+		ctx:    &QueryContext{Type: TypeSession},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a RefreshToken entity by its id.
-func (c *RefreshTokenClient) Get(ctx context.Context, id uuid.UUID) (*RefreshToken, error) {
-	return c.Query().Where(refreshtoken.ID(id)).Only(ctx)
+// Get returns a Session entity by its id.
+func (c *SessionClient) Get(ctx context.Context, id uuid.UUID) (*Session, error) {
+	return c.Query().Where(session.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RefreshTokenClient) GetX(ctx context.Context, id uuid.UUID) *RefreshToken {
+func (c *SessionClient) GetX(ctx context.Context, id uuid.UUID) *Session {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1164,44 +1478,76 @@ func (c *RefreshTokenClient) GetX(ctx context.Context, id uuid.UUID) *RefreshTok
 	return obj
 }
 
-// QueryUser queries the user edge of a RefreshToken.
-func (c *RefreshTokenClient) QueryUser(rt *RefreshToken) *UserQuery {
+// QueryUser queries the user edge of a Session.
+func (c *SessionClient) QueryUser(s *Session) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := rt.ID
+		id := s.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(refreshtoken.Table, refreshtoken.FieldID, id),
+			sqlgraph.From(session.Table, session.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, refreshtoken.UserTable, refreshtoken.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
 		)
-		fromV = sqlgraph.Neighbors(rt.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryApnsToken queries the apns_token edge of a Session.
+func (c *SessionClient) QueryApnsToken(s *Session) *APNsTokenQuery {
+	query := (&APNsTokenClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(apnstoken.Table, apnstoken.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, session.ApnsTokenTable, session.ApnsTokenColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFcmToken queries the fcm_token edge of a Session.
+func (c *SessionClient) QueryFcmToken(s *Session) *FCMTokenQuery {
+	query := (&FCMTokenClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(fcmtoken.Table, fcmtoken.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, session.FcmTokenTable, session.FcmTokenColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *RefreshTokenClient) Hooks() []Hook {
-	return c.hooks.RefreshToken
+func (c *SessionClient) Hooks() []Hook {
+	return c.hooks.Session
 }
 
 // Interceptors returns the client interceptors.
-func (c *RefreshTokenClient) Interceptors() []Interceptor {
-	return c.inters.RefreshToken
+func (c *SessionClient) Interceptors() []Interceptor {
+	return c.inters.Session
 }
 
-func (c *RefreshTokenClient) mutate(ctx context.Context, m *RefreshTokenMutation) (Value, error) {
+func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&RefreshTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&SessionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&RefreshTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&RefreshTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&RefreshTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&SessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown RefreshToken mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Session mutation op: %q", m.Op())
 	}
 }
 
@@ -1920,15 +2266,15 @@ func (c *UserClient) QueryTimers(u *User) *TimerQuery {
 	return query
 }
 
-// QueryRefreshTokens queries the refresh_tokens edge of a User.
-func (c *UserClient) QueryRefreshTokens(u *User) *RefreshTokenQuery {
-	query := (&RefreshTokenClient{config: c.config}).Query()
+// QuerySessions queries the sessions edge of a User.
+func (c *UserClient) QuerySessions(u *User) *SessionQuery {
+	query := (&SessionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(refreshtoken.Table, refreshtoken.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.RefreshTokensTable, user.RefreshTokensColumn),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1996,11 +2342,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Affiliation, Category, DeletedUser, Group, InviteCode, RefreshToken, StudyLog,
-		Subject, Timer, User []ent.Hook
+		APNsToken, Affiliation, Category, DeletedUser, FCMToken, Group, InviteCode,
+		Session, StudyLog, Subject, Timer, User []ent.Hook
 	}
 	inters struct {
-		Affiliation, Category, DeletedUser, Group, InviteCode, RefreshToken, StudyLog,
-		Subject, Timer, User []ent.Interceptor
+		APNsToken, Affiliation, Category, DeletedUser, FCMToken, Group, InviteCode,
+		Session, StudyLog, Subject, Timer, User []ent.Interceptor
 	}
 )

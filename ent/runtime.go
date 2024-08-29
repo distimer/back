@@ -11,8 +11,8 @@ import (
 	"pentag.kr/distimer/ent/deleteduser"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
-	"pentag.kr/distimer/ent/refreshtoken"
 	"pentag.kr/distimer/ent/schema"
+	"pentag.kr/distimer/ent/session"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/timer"
@@ -69,12 +69,24 @@ func init() {
 	invitecodeDescUsed := invitecodeFields[1].Descriptor()
 	// invitecode.DefaultUsed holds the default value on creation for the used field.
 	invitecode.DefaultUsed = invitecodeDescUsed.Default.(int32)
-	refreshtokenFields := schema.RefreshToken{}.Fields()
-	_ = refreshtokenFields
-	// refreshtokenDescCreatedAt is the schema descriptor for created_at field.
-	refreshtokenDescCreatedAt := refreshtokenFields[1].Descriptor()
-	// refreshtoken.DefaultCreatedAt holds the default value on creation for the created_at field.
-	refreshtoken.DefaultCreatedAt = refreshtokenDescCreatedAt.Default.(func() time.Time)
+	sessionFields := schema.Session{}.Fields()
+	_ = sessionFields
+	// sessionDescRefreshToken is the schema descriptor for refresh_token field.
+	sessionDescRefreshToken := sessionFields[1].Descriptor()
+	// session.DefaultRefreshToken holds the default value on creation for the refresh_token field.
+	session.DefaultRefreshToken = sessionDescRefreshToken.Default.(func() uuid.UUID)
+	// sessionDescCreatedAt is the schema descriptor for created_at field.
+	sessionDescCreatedAt := sessionFields[2].Descriptor()
+	// session.DefaultCreatedAt holds the default value on creation for the created_at field.
+	session.DefaultCreatedAt = sessionDescCreatedAt.Default.(func() time.Time)
+	// sessionDescLastActive is the schema descriptor for last_active field.
+	sessionDescLastActive := sessionFields[4].Descriptor()
+	// session.DefaultLastActive holds the default value on creation for the last_active field.
+	session.DefaultLastActive = sessionDescLastActive.Default.(func() time.Time)
+	// sessionDescID is the schema descriptor for id field.
+	sessionDescID := sessionFields[0].Descriptor()
+	// session.DefaultID holds the default value on creation for the id field.
+	session.DefaultID = sessionDescID.Default.(func() uuid.UUID)
 	studylogFields := schema.StudyLog{}.Fields()
 	_ = studylogFields
 	// studylogDescID is the schema descriptor for id field.

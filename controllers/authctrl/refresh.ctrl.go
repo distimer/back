@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
+	"pentag.kr/distimer/ent/session"
 	"pentag.kr/distimer/utils/crypt"
 	"pentag.kr/distimer/utils/dto"
 	"pentag.kr/distimer/utils/logger"
@@ -22,7 +23,7 @@ func Refresh(c *fiber.Ctx) error {
 	dbConn := db.GetDBClient()
 	refreshToken := uuid.MustParse(data.RefreshToken)
 
-	refreshTokenObj, err := dbConn.RefreshToken.Get(context.Background(), refreshToken)
+	sessionObj, err := dbConn.Session.Query().Where(session.RefreshToken(refreshToken)).Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return c.Status(401).JSON(fiber.Map{
@@ -35,7 +36,7 @@ func Refresh(c *fiber.Ctx) error {
 		})
 	}
 
-	owner, err := refreshTokenObj.QueryUser().Only(context.Background())
+	owner, err := sessionObj.QueryUser().Only(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
@@ -44,9 +45,9 @@ func Refresh(c *fiber.Ctx) error {
 	}
 
 	newAccessToken := crypt.NewJWT(owner.ID, owner.TermsAgreed)
-	newRefrshToken := uuid.New()
+	newRefreshToken := uuid.New()
 
-	err = dbConn.RefreshToken.DeleteOne(refreshTokenObj).Exec(context.Background())
+	err = dbConn.Session.UpdateOne(sessionObj).SetRefreshToken(newRefreshToken).Exec(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
@@ -54,20 +55,11 @@ func Refresh(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err = dbConn.RefreshToken.Create().
-		SetID(newRefrshToken).
-		SetUser(owner).
-		Save(context.Background())
-	if err != nil {
-		logger.CtxError(c, err)
-		return c.Status(500).JSON(fiber.Map{
-			"error": "Internal server error",
-		})
-	}
 	return c.JSON(accessInfoDTO{
+		SessionID:    sessionObj.ID.String(),
 		UserID:       owner.ID.String(),
 		Name:         owner.Name,
-		RefreshToken: newRefrshToken.String(),
+		RefreshToken: newRefreshToken.String(),
 		AccessToken:  newAccessToken,
 	})
 }

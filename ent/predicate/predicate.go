@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// APNsToken is the predicate function for apnstoken builders.
+type APNsToken func(*sql.Selector)
+
 // Affiliation is the predicate function for affiliation builders.
 type Affiliation func(*sql.Selector)
 
@@ -15,14 +18,17 @@ type Category func(*sql.Selector)
 // DeletedUser is the predicate function for deleteduser builders.
 type DeletedUser func(*sql.Selector)
 
+// FCMToken is the predicate function for fcmtoken builders.
+type FCMToken func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 
 // InviteCode is the predicate function for invitecode builders.
 type InviteCode func(*sql.Selector)
 
-// RefreshToken is the predicate function for refreshtoken builders.
-type RefreshToken func(*sql.Selector)
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
 
 // StudyLog is the predicate function for studylog builders.
 type StudyLog func(*sql.Selector)

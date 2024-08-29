@@ -14,7 +14,7 @@ import (
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/predicate"
-	"pentag.kr/distimer/ent/refreshtoken"
+	"pentag.kr/distimer/ent/session"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
@@ -160,19 +160,19 @@ func (uu *UserUpdate) SetTimers(t *Timer) *UserUpdate {
 	return uu.SetTimersID(t.ID)
 }
 
-// AddRefreshTokenIDs adds the "refresh_tokens" edge to the RefreshToken entity by IDs.
-func (uu *UserUpdate) AddRefreshTokenIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddRefreshTokenIDs(ids...)
+// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+func (uu *UserUpdate) AddSessionIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddSessionIDs(ids...)
 	return uu
 }
 
-// AddRefreshTokens adds the "refresh_tokens" edges to the RefreshToken entity.
-func (uu *UserUpdate) AddRefreshTokens(r ...*RefreshToken) *UserUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddSessions adds the "sessions" edges to the Session entity.
+func (uu *UserUpdate) AddSessions(s ...*Session) *UserUpdate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return uu.AddRefreshTokenIDs(ids...)
+	return uu.AddSessionIDs(ids...)
 }
 
 // AddOwnedCategoryIDs adds the "owned_categories" edge to the Category entity by IDs.
@@ -264,25 +264,25 @@ func (uu *UserUpdate) ClearTimers() *UserUpdate {
 	return uu
 }
 
-// ClearRefreshTokens clears all "refresh_tokens" edges to the RefreshToken entity.
-func (uu *UserUpdate) ClearRefreshTokens() *UserUpdate {
-	uu.mutation.ClearRefreshTokens()
+// ClearSessions clears all "sessions" edges to the Session entity.
+func (uu *UserUpdate) ClearSessions() *UserUpdate {
+	uu.mutation.ClearSessions()
 	return uu
 }
 
-// RemoveRefreshTokenIDs removes the "refresh_tokens" edge to RefreshToken entities by IDs.
-func (uu *UserUpdate) RemoveRefreshTokenIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveRefreshTokenIDs(ids...)
+// RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
+func (uu *UserUpdate) RemoveSessionIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveSessionIDs(ids...)
 	return uu
 }
 
-// RemoveRefreshTokens removes "refresh_tokens" edges to RefreshToken entities.
-func (uu *UserUpdate) RemoveRefreshTokens(r ...*RefreshToken) *UserUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// RemoveSessions removes "sessions" edges to Session entities.
+func (uu *UserUpdate) RemoveSessions(s ...*Session) *UserUpdate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return uu.RemoveRefreshTokenIDs(ids...)
+	return uu.RemoveSessionIDs(ids...)
 }
 
 // ClearOwnedCategories clears all "owned_categories" edges to the Category entity.
@@ -533,28 +533,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.RefreshTokensCleared() {
+	if uu.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.RefreshTokensTable,
-			Columns: []string{user.RefreshTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedRefreshTokensIDs(); len(nodes) > 0 && !uu.mutation.RefreshTokensCleared() {
+	if nodes := uu.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !uu.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.RefreshTokensTable,
-			Columns: []string{user.RefreshTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -562,15 +562,15 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RefreshTokensIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.RefreshTokensTable,
-			Columns: []string{user.RefreshTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -770,19 +770,19 @@ func (uuo *UserUpdateOne) SetTimers(t *Timer) *UserUpdateOne {
 	return uuo.SetTimersID(t.ID)
 }
 
-// AddRefreshTokenIDs adds the "refresh_tokens" edge to the RefreshToken entity by IDs.
-func (uuo *UserUpdateOne) AddRefreshTokenIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddRefreshTokenIDs(ids...)
+// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+func (uuo *UserUpdateOne) AddSessionIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddSessionIDs(ids...)
 	return uuo
 }
 
-// AddRefreshTokens adds the "refresh_tokens" edges to the RefreshToken entity.
-func (uuo *UserUpdateOne) AddRefreshTokens(r ...*RefreshToken) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddSessions adds the "sessions" edges to the Session entity.
+func (uuo *UserUpdateOne) AddSessions(s ...*Session) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return uuo.AddRefreshTokenIDs(ids...)
+	return uuo.AddSessionIDs(ids...)
 }
 
 // AddOwnedCategoryIDs adds the "owned_categories" edge to the Category entity by IDs.
@@ -874,25 +874,25 @@ func (uuo *UserUpdateOne) ClearTimers() *UserUpdateOne {
 	return uuo
 }
 
-// ClearRefreshTokens clears all "refresh_tokens" edges to the RefreshToken entity.
-func (uuo *UserUpdateOne) ClearRefreshTokens() *UserUpdateOne {
-	uuo.mutation.ClearRefreshTokens()
+// ClearSessions clears all "sessions" edges to the Session entity.
+func (uuo *UserUpdateOne) ClearSessions() *UserUpdateOne {
+	uuo.mutation.ClearSessions()
 	return uuo
 }
 
-// RemoveRefreshTokenIDs removes the "refresh_tokens" edge to RefreshToken entities by IDs.
-func (uuo *UserUpdateOne) RemoveRefreshTokenIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveRefreshTokenIDs(ids...)
+// RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
+func (uuo *UserUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveSessionIDs(ids...)
 	return uuo
 }
 
-// RemoveRefreshTokens removes "refresh_tokens" edges to RefreshToken entities.
-func (uuo *UserUpdateOne) RemoveRefreshTokens(r ...*RefreshToken) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// RemoveSessions removes "sessions" edges to Session entities.
+func (uuo *UserUpdateOne) RemoveSessions(s ...*Session) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return uuo.RemoveRefreshTokenIDs(ids...)
+	return uuo.RemoveSessionIDs(ids...)
 }
 
 // ClearOwnedCategories clears all "owned_categories" edges to the Category entity.
@@ -1173,28 +1173,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.RefreshTokensCleared() {
+	if uuo.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.RefreshTokensTable,
-			Columns: []string{user.RefreshTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedRefreshTokensIDs(); len(nodes) > 0 && !uuo.mutation.RefreshTokensCleared() {
+	if nodes := uuo.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !uuo.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.RefreshTokensTable,
-			Columns: []string{user.RefreshTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1202,15 +1202,15 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RefreshTokensIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.RefreshTokensTable,
-			Columns: []string{user.RefreshTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

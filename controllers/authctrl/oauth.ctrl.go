@@ -16,7 +16,8 @@ import (
 )
 
 type oauthLoginReq struct {
-	Token string `json:"token" validate:"required"`
+	Token      string `json:"token" validate:"required"`
+	DeviceType *int8  `json:"device_type" validate:"required,min=0,max=1"`
 }
 
 func GoogleOauthLogin(c *fiber.Ctx) error {
@@ -109,8 +110,9 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 
 	// create new refresh token
 	newRefreshToken := uuid.New()
-	_, err = dbConn.RefreshToken.Create().
-		SetID(newRefreshToken).
+	sessionObj, err := dbConn.Session.Create().
+		SetRefreshToken(newRefreshToken).
+		SetDeviceType(*data.DeviceType).
 		SetUserID(findUser.ID).
 		Save(context.Background())
 	if err != nil {
@@ -126,6 +128,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 	if new {
 		return c.Status(201).JSON(
 			accessInfoDTO{
+				SessionID:    sessionObj.ID.String(),
 				UserID:       findUser.ID.String(),
 				Name:         findUser.Name,
 				AccessToken:  newAccessToken,
@@ -135,6 +138,7 @@ func GoogleOauthLogin(c *fiber.Ctx) error {
 	}
 	return c.JSON(
 		accessInfoDTO{
+			SessionID:    sessionObj.ID.String(),
 			UserID:       findUser.ID.String(),
 			Name:         findUser.Name,
 			AccessToken:  newAccessToken,
@@ -238,8 +242,9 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 
 	// create new refresh token
 	newRefreshToken := uuid.New()
-	_, err = dbConn.RefreshToken.Create().
-		SetID(newRefreshToken).
+	sessionObj, err := dbConn.Session.Create().
+		SetRefreshToken(newRefreshToken).
+		SetDeviceType(*data.DeviceType).
 		SetUserID(findUser.ID).
 		Save(context.Background())
 	if err != nil {
@@ -254,6 +259,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 	if new {
 		return c.Status(201).JSON(
 			accessInfoDTO{
+				SessionID:    sessionObj.ID.String(),
 				UserID:       findUser.ID.String(),
 				Name:         findUser.Name,
 				AccessToken:  newAccessToken,
@@ -263,6 +269,7 @@ func AppleOauthLogin(c *fiber.Ctx) error {
 	}
 	return c.JSON(
 		accessInfoDTO{
+			SessionID:    sessionObj.ID.String(),
 			UserID:       findUser.ID.String(),
 			Name:         findUser.Name,
 			AccessToken:  newAccessToken,

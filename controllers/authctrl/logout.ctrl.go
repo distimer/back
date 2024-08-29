@@ -20,7 +20,7 @@ func Logout(c *fiber.Ctx) error {
 	}
 	dbConn := db.GetDBClient()
 
-	err = dbConn.RefreshToken.DeleteOneID(refreshToken).Exec(context.Background())
+	err = dbConn.Session.DeleteOneID(refreshToken).Exec(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return c.Status(401).JSON(fiber.Map{

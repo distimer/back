@@ -12,18 +12,22 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// APNsToken is the client for interacting with the APNsToken builders.
+	APNsToken *APNsTokenClient
 	// Affiliation is the client for interacting with the Affiliation builders.
 	Affiliation *AffiliationClient
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
 	// DeletedUser is the client for interacting with the DeletedUser builders.
 	DeletedUser *DeletedUserClient
+	// FCMToken is the client for interacting with the FCMToken builders.
+	FCMToken *FCMTokenClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// InviteCode is the client for interacting with the InviteCode builders.
 	InviteCode *InviteCodeClient
-	// RefreshToken is the client for interacting with the RefreshToken builders.
-	RefreshToken *RefreshTokenClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// StudyLog is the client for interacting with the StudyLog builders.
 	StudyLog *StudyLogClient
 	// Subject is the client for interacting with the Subject builders.
@@ -163,12 +167,14 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.APNsToken = NewAPNsTokenClient(tx.config)
 	tx.Affiliation = NewAffiliationClient(tx.config)
 	tx.Category = NewCategoryClient(tx.config)
 	tx.DeletedUser = NewDeletedUserClient(tx.config)
+	tx.FCMToken = NewFCMTokenClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.InviteCode = NewInviteCodeClient(tx.config)
-	tx.RefreshToken = NewRefreshTokenClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
 	tx.StudyLog = NewStudyLogClient(tx.config)
 	tx.Subject = NewSubjectClient(tx.config)
 	tx.Timer = NewTimerClient(tx.config)
@@ -182,7 +188,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Affiliation.QueryXXX(), the query will be executed
+// applies a query, for example: APNsToken.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

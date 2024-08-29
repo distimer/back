@@ -13,11 +13,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"pentag.kr/distimer/ent/affiliation"
+	"pentag.kr/distimer/ent/apnstoken"
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/deleteduser"
+	"pentag.kr/distimer/ent/fcmtoken"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
-	"pentag.kr/distimer/ent/refreshtoken"
+	"pentag.kr/distimer/ent/session"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/timer"
@@ -82,16 +84,18 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			affiliation.Table:  affiliation.ValidColumn,
-			category.Table:     category.ValidColumn,
-			deleteduser.Table:  deleteduser.ValidColumn,
-			group.Table:        group.ValidColumn,
-			invitecode.Table:   invitecode.ValidColumn,
-			refreshtoken.Table: refreshtoken.ValidColumn,
-			studylog.Table:     studylog.ValidColumn,
-			subject.Table:      subject.ValidColumn,
-			timer.Table:        timer.ValidColumn,
-			user.Table:         user.ValidColumn,
+			apnstoken.Table:   apnstoken.ValidColumn,
+			affiliation.Table: affiliation.ValidColumn,
+			category.Table:    category.ValidColumn,
+			deleteduser.Table: deleteduser.ValidColumn,
+			fcmtoken.Table:    fcmtoken.ValidColumn,
+			group.Table:       group.ValidColumn,
+			invitecode.Table:  invitecode.ValidColumn,
+			session.Table:     session.ValidColumn,
+			studylog.Table:    studylog.ValidColumn,
+			subject.Table:     subject.ValidColumn,
+			timer.Table:       timer.ValidColumn,
+			user.Table:        user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

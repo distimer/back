@@ -11,6 +11,7 @@ import (
 	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/logger"
+	"pentag.kr/distimer/utils/notify"
 )
 
 func GetMyTimerInfo(c *fiber.Ctx) error {
@@ -39,6 +40,7 @@ func GetMyTimerInfo(c *fiber.Ctx) error {
 				"error": "Internal server error",
 			})
 		}
+		go notify.SendTimerDelete(userID.String())
 		return c.Status(404).JSON(fiber.Map{
 			"info": "Timer not found",
 		})

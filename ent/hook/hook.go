@@ -9,6 +9,18 @@ import (
 	"pentag.kr/distimer/ent"
 )
 
+// The APNsTokenFunc type is an adapter to allow the use of ordinary
+// function as APNsToken mutator.
+type APNsTokenFunc func(context.Context, *ent.APNsTokenMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f APNsTokenFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.APNsTokenMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.APNsTokenMutation", m)
+}
+
 // The AffiliationFunc type is an adapter to allow the use of ordinary
 // function as Affiliation mutator.
 type AffiliationFunc func(context.Context, *ent.AffiliationMutation) (ent.Value, error)
@@ -45,6 +57,18 @@ func (f DeletedUserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeletedUserMutation", m)
 }
 
+// The FCMTokenFunc type is an adapter to allow the use of ordinary
+// function as FCMToken mutator.
+type FCMTokenFunc func(context.Context, *ent.FCMTokenMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FCMTokenFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FCMTokenMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FCMTokenMutation", m)
+}
+
 // The GroupFunc type is an adapter to allow the use of ordinary
 // function as Group mutator.
 type GroupFunc func(context.Context, *ent.GroupMutation) (ent.Value, error)
@@ -69,16 +93,16 @@ func (f InviteCodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InviteCodeMutation", m)
 }
 
-// The RefreshTokenFunc type is an adapter to allow the use of ordinary
-// function as RefreshToken mutator.
-type RefreshTokenFunc func(context.Context, *ent.RefreshTokenMutation) (ent.Value, error)
+// The SessionFunc type is an adapter to allow the use of ordinary
+// function as Session mutator.
+type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f RefreshTokenFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.RefreshTokenMutation); ok {
+func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SessionMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RefreshTokenMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
 }
 
 // The StudyLogFunc type is an adapter to allow the use of ordinary

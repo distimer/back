@@ -3,11 +3,33 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
+	// ApNsTokensColumns holds the columns for the "ap_ns_tokens" table.
+	ApNsTokensColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "start_token", Type: field.TypeString, Unique: true},
+		{Name: "update_token", Type: field.TypeString, Unique: true},
+		{Name: "session_apns_token", Type: field.TypeUUID, Unique: true},
+	}
+	// ApNsTokensTable holds the schema information for the "ap_ns_tokens" table.
+	ApNsTokensTable = &schema.Table{
+		Name:       "ap_ns_tokens",
+		Columns:    ApNsTokensColumns,
+		PrimaryKey: []*schema.Column{ApNsTokensColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ap_ns_tokens_sessions_apns_token",
+				Columns:    []*schema.Column{ApNsTokensColumns[3]},
+				RefColumns: []*schema.Column{SessionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// AffiliationsColumns holds the columns for the "affiliations" table.
 	AffiliationsColumns = []*schema.Column{
 		{Name: "nickname", Type: field.TypeString},
@@ -23,9 +45,9 @@ var (
 		PrimaryKey: []*schema.Column{AffiliationsColumns[3], AffiliationsColumns[4]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "affiliations_users_user",
+				Symbol:     "affiliations_apns_tokens_user",
 				Columns:    []*schema.Column{AffiliationsColumns[3]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{ApnsTokensColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
@@ -62,9 +84,9 @@ var (
 		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "categories_users_owned_categories",
+				Symbol:     "categories_apns_tokens_owned_categories",
 				Columns:    []*schema.Column{CategoriesColumns[3]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{ApnsTokensColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -91,6 +113,26 @@ var (
 		Columns:    DeletedUsersColumns,
 		PrimaryKey: []*schema.Column{DeletedUsersColumns[0]},
 	}
+	// FcmTokensColumns holds the columns for the "fcm_tokens" table.
+	FcmTokensColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "push_token", Type: field.TypeString, Unique: true},
+		{Name: "session_fcm_token", Type: field.TypeUUID, Unique: true},
+	}
+	// FcmTokensTable holds the schema information for the "fcm_tokens" table.
+	FcmTokensTable = &schema.Table{
+		Name:       "fcm_tokens",
+		Columns:    FcmTokensColumns,
+		PrimaryKey: []*schema.Column{FcmTokensColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "fcm_tokens_sessions_fcm_token",
+				Columns:    []*schema.Column{FcmTokensColumns[2]},
+				RefColumns: []*schema.Column{SessionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -109,9 +151,9 @@ var (
 		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "groups_users_owned_groups",
+				Symbol:     "groups_apns_tokens_owned_groups",
 				Columns:    []*schema.Column{GroupsColumns[7]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{ApnsTokensColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -137,23 +179,33 @@ var (
 			},
 		},
 	}
-	// RefreshTokensColumns holds the columns for the "refresh_tokens" table.
-	RefreshTokensColumns = []*schema.Column{
+	// SessionsColumns holds the columns for the "sessions" table.
+	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "refresh_token", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "user_refresh_tokens", Type: field.TypeUUID},
+		{Name: "device_type", Type: field.TypeInt8},
+		{Name: "last_active", Type: field.TypeTime},
+		{Name: "user_sessions", Type: field.TypeUUID},
 	}
-	// RefreshTokensTable holds the schema information for the "refresh_tokens" table.
-	RefreshTokensTable = &schema.Table{
-		Name:       "refresh_tokens",
-		Columns:    RefreshTokensColumns,
-		PrimaryKey: []*schema.Column{RefreshTokensColumns[0]},
+	// SessionsTable holds the schema information for the "sessions" table.
+	SessionsTable = &schema.Table{
+		Name:       "sessions",
+		Columns:    SessionsColumns,
+		PrimaryKey: []*schema.Column{SessionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "refresh_tokens_users_refresh_tokens",
-				Columns:    []*schema.Column{RefreshTokensColumns[2]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				Symbol:     "sessions_apns_tokens_sessions",
+				Columns:    []*schema.Column{SessionsColumns[5]},
+				RefColumns: []*schema.Column{ApnsTokensColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "session_refresh_token",
+				Unique:  false,
+				Columns: []*schema.Column{SessionsColumns[1]},
 			},
 		},
 	}
@@ -179,9 +231,9 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "study_logs_users_study_logs",
+				Symbol:     "study_logs_apns_tokens_study_logs",
 				Columns:    []*schema.Column{StudyLogsColumns[5]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{ApnsTokensColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -258,15 +310,15 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "timers_users_timers",
+				Symbol:     "timers_apns_tokens_timers",
 				Columns:    []*schema.Column{TimersColumns[4]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{ApnsTokensColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 	}
-	// UsersColumns holds the columns for the "users" table.
-	UsersColumns = []*schema.Column{
+	// ApnsTokensColumns holds the columns for the "apns_tokens" table.
+	ApnsTokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString, Default: "유저"},
 		{Name: "oauth_id", Type: field.TypeString},
@@ -274,16 +326,16 @@ var (
 		{Name: "terms_agreed", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 	}
-	// UsersTable holds the schema information for the "users" table.
-	UsersTable = &schema.Table{
-		Name:       "users",
-		Columns:    UsersColumns,
-		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	// ApnsTokensTable holds the schema information for the "apns_tokens" table.
+	ApnsTokensTable = &schema.Table{
+		Name:       "apns_tokens",
+		Columns:    ApnsTokensColumns,
+		PrimaryKey: []*schema.Column{ApnsTokensColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "user_oauth_id_oauth_provider",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[2], UsersColumns[3]},
+				Columns: []*schema.Column{ApnsTokensColumns[2], ApnsTokensColumns[3]},
 			},
 		},
 	}
@@ -339,33 +391,40 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ApNsTokensTable,
 		AffiliationsTable,
 		CategoriesTable,
 		DeletedUsersTable,
+		FcmTokensTable,
 		GroupsTable,
 		InviteCodesTable,
-		RefreshTokensTable,
+		SessionsTable,
 		StudyLogsTable,
 		SubjectsTable,
 		TimersTable,
-		UsersTable,
+		ApnsTokensTable,
 		StudyLogSharedGroupTable,
 		TimerSharedGroupTable,
 	}
 )
 
 func init() {
-	AffiliationsTable.ForeignKeys[0].RefTable = UsersTable
+	ApNsTokensTable.ForeignKeys[0].RefTable = SessionsTable
+	AffiliationsTable.ForeignKeys[0].RefTable = ApnsTokensTable
 	AffiliationsTable.ForeignKeys[1].RefTable = GroupsTable
-	CategoriesTable.ForeignKeys[0].RefTable = UsersTable
-	GroupsTable.ForeignKeys[0].RefTable = UsersTable
+	CategoriesTable.ForeignKeys[0].RefTable = ApnsTokensTable
+	FcmTokensTable.ForeignKeys[0].RefTable = SessionsTable
+	GroupsTable.ForeignKeys[0].RefTable = ApnsTokensTable
 	InviteCodesTable.ForeignKeys[0].RefTable = GroupsTable
-	RefreshTokensTable.ForeignKeys[0].RefTable = UsersTable
+	SessionsTable.ForeignKeys[0].RefTable = ApnsTokensTable
 	StudyLogsTable.ForeignKeys[0].RefTable = SubjectsTable
-	StudyLogsTable.ForeignKeys[1].RefTable = UsersTable
+	StudyLogsTable.ForeignKeys[1].RefTable = ApnsTokensTable
 	SubjectsTable.ForeignKeys[0].RefTable = CategoriesTable
 	TimersTable.ForeignKeys[0].RefTable = SubjectsTable
-	TimersTable.ForeignKeys[1].RefTable = UsersTable
+	TimersTable.ForeignKeys[1].RefTable = ApnsTokensTable
+	ApnsTokensTable.Annotation = &entsql.Annotation{
+		Table: "apns_tokens",
+	}
 	StudyLogSharedGroupTable.ForeignKeys[0].RefTable = StudyLogsTable
 	StudyLogSharedGroupTable.ForeignKeys[1].RefTable = GroupsTable
 	TimerSharedGroupTable.ForeignKeys[0].RefTable = TimersTable

@@ -9,6 +9,7 @@ import (
 	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
 	"pentag.kr/distimer/utils/logger"
+	"pentag.kr/distimer/utils/notify"
 )
 
 func DeleteTimer(c *fiber.Ctx) error {
@@ -28,5 +29,6 @@ func DeleteTimer(c *fiber.Ctx) error {
 			"error": "Timer not found",
 		})
 	}
+	go notify.SendTimerDelete(userID.String())
 	return c.SendStatus(204)
 }

@@ -13,12 +13,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"pentag.kr/distimer/ent/affiliation"
+	"pentag.kr/distimer/ent/apnstoken"
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/deleteduser"
+	"pentag.kr/distimer/ent/fcmtoken"
 	"pentag.kr/distimer/ent/group"
 	"pentag.kr/distimer/ent/invitecode"
 	"pentag.kr/distimer/ent/predicate"
-	"pentag.kr/distimer/ent/refreshtoken"
+	"pentag.kr/distimer/ent/session"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/subject"
 	"pentag.kr/distimer/ent/timer"
@@ -34,17 +36,466 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAffiliation  = "Affiliation"
-	TypeCategory     = "Category"
-	TypeDeletedUser  = "DeletedUser"
-	TypeGroup        = "Group"
-	TypeInviteCode   = "InviteCode"
-	TypeRefreshToken = "RefreshToken"
-	TypeStudyLog     = "StudyLog"
-	TypeSubject      = "Subject"
-	TypeTimer        = "Timer"
-	TypeUser         = "User"
+	TypeAPNsToken   = "APNsToken"
+	TypeAffiliation = "Affiliation"
+	TypeCategory    = "Category"
+	TypeDeletedUser = "DeletedUser"
+	TypeFCMToken    = "FCMToken"
+	TypeGroup       = "Group"
+	TypeInviteCode  = "InviteCode"
+	TypeSession     = "Session"
+	TypeStudyLog    = "StudyLog"
+	TypeSubject     = "Subject"
+	TypeTimer       = "Timer"
+	TypeUser        = "User"
 )
+
+// APNsTokenMutation represents an operation that mutates the APNsToken nodes in the graph.
+type APNsTokenMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	start_token    *string
+	update_token   *string
+	clearedFields  map[string]struct{}
+	session        *uuid.UUID
+	clearedsession bool
+	done           bool
+	oldValue       func(context.Context) (*APNsToken, error)
+	predicates     []predicate.APNsToken
+}
+
+var _ ent.Mutation = (*APNsTokenMutation)(nil)
+
+// apnstokenOption allows management of the mutation configuration using functional options.
+type apnstokenOption func(*APNsTokenMutation)
+
+// newAPNsTokenMutation creates new mutation for the APNsToken entity.
+func newAPNsTokenMutation(c config, op Op, opts ...apnstokenOption) *APNsTokenMutation {
+	m := &APNsTokenMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAPNsToken,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAPNsTokenID sets the ID field of the mutation.
+func withAPNsTokenID(id int) apnstokenOption {
+	return func(m *APNsTokenMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *APNsToken
+		)
+		m.oldValue = func(ctx context.Context) (*APNsToken, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().APNsToken.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAPNsToken sets the old APNsToken of the mutation.
+func withAPNsToken(node *APNsToken) apnstokenOption {
+	return func(m *APNsTokenMutation) {
+		m.oldValue = func(context.Context) (*APNsToken, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m APNsTokenMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m APNsTokenMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *APNsTokenMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *APNsTokenMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().APNsToken.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetStartToken sets the "start_token" field.
+func (m *APNsTokenMutation) SetStartToken(s string) {
+	m.start_token = &s
+}
+
+// StartToken returns the value of the "start_token" field in the mutation.
+func (m *APNsTokenMutation) StartToken() (r string, exists bool) {
+	v := m.start_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartToken returns the old "start_token" field's value of the APNsToken entity.
+// If the APNsToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *APNsTokenMutation) OldStartToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartToken: %w", err)
+	}
+	return oldValue.StartToken, nil
+}
+
+// ResetStartToken resets all changes to the "start_token" field.
+func (m *APNsTokenMutation) ResetStartToken() {
+	m.start_token = nil
+}
+
+// SetUpdateToken sets the "update_token" field.
+func (m *APNsTokenMutation) SetUpdateToken(s string) {
+	m.update_token = &s
+}
+
+// UpdateToken returns the value of the "update_token" field in the mutation.
+func (m *APNsTokenMutation) UpdateToken() (r string, exists bool) {
+	v := m.update_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateToken returns the old "update_token" field's value of the APNsToken entity.
+// If the APNsToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *APNsTokenMutation) OldUpdateToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateToken: %w", err)
+	}
+	return oldValue.UpdateToken, nil
+}
+
+// ResetUpdateToken resets all changes to the "update_token" field.
+func (m *APNsTokenMutation) ResetUpdateToken() {
+	m.update_token = nil
+}
+
+// SetSessionID sets the "session" edge to the Session entity by id.
+func (m *APNsTokenMutation) SetSessionID(id uuid.UUID) {
+	m.session = &id
+}
+
+// ClearSession clears the "session" edge to the Session entity.
+func (m *APNsTokenMutation) ClearSession() {
+	m.clearedsession = true
+}
+
+// SessionCleared reports if the "session" edge to the Session entity was cleared.
+func (m *APNsTokenMutation) SessionCleared() bool {
+	return m.clearedsession
+}
+
+// SessionID returns the "session" edge ID in the mutation.
+func (m *APNsTokenMutation) SessionID() (id uuid.UUID, exists bool) {
+	if m.session != nil {
+		return *m.session, true
+	}
+	return
+}
+
+// SessionIDs returns the "session" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SessionID instead. It exists only for internal usage by the builders.
+func (m *APNsTokenMutation) SessionIDs() (ids []uuid.UUID) {
+	if id := m.session; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSession resets all changes to the "session" edge.
+func (m *APNsTokenMutation) ResetSession() {
+	m.session = nil
+	m.clearedsession = false
+}
+
+// Where appends a list predicates to the APNsTokenMutation builder.
+func (m *APNsTokenMutation) Where(ps ...predicate.APNsToken) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the APNsTokenMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *APNsTokenMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.APNsToken, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *APNsTokenMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *APNsTokenMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (APNsToken).
+func (m *APNsTokenMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *APNsTokenMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.start_token != nil {
+		fields = append(fields, apnstoken.FieldStartToken)
+	}
+	if m.update_token != nil {
+		fields = append(fields, apnstoken.FieldUpdateToken)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *APNsTokenMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case apnstoken.FieldStartToken:
+		return m.StartToken()
+	case apnstoken.FieldUpdateToken:
+		return m.UpdateToken()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *APNsTokenMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case apnstoken.FieldStartToken:
+		return m.OldStartToken(ctx)
+	case apnstoken.FieldUpdateToken:
+		return m.OldUpdateToken(ctx)
+	}
+	return nil, fmt.Errorf("unknown APNsToken field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *APNsTokenMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case apnstoken.FieldStartToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartToken(v)
+		return nil
+	case apnstoken.FieldUpdateToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateToken(v)
+		return nil
+	}
+	return fmt.Errorf("unknown APNsToken field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *APNsTokenMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *APNsTokenMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *APNsTokenMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown APNsToken numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *APNsTokenMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *APNsTokenMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *APNsTokenMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown APNsToken nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *APNsTokenMutation) ResetField(name string) error {
+	switch name {
+	case apnstoken.FieldStartToken:
+		m.ResetStartToken()
+		return nil
+	case apnstoken.FieldUpdateToken:
+		m.ResetUpdateToken()
+		return nil
+	}
+	return fmt.Errorf("unknown APNsToken field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *APNsTokenMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.session != nil {
+		edges = append(edges, apnstoken.EdgeSession)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *APNsTokenMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case apnstoken.EdgeSession:
+		if id := m.session; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *APNsTokenMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *APNsTokenMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *APNsTokenMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedsession {
+		edges = append(edges, apnstoken.EdgeSession)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *APNsTokenMutation) EdgeCleared(name string) bool {
+	switch name {
+	case apnstoken.EdgeSession:
+		return m.clearedsession
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *APNsTokenMutation) ClearEdge(name string) error {
+	switch name {
+	case apnstoken.EdgeSession:
+		m.ClearSession()
+		return nil
+	}
+	return fmt.Errorf("unknown APNsToken unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *APNsTokenMutation) ResetEdge(name string) error {
+	switch name {
+	case apnstoken.EdgeSession:
+		m.ResetSession()
+		return nil
+	}
+	return fmt.Errorf("unknown APNsToken edge %s", name)
+}
 
 // AffiliationMutation represents an operation that mutates the Affiliation nodes in the graph.
 type AffiliationMutation struct {
@@ -1724,6 +2175,399 @@ func (m *DeletedUserMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown DeletedUser edge %s", name)
 }
 
+// FCMTokenMutation represents an operation that mutates the FCMToken nodes in the graph.
+type FCMTokenMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	push_token     *string
+	clearedFields  map[string]struct{}
+	session        *uuid.UUID
+	clearedsession bool
+	done           bool
+	oldValue       func(context.Context) (*FCMToken, error)
+	predicates     []predicate.FCMToken
+}
+
+var _ ent.Mutation = (*FCMTokenMutation)(nil)
+
+// fcmtokenOption allows management of the mutation configuration using functional options.
+type fcmtokenOption func(*FCMTokenMutation)
+
+// newFCMTokenMutation creates new mutation for the FCMToken entity.
+func newFCMTokenMutation(c config, op Op, opts ...fcmtokenOption) *FCMTokenMutation {
+	m := &FCMTokenMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeFCMToken,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withFCMTokenID sets the ID field of the mutation.
+func withFCMTokenID(id int) fcmtokenOption {
+	return func(m *FCMTokenMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *FCMToken
+		)
+		m.oldValue = func(ctx context.Context) (*FCMToken, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FCMToken.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withFCMToken sets the old FCMToken of the mutation.
+func withFCMToken(node *FCMToken) fcmtokenOption {
+	return func(m *FCMTokenMutation) {
+		m.oldValue = func(context.Context) (*FCMToken, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FCMTokenMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FCMTokenMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *FCMTokenMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *FCMTokenMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().FCMToken.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPushToken sets the "push_token" field.
+func (m *FCMTokenMutation) SetPushToken(s string) {
+	m.push_token = &s
+}
+
+// PushToken returns the value of the "push_token" field in the mutation.
+func (m *FCMTokenMutation) PushToken() (r string, exists bool) {
+	v := m.push_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPushToken returns the old "push_token" field's value of the FCMToken entity.
+// If the FCMToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FCMTokenMutation) OldPushToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPushToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPushToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPushToken: %w", err)
+	}
+	return oldValue.PushToken, nil
+}
+
+// ResetPushToken resets all changes to the "push_token" field.
+func (m *FCMTokenMutation) ResetPushToken() {
+	m.push_token = nil
+}
+
+// SetSessionID sets the "session" edge to the Session entity by id.
+func (m *FCMTokenMutation) SetSessionID(id uuid.UUID) {
+	m.session = &id
+}
+
+// ClearSession clears the "session" edge to the Session entity.
+func (m *FCMTokenMutation) ClearSession() {
+	m.clearedsession = true
+}
+
+// SessionCleared reports if the "session" edge to the Session entity was cleared.
+func (m *FCMTokenMutation) SessionCleared() bool {
+	return m.clearedsession
+}
+
+// SessionID returns the "session" edge ID in the mutation.
+func (m *FCMTokenMutation) SessionID() (id uuid.UUID, exists bool) {
+	if m.session != nil {
+		return *m.session, true
+	}
+	return
+}
+
+// SessionIDs returns the "session" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SessionID instead. It exists only for internal usage by the builders.
+func (m *FCMTokenMutation) SessionIDs() (ids []uuid.UUID) {
+	if id := m.session; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSession resets all changes to the "session" edge.
+func (m *FCMTokenMutation) ResetSession() {
+	m.session = nil
+	m.clearedsession = false
+}
+
+// Where appends a list predicates to the FCMTokenMutation builder.
+func (m *FCMTokenMutation) Where(ps ...predicate.FCMToken) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the FCMTokenMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FCMTokenMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FCMToken, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *FCMTokenMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FCMTokenMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (FCMToken).
+func (m *FCMTokenMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *FCMTokenMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.push_token != nil {
+		fields = append(fields, fcmtoken.FieldPushToken)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *FCMTokenMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case fcmtoken.FieldPushToken:
+		return m.PushToken()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *FCMTokenMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case fcmtoken.FieldPushToken:
+		return m.OldPushToken(ctx)
+	}
+	return nil, fmt.Errorf("unknown FCMToken field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FCMTokenMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case fcmtoken.FieldPushToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPushToken(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FCMToken field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *FCMTokenMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *FCMTokenMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FCMTokenMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown FCMToken numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *FCMTokenMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *FCMTokenMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *FCMTokenMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown FCMToken nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *FCMTokenMutation) ResetField(name string) error {
+	switch name {
+	case fcmtoken.FieldPushToken:
+		m.ResetPushToken()
+		return nil
+	}
+	return fmt.Errorf("unknown FCMToken field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *FCMTokenMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.session != nil {
+		edges = append(edges, fcmtoken.EdgeSession)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *FCMTokenMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case fcmtoken.EdgeSession:
+		if id := m.session; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *FCMTokenMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *FCMTokenMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *FCMTokenMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedsession {
+		edges = append(edges, fcmtoken.EdgeSession)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *FCMTokenMutation) EdgeCleared(name string) bool {
+	switch name {
+	case fcmtoken.EdgeSession:
+		return m.clearedsession
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *FCMTokenMutation) ClearEdge(name string) error {
+	switch name {
+	case fcmtoken.EdgeSession:
+		m.ClearSession()
+		return nil
+	}
+	return fmt.Errorf("unknown FCMToken unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *FCMTokenMutation) ResetEdge(name string) error {
+	switch name {
+	case fcmtoken.EdgeSession:
+		m.ResetSession()
+		return nil
+	}
+	return fmt.Errorf("unknown FCMToken edge %s", name)
+}
+
 // GroupMutation represents an operation that mutates the Group nodes in the graph.
 type GroupMutation struct {
 	config
@@ -3279,32 +4123,40 @@ func (m *InviteCodeMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown InviteCode edge %s", name)
 }
 
-// RefreshTokenMutation represents an operation that mutates the RefreshToken nodes in the graph.
-type RefreshTokenMutation struct {
+// SessionMutation represents an operation that mutates the Session nodes in the graph.
+type SessionMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	clearedFields map[string]struct{}
-	user          *uuid.UUID
-	cleareduser   bool
-	done          bool
-	oldValue      func(context.Context) (*RefreshToken, error)
-	predicates    []predicate.RefreshToken
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	refresh_token     *uuid.UUID
+	created_at        *time.Time
+	device_type       *int8
+	adddevice_type    *int8
+	last_active       *time.Time
+	clearedFields     map[string]struct{}
+	user              *uuid.UUID
+	cleareduser       bool
+	apns_token        *int
+	clearedapns_token bool
+	fcm_token         *int
+	clearedfcm_token  bool
+	done              bool
+	oldValue          func(context.Context) (*Session, error)
+	predicates        []predicate.Session
 }
 
-var _ ent.Mutation = (*RefreshTokenMutation)(nil)
+var _ ent.Mutation = (*SessionMutation)(nil)
 
-// refreshtokenOption allows management of the mutation configuration using functional options.
-type refreshtokenOption func(*RefreshTokenMutation)
+// sessionOption allows management of the mutation configuration using functional options.
+type sessionOption func(*SessionMutation)
 
-// newRefreshTokenMutation creates new mutation for the RefreshToken entity.
-func newRefreshTokenMutation(c config, op Op, opts ...refreshtokenOption) *RefreshTokenMutation {
-	m := &RefreshTokenMutation{
+// newSessionMutation creates new mutation for the Session entity.
+func newSessionMutation(c config, op Op, opts ...sessionOption) *SessionMutation {
+	m := &SessionMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeRefreshToken,
+		typ:           TypeSession,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -3313,20 +4165,20 @@ func newRefreshTokenMutation(c config, op Op, opts ...refreshtokenOption) *Refre
 	return m
 }
 
-// withRefreshTokenID sets the ID field of the mutation.
-func withRefreshTokenID(id uuid.UUID) refreshtokenOption {
-	return func(m *RefreshTokenMutation) {
+// withSessionID sets the ID field of the mutation.
+func withSessionID(id uuid.UUID) sessionOption {
+	return func(m *SessionMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *RefreshToken
+			value *Session
 		)
-		m.oldValue = func(ctx context.Context) (*RefreshToken, error) {
+		m.oldValue = func(ctx context.Context) (*Session, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().RefreshToken.Get(ctx, id)
+					value, err = m.Client().Session.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -3335,10 +4187,10 @@ func withRefreshTokenID(id uuid.UUID) refreshtokenOption {
 	}
 }
 
-// withRefreshToken sets the old RefreshToken of the mutation.
-func withRefreshToken(node *RefreshToken) refreshtokenOption {
-	return func(m *RefreshTokenMutation) {
-		m.oldValue = func(context.Context) (*RefreshToken, error) {
+// withSession sets the old Session of the mutation.
+func withSession(node *Session) sessionOption {
+	return func(m *SessionMutation) {
+		m.oldValue = func(context.Context) (*Session, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -3347,7 +4199,7 @@ func withRefreshToken(node *RefreshToken) refreshtokenOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m RefreshTokenMutation) Client() *Client {
+func (m SessionMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -3355,7 +4207,7 @@ func (m RefreshTokenMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m RefreshTokenMutation) Tx() (*Tx, error) {
+func (m SessionMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -3365,14 +4217,14 @@ func (m RefreshTokenMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of RefreshToken entities.
-func (m *RefreshTokenMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of Session entities.
+func (m *SessionMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *RefreshTokenMutation) ID() (id uuid.UUID, exists bool) {
+func (m *SessionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3383,7 +4235,7 @@ func (m *RefreshTokenMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *RefreshTokenMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *SessionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -3392,19 +4244,55 @@ func (m *RefreshTokenMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().RefreshToken.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Session.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
+// SetRefreshToken sets the "refresh_token" field.
+func (m *SessionMutation) SetRefreshToken(u uuid.UUID) {
+	m.refresh_token = &u
+}
+
+// RefreshToken returns the value of the "refresh_token" field in the mutation.
+func (m *SessionMutation) RefreshToken() (r uuid.UUID, exists bool) {
+	v := m.refresh_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRefreshToken returns the old "refresh_token" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldRefreshToken(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRefreshToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRefreshToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRefreshToken: %w", err)
+	}
+	return oldValue.RefreshToken, nil
+}
+
+// ResetRefreshToken resets all changes to the "refresh_token" field.
+func (m *SessionMutation) ResetRefreshToken() {
+	m.refresh_token = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
-func (m *RefreshTokenMutation) SetCreatedAt(t time.Time) {
+func (m *SessionMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *RefreshTokenMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *SessionMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -3412,10 +4300,10 @@ func (m *RefreshTokenMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the RefreshToken entity.
-// If the RefreshToken object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RefreshTokenMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *SessionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -3430,27 +4318,119 @@ func (m *RefreshTokenMutation) OldCreatedAt(ctx context.Context) (v time.Time, e
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *RefreshTokenMutation) ResetCreatedAt() {
+func (m *SessionMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetDeviceType sets the "device_type" field.
+func (m *SessionMutation) SetDeviceType(i int8) {
+	m.device_type = &i
+	m.adddevice_type = nil
+}
+
+// DeviceType returns the value of the "device_type" field in the mutation.
+func (m *SessionMutation) DeviceType() (r int8, exists bool) {
+	v := m.device_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceType returns the old "device_type" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldDeviceType(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceType: %w", err)
+	}
+	return oldValue.DeviceType, nil
+}
+
+// AddDeviceType adds i to the "device_type" field.
+func (m *SessionMutation) AddDeviceType(i int8) {
+	if m.adddevice_type != nil {
+		*m.adddevice_type += i
+	} else {
+		m.adddevice_type = &i
+	}
+}
+
+// AddedDeviceType returns the value that was added to the "device_type" field in this mutation.
+func (m *SessionMutation) AddedDeviceType() (r int8, exists bool) {
+	v := m.adddevice_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDeviceType resets all changes to the "device_type" field.
+func (m *SessionMutation) ResetDeviceType() {
+	m.device_type = nil
+	m.adddevice_type = nil
+}
+
+// SetLastActive sets the "last_active" field.
+func (m *SessionMutation) SetLastActive(t time.Time) {
+	m.last_active = &t
+}
+
+// LastActive returns the value of the "last_active" field in the mutation.
+func (m *SessionMutation) LastActive() (r time.Time, exists bool) {
+	v := m.last_active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastActive returns the old "last_active" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldLastActive(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastActive: %w", err)
+	}
+	return oldValue.LastActive, nil
+}
+
+// ResetLastActive resets all changes to the "last_active" field.
+func (m *SessionMutation) ResetLastActive() {
+	m.last_active = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
-func (m *RefreshTokenMutation) SetUserID(id uuid.UUID) {
+func (m *SessionMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (m *RefreshTokenMutation) ClearUser() {
+func (m *SessionMutation) ClearUser() {
 	m.cleareduser = true
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *RefreshTokenMutation) UserCleared() bool {
+func (m *SessionMutation) UserCleared() bool {
 	return m.cleareduser
 }
 
 // UserID returns the "user" edge ID in the mutation.
-func (m *RefreshTokenMutation) UserID() (id uuid.UUID, exists bool) {
+func (m *SessionMutation) UserID() (id uuid.UUID, exists bool) {
 	if m.user != nil {
 		return *m.user, true
 	}
@@ -3460,7 +4440,7 @@ func (m *RefreshTokenMutation) UserID() (id uuid.UUID, exists bool) {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *RefreshTokenMutation) UserIDs() (ids []uuid.UUID) {
+func (m *SessionMutation) UserIDs() (ids []uuid.UUID) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3468,20 +4448,98 @@ func (m *RefreshTokenMutation) UserIDs() (ids []uuid.UUID) {
 }
 
 // ResetUser resets all changes to the "user" edge.
-func (m *RefreshTokenMutation) ResetUser() {
+func (m *SessionMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
 }
 
-// Where appends a list predicates to the RefreshTokenMutation builder.
-func (m *RefreshTokenMutation) Where(ps ...predicate.RefreshToken) {
+// SetApnsTokenID sets the "apns_token" edge to the APNsToken entity by id.
+func (m *SessionMutation) SetApnsTokenID(id int) {
+	m.apns_token = &id
+}
+
+// ClearApnsToken clears the "apns_token" edge to the APNsToken entity.
+func (m *SessionMutation) ClearApnsToken() {
+	m.clearedapns_token = true
+}
+
+// ApnsTokenCleared reports if the "apns_token" edge to the APNsToken entity was cleared.
+func (m *SessionMutation) ApnsTokenCleared() bool {
+	return m.clearedapns_token
+}
+
+// ApnsTokenID returns the "apns_token" edge ID in the mutation.
+func (m *SessionMutation) ApnsTokenID() (id int, exists bool) {
+	if m.apns_token != nil {
+		return *m.apns_token, true
+	}
+	return
+}
+
+// ApnsTokenIDs returns the "apns_token" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ApnsTokenID instead. It exists only for internal usage by the builders.
+func (m *SessionMutation) ApnsTokenIDs() (ids []int) {
+	if id := m.apns_token; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetApnsToken resets all changes to the "apns_token" edge.
+func (m *SessionMutation) ResetApnsToken() {
+	m.apns_token = nil
+	m.clearedapns_token = false
+}
+
+// SetFcmTokenID sets the "fcm_token" edge to the FCMToken entity by id.
+func (m *SessionMutation) SetFcmTokenID(id int) {
+	m.fcm_token = &id
+}
+
+// ClearFcmToken clears the "fcm_token" edge to the FCMToken entity.
+func (m *SessionMutation) ClearFcmToken() {
+	m.clearedfcm_token = true
+}
+
+// FcmTokenCleared reports if the "fcm_token" edge to the FCMToken entity was cleared.
+func (m *SessionMutation) FcmTokenCleared() bool {
+	return m.clearedfcm_token
+}
+
+// FcmTokenID returns the "fcm_token" edge ID in the mutation.
+func (m *SessionMutation) FcmTokenID() (id int, exists bool) {
+	if m.fcm_token != nil {
+		return *m.fcm_token, true
+	}
+	return
+}
+
+// FcmTokenIDs returns the "fcm_token" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FcmTokenID instead. It exists only for internal usage by the builders.
+func (m *SessionMutation) FcmTokenIDs() (ids []int) {
+	if id := m.fcm_token; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFcmToken resets all changes to the "fcm_token" edge.
+func (m *SessionMutation) ResetFcmToken() {
+	m.fcm_token = nil
+	m.clearedfcm_token = false
+}
+
+// Where appends a list predicates to the SessionMutation builder.
+func (m *SessionMutation) Where(ps ...predicate.Session) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the RefreshTokenMutation builder. Using this method,
+// WhereP appends storage-level predicates to the SessionMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *RefreshTokenMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.RefreshToken, len(ps))
+func (m *SessionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Session, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -3489,27 +4547,36 @@ func (m *RefreshTokenMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *RefreshTokenMutation) Op() Op {
+func (m *SessionMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *RefreshTokenMutation) SetOp(op Op) {
+func (m *SessionMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (RefreshToken).
-func (m *RefreshTokenMutation) Type() string {
+// Type returns the node type of this mutation (Session).
+func (m *SessionMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *RefreshTokenMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+func (m *SessionMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.refresh_token != nil {
+		fields = append(fields, session.FieldRefreshToken)
+	}
 	if m.created_at != nil {
-		fields = append(fields, refreshtoken.FieldCreatedAt)
+		fields = append(fields, session.FieldCreatedAt)
+	}
+	if m.device_type != nil {
+		fields = append(fields, session.FieldDeviceType)
+	}
+	if m.last_active != nil {
+		fields = append(fields, session.FieldLastActive)
 	}
 	return fields
 }
@@ -3517,10 +4584,16 @@ func (m *RefreshTokenMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *RefreshTokenMutation) Field(name string) (ent.Value, bool) {
+func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case refreshtoken.FieldCreatedAt:
+	case session.FieldRefreshToken:
+		return m.RefreshToken()
+	case session.FieldCreatedAt:
 		return m.CreatedAt()
+	case session.FieldDeviceType:
+		return m.DeviceType()
+	case session.FieldLastActive:
+		return m.LastActive()
 	}
 	return nil, false
 }
@@ -3528,97 +4601,162 @@ func (m *RefreshTokenMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *RefreshTokenMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case refreshtoken.FieldCreatedAt:
+	case session.FieldRefreshToken:
+		return m.OldRefreshToken(ctx)
+	case session.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case session.FieldDeviceType:
+		return m.OldDeviceType(ctx)
+	case session.FieldLastActive:
+		return m.OldLastActive(ctx)
 	}
-	return nil, fmt.Errorf("unknown RefreshToken field %s", name)
+	return nil, fmt.Errorf("unknown Session field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *RefreshTokenMutation) SetField(name string, value ent.Value) error {
+func (m *SessionMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case refreshtoken.FieldCreatedAt:
+	case session.FieldRefreshToken:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRefreshToken(v)
+		return nil
+	case session.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
+	case session.FieldDeviceType:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceType(v)
+		return nil
+	case session.FieldLastActive:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastActive(v)
+		return nil
 	}
-	return fmt.Errorf("unknown RefreshToken field %s", name)
+	return fmt.Errorf("unknown Session field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *RefreshTokenMutation) AddedFields() []string {
-	return nil
+func (m *SessionMutation) AddedFields() []string {
+	var fields []string
+	if m.adddevice_type != nil {
+		fields = append(fields, session.FieldDeviceType)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *RefreshTokenMutation) AddedField(name string) (ent.Value, bool) {
+func (m *SessionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case session.FieldDeviceType:
+		return m.AddedDeviceType()
+	}
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *RefreshTokenMutation) AddField(name string, value ent.Value) error {
+func (m *SessionMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case session.FieldDeviceType:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeviceType(v)
+		return nil
 	}
-	return fmt.Errorf("unknown RefreshToken numeric field %s", name)
+	return fmt.Errorf("unknown Session numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *RefreshTokenMutation) ClearedFields() []string {
+func (m *SessionMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *RefreshTokenMutation) FieldCleared(name string) bool {
+func (m *SessionMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *RefreshTokenMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown RefreshToken nullable field %s", name)
+func (m *SessionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Session nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *RefreshTokenMutation) ResetField(name string) error {
+func (m *SessionMutation) ResetField(name string) error {
 	switch name {
-	case refreshtoken.FieldCreatedAt:
+	case session.FieldRefreshToken:
+		m.ResetRefreshToken()
+		return nil
+	case session.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
+	case session.FieldDeviceType:
+		m.ResetDeviceType()
+		return nil
+	case session.FieldLastActive:
+		m.ResetLastActive()
+		return nil
 	}
-	return fmt.Errorf("unknown RefreshToken field %s", name)
+	return fmt.Errorf("unknown Session field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *RefreshTokenMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+func (m *SessionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
 	if m.user != nil {
-		edges = append(edges, refreshtoken.EdgeUser)
+		edges = append(edges, session.EdgeUser)
+	}
+	if m.apns_token != nil {
+		edges = append(edges, session.EdgeApnsToken)
+	}
+	if m.fcm_token != nil {
+		edges = append(edges, session.EdgeFcmToken)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *RefreshTokenMutation) AddedIDs(name string) []ent.Value {
+func (m *SessionMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case refreshtoken.EdgeUser:
+	case session.EdgeUser:
 		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case session.EdgeApnsToken:
+		if id := m.apns_token; id != nil {
+			return []ent.Value{*id}
+		}
+	case session.EdgeFcmToken:
+		if id := m.fcm_token; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -3626,56 +4764,78 @@ func (m *RefreshTokenMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *RefreshTokenMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+func (m *SessionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *RefreshTokenMutation) RemovedIDs(name string) []ent.Value {
+func (m *SessionMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *RefreshTokenMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+func (m *SessionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
-		edges = append(edges, refreshtoken.EdgeUser)
+		edges = append(edges, session.EdgeUser)
+	}
+	if m.clearedapns_token {
+		edges = append(edges, session.EdgeApnsToken)
+	}
+	if m.clearedfcm_token {
+		edges = append(edges, session.EdgeFcmToken)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *RefreshTokenMutation) EdgeCleared(name string) bool {
+func (m *SessionMutation) EdgeCleared(name string) bool {
 	switch name {
-	case refreshtoken.EdgeUser:
+	case session.EdgeUser:
 		return m.cleareduser
+	case session.EdgeApnsToken:
+		return m.clearedapns_token
+	case session.EdgeFcmToken:
+		return m.clearedfcm_token
 	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *RefreshTokenMutation) ClearEdge(name string) error {
+func (m *SessionMutation) ClearEdge(name string) error {
 	switch name {
-	case refreshtoken.EdgeUser:
+	case session.EdgeUser:
 		m.ClearUser()
 		return nil
+	case session.EdgeApnsToken:
+		m.ClearApnsToken()
+		return nil
+	case session.EdgeFcmToken:
+		m.ClearFcmToken()
+		return nil
 	}
-	return fmt.Errorf("unknown RefreshToken unique edge %s", name)
+	return fmt.Errorf("unknown Session unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *RefreshTokenMutation) ResetEdge(name string) error {
+func (m *SessionMutation) ResetEdge(name string) error {
 	switch name {
-	case refreshtoken.EdgeUser:
+	case session.EdgeUser:
 		m.ResetUser()
 		return nil
+	case session.EdgeApnsToken:
+		m.ResetApnsToken()
+		return nil
+	case session.EdgeFcmToken:
+		m.ResetFcmToken()
+		return nil
 	}
-	return fmt.Errorf("unknown RefreshToken edge %s", name)
+	return fmt.Errorf("unknown Session edge %s", name)
 }
 
 // StudyLogMutation represents an operation that mutates the StudyLog nodes in the graph.
@@ -5743,9 +6903,9 @@ type UserMutation struct {
 	clearedstudy_logs       bool
 	timers                  *uuid.UUID
 	clearedtimers           bool
-	refresh_tokens          map[uuid.UUID]struct{}
-	removedrefresh_tokens   map[uuid.UUID]struct{}
-	clearedrefresh_tokens   bool
+	sessions                map[uuid.UUID]struct{}
+	removedsessions         map[uuid.UUID]struct{}
+	clearedsessions         bool
 	owned_categories        map[uuid.UUID]struct{}
 	removedowned_categories map[uuid.UUID]struct{}
 	clearedowned_categories bool
@@ -6259,58 +7419,58 @@ func (m *UserMutation) ResetTimers() {
 	m.clearedtimers = false
 }
 
-// AddRefreshTokenIDs adds the "refresh_tokens" edge to the RefreshToken entity by ids.
-func (m *UserMutation) AddRefreshTokenIDs(ids ...uuid.UUID) {
-	if m.refresh_tokens == nil {
-		m.refresh_tokens = make(map[uuid.UUID]struct{})
+// AddSessionIDs adds the "sessions" edge to the Session entity by ids.
+func (m *UserMutation) AddSessionIDs(ids ...uuid.UUID) {
+	if m.sessions == nil {
+		m.sessions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.refresh_tokens[ids[i]] = struct{}{}
+		m.sessions[ids[i]] = struct{}{}
 	}
 }
 
-// ClearRefreshTokens clears the "refresh_tokens" edge to the RefreshToken entity.
-func (m *UserMutation) ClearRefreshTokens() {
-	m.clearedrefresh_tokens = true
+// ClearSessions clears the "sessions" edge to the Session entity.
+func (m *UserMutation) ClearSessions() {
+	m.clearedsessions = true
 }
 
-// RefreshTokensCleared reports if the "refresh_tokens" edge to the RefreshToken entity was cleared.
-func (m *UserMutation) RefreshTokensCleared() bool {
-	return m.clearedrefresh_tokens
+// SessionsCleared reports if the "sessions" edge to the Session entity was cleared.
+func (m *UserMutation) SessionsCleared() bool {
+	return m.clearedsessions
 }
 
-// RemoveRefreshTokenIDs removes the "refresh_tokens" edge to the RefreshToken entity by IDs.
-func (m *UserMutation) RemoveRefreshTokenIDs(ids ...uuid.UUID) {
-	if m.removedrefresh_tokens == nil {
-		m.removedrefresh_tokens = make(map[uuid.UUID]struct{})
+// RemoveSessionIDs removes the "sessions" edge to the Session entity by IDs.
+func (m *UserMutation) RemoveSessionIDs(ids ...uuid.UUID) {
+	if m.removedsessions == nil {
+		m.removedsessions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.refresh_tokens, ids[i])
-		m.removedrefresh_tokens[ids[i]] = struct{}{}
+		delete(m.sessions, ids[i])
+		m.removedsessions[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedRefreshTokens returns the removed IDs of the "refresh_tokens" edge to the RefreshToken entity.
-func (m *UserMutation) RemovedRefreshTokensIDs() (ids []uuid.UUID) {
-	for id := range m.removedrefresh_tokens {
+// RemovedSessions returns the removed IDs of the "sessions" edge to the Session entity.
+func (m *UserMutation) RemovedSessionsIDs() (ids []uuid.UUID) {
+	for id := range m.removedsessions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// RefreshTokensIDs returns the "refresh_tokens" edge IDs in the mutation.
-func (m *UserMutation) RefreshTokensIDs() (ids []uuid.UUID) {
-	for id := range m.refresh_tokens {
+// SessionsIDs returns the "sessions" edge IDs in the mutation.
+func (m *UserMutation) SessionsIDs() (ids []uuid.UUID) {
+	for id := range m.sessions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetRefreshTokens resets all changes to the "refresh_tokens" edge.
-func (m *UserMutation) ResetRefreshTokens() {
-	m.refresh_tokens = nil
-	m.clearedrefresh_tokens = false
-	m.removedrefresh_tokens = nil
+// ResetSessions resets all changes to the "sessions" edge.
+func (m *UserMutation) ResetSessions() {
+	m.sessions = nil
+	m.clearedsessions = false
+	m.removedsessions = nil
 }
 
 // AddOwnedCategoryIDs adds the "owned_categories" edge to the Category entity by ids.
@@ -6596,8 +7756,8 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.timers != nil {
 		edges = append(edges, user.EdgeTimers)
 	}
-	if m.refresh_tokens != nil {
-		edges = append(edges, user.EdgeRefreshTokens)
+	if m.sessions != nil {
+		edges = append(edges, user.EdgeSessions)
 	}
 	if m.owned_categories != nil {
 		edges = append(edges, user.EdgeOwnedCategories)
@@ -6631,9 +7791,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 		if id := m.timers; id != nil {
 			return []ent.Value{*id}
 		}
-	case user.EdgeRefreshTokens:
-		ids := make([]ent.Value, 0, len(m.refresh_tokens))
-		for id := range m.refresh_tokens {
+	case user.EdgeSessions:
+		ids := make([]ent.Value, 0, len(m.sessions))
+		for id := range m.sessions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6659,8 +7819,8 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedstudy_logs != nil {
 		edges = append(edges, user.EdgeStudyLogs)
 	}
-	if m.removedrefresh_tokens != nil {
-		edges = append(edges, user.EdgeRefreshTokens)
+	if m.removedsessions != nil {
+		edges = append(edges, user.EdgeSessions)
 	}
 	if m.removedowned_categories != nil {
 		edges = append(edges, user.EdgeOwnedCategories)
@@ -6690,9 +7850,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeRefreshTokens:
-		ids := make([]ent.Value, 0, len(m.removedrefresh_tokens))
-		for id := range m.removedrefresh_tokens {
+	case user.EdgeSessions:
+		ids := make([]ent.Value, 0, len(m.removedsessions))
+		for id := range m.removedsessions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6721,8 +7881,8 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedtimers {
 		edges = append(edges, user.EdgeTimers)
 	}
-	if m.clearedrefresh_tokens {
-		edges = append(edges, user.EdgeRefreshTokens)
+	if m.clearedsessions {
+		edges = append(edges, user.EdgeSessions)
 	}
 	if m.clearedowned_categories {
 		edges = append(edges, user.EdgeOwnedCategories)
@@ -6742,8 +7902,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedstudy_logs
 	case user.EdgeTimers:
 		return m.clearedtimers
-	case user.EdgeRefreshTokens:
-		return m.clearedrefresh_tokens
+	case user.EdgeSessions:
+		return m.clearedsessions
 	case user.EdgeOwnedCategories:
 		return m.clearedowned_categories
 	}
@@ -6777,8 +7937,8 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeTimers:
 		m.ResetTimers()
 		return nil
-	case user.EdgeRefreshTokens:
-		m.ResetRefreshTokens()
+	case user.EdgeSessions:
+		m.ResetSessions()
 		return nil
 	case user.EdgeOwnedCategories:
 		m.ResetOwnedCategories()

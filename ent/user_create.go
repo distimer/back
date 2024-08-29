@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"pentag.kr/distimer/ent/category"
 	"pentag.kr/distimer/ent/group"
-	"pentag.kr/distimer/ent/refreshtoken"
+	"pentag.kr/distimer/ent/session"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/timer"
 	"pentag.kr/distimer/ent/user"
@@ -150,19 +150,19 @@ func (uc *UserCreate) SetTimers(t *Timer) *UserCreate {
 	return uc.SetTimersID(t.ID)
 }
 
-// AddRefreshTokenIDs adds the "refresh_tokens" edge to the RefreshToken entity by IDs.
-func (uc *UserCreate) AddRefreshTokenIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddRefreshTokenIDs(ids...)
+// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+func (uc *UserCreate) AddSessionIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddSessionIDs(ids...)
 	return uc
 }
 
-// AddRefreshTokens adds the "refresh_tokens" edges to the RefreshToken entity.
-func (uc *UserCreate) AddRefreshTokens(r ...*RefreshToken) *UserCreate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddSessions adds the "sessions" edges to the Session entity.
+func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return uc.AddRefreshTokenIDs(ids...)
+	return uc.AddSessionIDs(ids...)
 }
 
 // AddOwnedCategoryIDs adds the "owned_categories" edge to the Category entity by IDs.
@@ -369,15 +369,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.RefreshTokensIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.RefreshTokensTable,
-			Columns: []string{user.RefreshTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

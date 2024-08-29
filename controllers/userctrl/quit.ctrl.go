@@ -7,7 +7,9 @@ import (
 	"pentag.kr/distimer/db"
 	"pentag.kr/distimer/ent"
 	"pentag.kr/distimer/ent/affiliation"
-	"pentag.kr/distimer/ent/refreshtoken"
+	"pentag.kr/distimer/ent/apnstoken"
+	"pentag.kr/distimer/ent/fcmtoken"
+	"pentag.kr/distimer/ent/session"
 	"pentag.kr/distimer/ent/studylog"
 	"pentag.kr/distimer/ent/user"
 	"pentag.kr/distimer/middlewares"
@@ -48,13 +50,40 @@ func QuitService(c *fiber.Ctx) error {
 		})
 	}
 
-	// refresh token deletion
-	_, err = dbConn.RefreshToken.Delete().Where(refreshtoken.HasUserWith(user.ID(userID))).Exec(context.Background())
+	// session deletion
+
+	sessionList, err := dbConn.Session.Query().Where(session.HasUserWith(user.ID(userID))).All(context.Background())
 	if err != nil {
 		logger.CtxError(c, err)
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Internal server error",
 		})
+	}
+	for _, sessionObj := range sessionList {
+		// delete apns token
+		_, err = dbConn.APNsToken.Delete().Where(apnstoken.HasSessionWith(session.ID(sessionObj.ID))).Exec(context.Background())
+		if err != nil {
+			logger.CtxError(c, err)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Internal server error",
+			})
+		}
+		// delete fcm token
+		_, err = dbConn.FCMToken.Delete().Where(fcmtoken.HasSessionWith(session.ID(sessionObj.ID))).Exec(context.Background())
+		if err != nil {
+			logger.CtxError(c, err)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Internal server error",
+			})
+		}
+		// delete session
+		err = dbConn.Session.DeleteOne(sessionObj).Exec(context.Background())
+		if err != nil {
+			logger.CtxError(c, err)
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Internal server error",
+			})
+		}
 	}
 
 	// timer deletion

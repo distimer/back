@@ -45,8 +45,8 @@ type UserEdges struct {
 	StudyLogs []*StudyLog `json:"study_logs,omitempty"`
 	// Timers holds the value of the timers edge.
 	Timers *Timer `json:"timers,omitempty"`
-	// RefreshTokens holds the value of the refresh_tokens edge.
-	RefreshTokens []*RefreshToken `json:"refresh_tokens,omitempty"`
+	// Sessions holds the value of the sessions edge.
+	Sessions []*Session `json:"sessions,omitempty"`
 	// OwnedCategories holds the value of the owned_categories edge.
 	OwnedCategories []*Category `json:"owned_categories,omitempty"`
 	// Affiliations holds the value of the affiliations edge.
@@ -94,13 +94,13 @@ func (e UserEdges) TimersOrErr() (*Timer, error) {
 	return nil, &NotLoadedError{edge: "timers"}
 }
 
-// RefreshTokensOrErr returns the RefreshTokens value or an error if the edge
+// SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) RefreshTokensOrErr() ([]*RefreshToken, error) {
+func (e UserEdges) SessionsOrErr() ([]*Session, error) {
 	if e.loadedTypes[4] {
-		return e.RefreshTokens, nil
+		return e.Sessions, nil
 	}
-	return nil, &NotLoadedError{edge: "refresh_tokens"}
+	return nil, &NotLoadedError{edge: "sessions"}
 }
 
 // OwnedCategoriesOrErr returns the OwnedCategories value or an error if the edge
@@ -220,9 +220,9 @@ func (u *User) QueryTimers() *TimerQuery {
 	return NewUserClient(u.config).QueryTimers(u)
 }
 
-// QueryRefreshTokens queries the "refresh_tokens" edge of the User entity.
-func (u *User) QueryRefreshTokens() *RefreshTokenQuery {
-	return NewUserClient(u.config).QueryRefreshTokens(u)
+// QuerySessions queries the "sessions" edge of the User entity.
+func (u *User) QuerySessions() *SessionQuery {
+	return NewUserClient(u.config).QuerySessions(u)
 }
 
 // QueryOwnedCategories queries the "owned_categories" edge of the User entity.

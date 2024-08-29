@@ -393,21 +393,21 @@ func HasTimersWith(preds ...predicate.Timer) predicate.User {
 	})
 }
 
-// HasRefreshTokens applies the HasEdge predicate on the "refresh_tokens" edge.
-func HasRefreshTokens() predicate.User {
+// HasSessions applies the HasEdge predicate on the "sessions" edge.
+func HasSessions() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RefreshTokensTable, RefreshTokensColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasRefreshTokensWith applies the HasEdge predicate on the "refresh_tokens" edge with a given conditions (other predicates).
-func HasRefreshTokensWith(preds ...predicate.RefreshToken) predicate.User {
+// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
+func HasSessionsWith(preds ...predicate.Session) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newRefreshTokensStep()
+		step := newSessionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
